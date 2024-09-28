@@ -1,4 +1,4 @@
-﻿namespace MTCG
+﻿namespace MTCG.Models
 {
     internal class User
     {
@@ -15,8 +15,8 @@
         {
             this.username = username;
             this.password = password;
-            this.elo = 0;
-            this.coinCount = 20;
+            elo = 0;
+            coinCount = 20;
 
             stack = new Stack();
             deck = new Deck();

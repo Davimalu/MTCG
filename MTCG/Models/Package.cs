@@ -1,4 +1,4 @@
-﻿namespace MTCG
+﻿namespace MTCG.Models
 {
     internal class Package
     {

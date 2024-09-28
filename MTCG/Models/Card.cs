@@ -1,6 +1,6 @@
-﻿using static MTCG.Card;
+﻿using static MTCG.Models.Card;
 
-namespace MTCG
+namespace MTCG.Models
 {
     // Enum for element type
     public enum ElementType
