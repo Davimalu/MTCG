@@ -9,13 +9,8 @@ namespace MTCG
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
-
-            // Classes
             User testUser = new User("testUser", "testPassword");
 
-            testUser.BuyPackage();
-            testUser.printStack();
             testUser.BuyPackage();
             testUser.printStack();
         }
