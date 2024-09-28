@@ -2,13 +2,33 @@
 {
     internal class Stack
     {
-        private Card[] cards;
+        private List<Card> cards = new List<Card>();
 
         // Constructor
         public Stack()
         {
-            // Initialize an empty stack
-            cards = Array.Empty<Card>();
+            
+        }
+
+        public void AddCard(Card card)
+        {
+            cards.Add(card);
+        }
+
+        public bool RemoveCard(Card card) {
+            if (cards.Contains(card))
+            {
+                cards.Remove(card);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public List<Card> GetCards()
+        {
+            return cards;
         }
     }
 }
