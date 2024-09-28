@@ -2,8 +2,8 @@
 {
     public class User
     {
-        private string username;
-        private string password;
+        public string Username { get; private set; }
+        public string Password { get; private set; }
         private int elo;
         private int coinCount;
 
@@ -13,8 +13,8 @@
         // Constructor
         public User(string username, string password)
         {
-            this.username = username;
-            this.password = password;
+            this.Username = username;
+            this.Password = password;
             elo = 0;
             coinCount = 20;
 
