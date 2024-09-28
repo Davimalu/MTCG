@@ -10,26 +10,17 @@ namespace MTCG
         Normal
     }
 
-    // Enum for card type
-    public enum CardType
-    {
-        Monster,
-        Spell
-    }
-
-    internal class Card
+    public abstract class Card
     {
         private string name;
         private readonly int damage; // The damage of a card is constant and does not change
         private ElementType elementType;
-        private CardType cardType;
 
-        public Card(string name, int damage, ElementType elementType, CardType cardType)
+        public Card(string name, int damage, ElementType elementType)
         {
             this.name = name;
             this.damage = damage;
             this.elementType = elementType;
-            this.cardType = cardType;
         }
 
 
