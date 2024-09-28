@@ -12,5 +12,13 @@ namespace MTCG.Models
         {
 
         }
+
+        public override void printCard()
+        {
+            Console.WriteLine($"Name: {name}");
+            Console.WriteLine($"Damage: {damage}");
+            Console.WriteLine($"Element Type: {elementType}");
+            Console.WriteLine("Card Type: Spell");
+        }
     }
 }

@@ -12,9 +12,9 @@ namespace MTCG.Models
 
     public abstract class Card
     {
-        private string name;
-        private readonly int damage; // The damage of a card is constant and does not change
-        private ElementType elementType;
+        protected string name;
+        protected readonly int damage; // The damage of a card is constant and does not change
+        protected ElementType elementType;
 
         public Card(string name, int damage, ElementType elementType)
         {
@@ -23,6 +23,6 @@ namespace MTCG.Models
             this.elementType = elementType;
         }
 
-
+        public abstract void printCard();
     }
 }
