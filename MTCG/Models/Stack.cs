@@ -15,6 +15,15 @@
             cards.Add(card);
         }
 
+        public void AddPackageToStack(Package package)
+        {
+            List<Card> packageCards = package.GetCards();
+            foreach (Card card in packageCards)
+            {
+                cards.Add(card);
+            }
+        }
+
         public bool RemoveCard(Card card) {
             if (cards.Contains(card))
             {

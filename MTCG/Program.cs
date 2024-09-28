@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using MTCG.Models;
 
 namespace MTCG
@@ -9,16 +10,15 @@ namespace MTCG
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
+
+            // Classes
+            User testUser = new User("testUser", "testPassword");
+
+            testUser.BuyPackage();
+            testUser.printStack();
+            testUser.BuyPackage();
+            testUser.printStack();
         }
-
-        // Classes
-        User testUser = new User("testUser", "testPassword");
-
-        // a user can manage his cards
-        Card testCard = new Card("testCard", 10, ElementType.Fire, CardType.Monster);
-
-        // a user can buy cards by acquiring packages
-        Package testPackage = new Package();
     }
 }
 

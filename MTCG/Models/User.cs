@@ -1,6 +1,6 @@
 ﻿namespace MTCG.Models
 {
-    internal class User
+    public class User
     {
         private string username;
         private string password;
@@ -20,6 +20,32 @@
 
             stack = new Stack();
             deck = new Deck();
+        }
+
+        public bool BuyPackage()
+        {
+            if (coinCount >= 5)
+            {
+                coinCount -= 5;
+
+                Package package = new Package();
+                stack.AddPackageToStack(package);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void printStack()
+        {
+            List<Card> cards = stack.GetCards();
+            foreach (Card card in cards)
+            {
+                card.printCard();
+            }
         }
     }
 }

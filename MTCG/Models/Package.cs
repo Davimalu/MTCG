@@ -18,5 +18,10 @@ namespace MTCG.Models
                 cards.Add(CardService.GetRandomCard());
             }
         }
+
+        public List<Card> GetCards()
+        {
+            return cards;
+        }
     }
 }
