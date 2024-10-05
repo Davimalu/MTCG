@@ -4,7 +4,10 @@ using System.Runtime.CompilerServices;
 
 using MTCG.Models;
 using MTCG.Logic;
+using MTCG.HTTP;
+
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace MTCG
 {
@@ -12,6 +15,7 @@ namespace MTCG
     {
         public static AuthService AuthService = new AuthService();
         public static UserService UserService = new UserService();
+        public static HTTPService HTTPService = new HTTPService();
 
         static void Main(string[] args)
         {
@@ -25,6 +29,8 @@ namespace MTCG
 
             UserService.BuyPackageForUser(testUser);
             UserService.printStackOfUser(testUser);
+
+            (HTTPHeader headers, string? body) = HTTPService.AcceptConnection();
         }
     }
 }

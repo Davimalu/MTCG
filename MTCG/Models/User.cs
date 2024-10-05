@@ -6,6 +6,8 @@
         public string Password { get; private set; }
         public Stack Stack { get; private set; }
         public Deck Deck { get; private set; }
+
+        private int _coinCount;
         public int CoinCount
         {
             get
@@ -27,7 +29,6 @@
         }
 
         private int elo;
-        private int _coinCount;
 
         // Constructor
         public User(string username, string password)
