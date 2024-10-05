@@ -1,42 +1,32 @@
 ﻿namespace MTCG.Models
 {
-    internal class Deck
+    public class Deck
     {
-        private List<Card> cards = new List<Card>();
+        public List<Card> Cards
+        {
+            get
+            {
+                return Cards;
+            }
+            set
+            {
+                // Check if deck has more than 4 cards
+                if (value.Count > 4)
+                {
+                    throw new System.ArgumentException("Deck can only have 4 cards");
+                }
+                else
+                {
+                    Cards = value;
+                }
+            }
+        }
 
         // Constructor
         public Deck()
         {
-
-        }
-        public bool AddCard(Card card)
-        {
-            if (cards.Count < 4)
-            {
-                cards.Add(card);
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
-
-        public bool RemoveCard(Card card)
-        {
-            if (cards.Contains(card))
-            {
-                cards.Remove(card);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public List<Card> GetCards()
-        {
-            return cards;
+            // Initalize empty deck
+            Cards = new List<Card>();
         }
     }
 }
