@@ -4,12 +4,14 @@ using System.Runtime.CompilerServices;
 
 using MTCG.Models;
 using MTCG.Logic;
+using System.Net.NetworkInformation;
 
 namespace MTCG
 {
     internal class Program
     {
         public static AuthService AuthService = new AuthService();
+        public static UserService UserService = new UserService();
 
         static void Main(string[] args)
         {
@@ -21,8 +23,8 @@ namespace MTCG
 
             User testUser = new User("testUser", "testPassword");
 
-            testUser.BuyPackage();
-            testUser.printStack();
+            UserService.BuyPackageForUser(testUser);
+            UserService.printStackOfUser(testUser);
         }
     }
 }

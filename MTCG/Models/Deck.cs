@@ -2,11 +2,13 @@
 {
     public class Deck
     {
+        private List<Card> _cards;
+
         public List<Card> Cards
         {
             get
             {
-                return Cards;
+                return _cards;
             }
             set
             {
@@ -17,7 +19,7 @@
                 }
                 else
                 {
-                    Cards = value;
+                    _cards = value;
                 }
             }
         }
@@ -26,7 +28,7 @@
         public Deck()
         {
             // Initalize empty deck
-            Cards = new List<Card>();
+            _cards = new List<Card>();
         }
     }
 }

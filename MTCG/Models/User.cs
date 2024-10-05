@@ -4,11 +4,30 @@
     {
         public string Username { get; private set; }
         public string Password { get; private set; }
-        private int elo;
-        private int coinCount;
+        public Stack Stack { get; private set; }
+        public Deck Deck { get; private set; }
+        public int CoinCount
+        {
+            get
+            {
+                return _coinCount;
+            }
+            set
+            {
+                // Check if coin count is negative
+                if (value < 0)
+                {
+                    throw new System.ArgumentException("Coin count cannot be negative");
+                }
+                else
+                {
+                    _coinCount = value;
+                }
+            }
+        }
 
-        private Stack stack;
-        private Deck deck;
+        private int elo;
+        private int _coinCount;
 
         // Constructor
         public User(string username, string password)
@@ -16,36 +35,11 @@
             this.Username = username;
             this.Password = password;
             elo = 0;
-            coinCount = 20;
+            _coinCount = 20;
 
-            stack = new Stack();
-            deck = new Deck();
-        }
-
-        public bool BuyPackage()
-        {
-            if (coinCount >= 5)
-            {
-                coinCount -= 5;
-
-                Package package = new Package();
-                stack.AddPackageToStack(package);
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public void printStack()
-        {
-            List<Card> cards = stack.GetCards();
-            foreach (Card card in cards)
-            {
-                card.printCard();
-            }
+            // Initalize empty stack and deck
+            Stack = new Stack();
+            Deck = new Deck();
         }
     }
 }
