@@ -19,17 +19,6 @@ namespace MTCG
 
         static void Main(string[] args)
         {
-            bool success = AuthService.Register("testUser", "testPassword");
-            bool success2 = AuthService.Register("testUser", "testPassword");
-
-            bool loginSuccess = AuthService.Login("testUser", "testPassword");
-            bool loginSuccess2 = AuthService.Login("testUser", "wrongPassword");
-
-            User testUser = new User("testUser", "testPassword");
-
-            UserService.BuyPackageForUser(testUser);
-            UserService.printStackOfUser(testUser);
-
             (HTTPHeader headers, string? body) = HTTPService.AcceptConnection();
         }
     }

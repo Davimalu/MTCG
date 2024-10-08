@@ -1,0 +1,39 @@
+﻿### 1) Create User ###
+
+POST http://localhost:10001/users
+Content-Type: application/json
+
+{
+  "Username": "kienboec",
+  "Password": "daniel"
+}
+### "Should return HTTP 201"
+
+POST http://localhost:10001/users --header "Content-Type: application/json" -d "{\"Username\":\"altenhof\", \"Password\":\"markus\"}"
+### "Should return HTTP 201"
+
+POST http://localhost:10001/users --header "Content-Type: application/json" -d "{\"Username\":\"admin\",    \"Password\":\"istrator\"}"
+### "Should return HTTP 201"
+
+### Should fail
+
+POST http://localhost:10001/users --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"daniel\"}"
+### "Should return HTTP 4xx - User already exists"
+
+POST http://localhost:10001/users --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"different\"}"
+### "Should return HTTP 4xx - User already exists"
+
+### 2) Login Users ###
+
+POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"daniel\"}"
+### "should return HTTP 200 with generated token for the user, here: kienboec-mtcgToken"
+
+POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"altenhof\", \"Password\":\"markus\"}"
+### "should return HTTP 200 with generated token for the user, here: altenhof-mtcgToken"
+
+POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"admin\",    \"Password\":\"istrator\"}"
+### "should return HTTP 200 with generated token for the user, here: admin-mtcgToken"
+
+### Should fail
+POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"different\"}"
+### "Should return HTTP 4xx - Login failed"

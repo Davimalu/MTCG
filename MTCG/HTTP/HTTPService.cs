@@ -4,14 +4,18 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
+using MTCG.Logic;
 using MTCG.Models;
 
 namespace MTCG.HTTP
 {
     public class HTTPService
     {
+        private static AuthService AuthService = new AuthService();
+        
         private TcpListener server;
         // Connected clients
         private List<TcpClient> connectedClients = new List<TcpClient>();
@@ -20,14 +24,18 @@ namespace MTCG.HTTP
         public HTTPService()
         {
             // Start server
-            server = new TcpListener(IPAddress.Any, 8000);
+            server = new TcpListener(IPAddress.Any, 10001);
             server.Start();
+
+            Console.WriteLine("Server started!");
         }
 
         public (HTTPHeader, string?) AcceptConnection()
         {
+            Console.WriteLine("Waiting for clients...");
             var client = server.AcceptTcpClient();
             connectedClients.Add(client);
+            Console.WriteLine("Client connected.");
 
             using StreamReader reader = new StreamReader(client.GetStream());
 
@@ -38,6 +46,36 @@ namespace MTCG.HTTP
 
             HTTPHeader headers = ParseHTTPHeader(reader);
             string? body = ParseHTTPBody(reader, headers);
+
+            // === Handle Request ===
+
+            // User Registration
+            if (headers.Method == "POST" && headers.Path == "/users")
+            {
+                // Handle empty body
+                if (body == null)
+                {
+                    SendResponseToClient(writer, 400, "No data provided");
+                    return (headers, body);
+                }
+
+                // Parse JSON
+                Console.WriteLine(body);
+
+                try
+                {
+                    User? tempUser = JsonSerializer.Deserialize<User>(body);
+
+                    Console.WriteLine(tempUser.Username);
+                    Console.WriteLine(tempUser.Password);
+                }
+                catch (JsonException E)
+                {
+                    SendResponseToClient(writer, 400, E.Message);
+                    return (headers, body);
+                }
+            }
+
             SendResponseToClient(writer, 200, "Hello World");
 
             return (headers, body);
