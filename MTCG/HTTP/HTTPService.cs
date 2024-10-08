@@ -86,7 +86,7 @@ namespace MTCG.HTTP
                 }
                 else
                 {
-                    SendResponseToClient(writer, 400, "User already exists");
+                    SendResponseToClient(writer, 409, "User already exists");
                 }
             }
 
@@ -106,7 +106,7 @@ namespace MTCG.HTTP
 
                 if (token == null)
                 {
-                    SendResponseToClient(writer, 403, "Login failed");
+                    SendResponseToClient(writer, 401, "Login failed");
                     return (headers, body);
                 }
                 else
