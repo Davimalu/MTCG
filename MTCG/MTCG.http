@@ -49,15 +49,39 @@ Content-Type: application/json
 
 ### 2) Login Users ###
 
-POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"daniel\"}"
+POST http://localhost:10001/sessions
+Content-Type: application/json
+
+{
+  "Username": "kienboec",
+  "Password": "daniel"
+}
 ### "should return HTTP 200 with generated token for the user, here: kienboec-mtcgToken"
 
-POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"altenhof\", \"Password\":\"markus\"}"
+POST http://localhost:10001/sessions
+Content-Type: application/json
+
+{
+  "Username": "altenhof",
+  "Password": "markus"
+}
 ### "should return HTTP 200 with generated token for the user, here: altenhof-mtcgToken"
 
-POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"admin\",    \"Password\":\"istrator\"}"
+POST http://localhost:10001/sessions
+Content-Type: application/json
+
+{
+  "Username": "admin",
+  "Password": "istrator"
+}
 ### "should return HTTP 200 with generated token for the user, here: admin-mtcgToken"
 
 ### Should fail
-POST http://localhost:10001/sessions --header "Content-Type: application/json" -d "{\"Username\":\"kienboec\", \"Password\":\"different\"}"
+POST http://localhost:10001/sessions
+Content-Type: application/json
+
+{
+  "Username": "kienboec",
+  "Password": "different"
+}
 ### "Should return HTTP 4xx - Login failed"

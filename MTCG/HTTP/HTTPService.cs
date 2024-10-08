@@ -49,28 +49,27 @@ namespace MTCG.HTTP
 
             // === Handle Request ===
 
+            // Handle empty body
+            if (body == null)
+            {
+                SendResponseToClient(writer, 400, "No data provided");
+                return (headers, body);
+            }
+
+            // Handle invalid JSON
+            try
+            {
+                JsonSerializer.Deserialize<User>(body);
+            }
+            catch (JsonException E)
+            {
+                SendResponseToClient(writer, 400, E.Message);
+                return (headers, body);
+            }
+
             // User Registration
             if (headers.Method == "POST" && headers.Path == "/users")
             {
-                // Handle empty body
-                if (body == null)
-                {
-                    SendResponseToClient(writer, 400, "No data provided");
-                    return (headers, body);
-                }
-
-                // Parse JSON
-                try
-                {
-                    JsonSerializer.Deserialize<User>(body);
-                }
-                catch (JsonException E)
-                {
-                    SendResponseToClient(writer, 400, E.Message);
-                    return (headers, body);
-                }
-
-                // TODO: Refactor to not use JsonSerializer.Deserialize twice
                 User? tempUser = JsonSerializer.Deserialize<User>(body);
 
                 // Check if Username and Password were provided
@@ -80,6 +79,7 @@ namespace MTCG.HTTP
                     return (headers, body);
                 }
 
+                // Try registering the user
                 if (AuthService.Register(tempUser.Username, tempUser.Password))
                 {
                     SendResponseToClient(writer, 201, "User Created");
@@ -90,6 +90,39 @@ namespace MTCG.HTTP
                 }
             }
 
+            // User Login
+            if (headers.Method == "POST" && headers.Path == "/sessions")
+            {
+                User? tempUser = JsonSerializer.Deserialize<User>(body);
+
+                // Check if Username and Password were provided
+                if (tempUser == null)
+                {
+                    SendResponseToClient(writer, 400, "Invalid data provided");
+                    return (headers, body);
+                }
+
+                string? token = AuthService.Login(tempUser.Username, tempUser.Password);
+
+                if (token == null)
+                {
+                    SendResponseToClient(writer, 403, "Login failed");
+                    return (headers, body);
+                }
+                else
+                {
+                    var jsonObject = new Dictionary<string, string>
+                    {
+                        { $"{tempUser.Username}-mtcgToken", token }
+                    };
+
+                    string jsonString = JsonSerializer.Serialize(jsonObject);
+
+                    SendResponseToClient(writer, 200, jsonString);
+
+                    return (headers, body);
+                }
+            }
 
             return (headers, body);
         }
