@@ -60,23 +60,36 @@ namespace MTCG.HTTP
                 }
 
                 // Parse JSON
-                Console.WriteLine(body);
-
                 try
                 {
-                    User? tempUser = JsonSerializer.Deserialize<User>(body);
-
-                    Console.WriteLine(tempUser.Username);
-                    Console.WriteLine(tempUser.Password);
+                    JsonSerializer.Deserialize<User>(body);
                 }
                 catch (JsonException E)
                 {
                     SendResponseToClient(writer, 400, E.Message);
                     return (headers, body);
                 }
+
+                // TODO: Refactor to not use JsonSerializer.Deserialize twice
+                User? tempUser = JsonSerializer.Deserialize<User>(body);
+
+                // Check if Username and Password were provided
+                if (tempUser == null)
+                {
+                    SendResponseToClient(writer, 400, "Invalid data provided");
+                    return (headers, body);
+                }
+
+                if (AuthService.Register(tempUser.Username, tempUser.Password))
+                {
+                    SendResponseToClient(writer, 201, "User Created");
+                }
+                else
+                {
+                    SendResponseToClient(writer, 400, "User already exists");
+                }
             }
 
-            SendResponseToClient(writer, 200, "Hello World");
 
             return (headers, body);
         }

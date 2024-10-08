@@ -19,7 +19,10 @@ namespace MTCG
 
         static void Main(string[] args)
         {
-            (HTTPHeader headers, string? body) = HTTPService.AcceptConnection();
+            while (true)
+            {
+                (HTTPHeader headers, string? body) = HTTPService.AcceptConnection();
+            }
         }
     }
 }
