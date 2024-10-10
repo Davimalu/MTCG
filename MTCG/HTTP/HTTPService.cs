@@ -1,137 +1,19 @@
-﻿using System;
+﻿using MTCG.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-
-using MTCG.Logic;
-using MTCG.Models;
 
 namespace MTCG.HTTP
 {
     public class HTTPService
     {
-        private static AuthService AuthService = new AuthService();
-        
-        private TcpListener server;
-        // Connected clients
-        private List<TcpClient> connectedClients = new List<TcpClient>();
-
-        // Constructor
-        public HTTPService()
-        {
-            // Start server
-            server = new TcpListener(IPAddress.Any, 10001);
-            server.Start();
-
-            Console.WriteLine("Server started!");
-        }
-
-        public (HTTPHeader, string?) AcceptConnection()
-        {
-            Console.WriteLine("Waiting for clients...");
-            var client = server.AcceptTcpClient();
-            connectedClients.Add(client);
-            Console.WriteLine("Client connected.");
-
-            using StreamReader reader = new StreamReader(client.GetStream());
-
-            using StreamWriter writer = new StreamWriter(client.GetStream())
-            {
-                AutoFlush = true
-            };
-
-            HTTPHeader headers = ParseHTTPHeader(reader);
-            string? body = ParseHTTPBody(reader, headers);
-
-            // === Handle Request ===
-
-            // Handle empty body
-            if (body == null)
-            {
-                SendResponseToClient(writer, 400, "No data provided");
-                return (headers, body);
-            }
-
-            // Handle invalid JSON
-            try
-            {
-                JsonSerializer.Deserialize<User>(body);
-            }
-            catch (JsonException E)
-            {
-                SendResponseToClient(writer, 400, E.Message);
-                return (headers, body);
-            }
-
-            // User Registration
-            if (headers.Method == "POST" && headers.Path == "/users")
-            {
-                User? tempUser = JsonSerializer.Deserialize<User>(body);
-
-                // Check if Username and Password were provided
-                if (tempUser == null)
-                {
-                    SendResponseToClient(writer, 400, "Invalid data provided");
-                    return (headers, body);
-                }
-
-                // Try registering the user
-                if (AuthService.Register(tempUser.Username, tempUser.Password))
-                {
-                    SendResponseToClient(writer, 201, "User Created");
-                }
-                else
-                {
-                    SendResponseToClient(writer, 409, "User already exists");
-                }
-            }
-
-            // User Login
-            if (headers.Method == "POST" && headers.Path == "/sessions")
-            {
-                User? tempUser = JsonSerializer.Deserialize<User>(body);
-
-                // Check if Username and Password were provided
-                if (tempUser == null)
-                {
-                    SendResponseToClient(writer, 400, "Invalid data provided");
-                    return (headers, body);
-                }
-
-                string? token = AuthService.Login(tempUser.Username, tempUser.Password);
-
-                if (token == null)
-                {
-                    SendResponseToClient(writer, 401, "Login failed");
-                    return (headers, body);
-                }
-                else
-                {
-                    var jsonObject = new Dictionary<string, string>
-                    {
-                        { $"{tempUser.Username}-mtcgToken", token }
-                    };
-
-                    string jsonString = JsonSerializer.Serialize(jsonObject);
-
-                    SendResponseToClient(writer, 200, jsonString);
-
-                    return (headers, body);
-                }
-            }
-
-            return (headers, body);
-        }
-
-        public void SendResponseToClient(StreamWriter writer, int statusCode, string response)
+        public void SendResponseToClient(StreamWriter writer, int statusCode, string? response)
         {
             string reasonPhrase;
 
-            switch(statusCode)
+            switch (statusCode)
             {
                 case 200:
                     reasonPhrase = "OK";
@@ -161,18 +43,15 @@ namespace MTCG.HTTP
 
             writer.WriteLine($"HTTP/1.1 {statusCode} {reasonPhrase}");
             writer.WriteLine("Content-Type: application/json");
-            writer.WriteLine($"Content-Length: {response.Length}");
+            writer.WriteLine($"Content-Length: {(response?.Length ?? 0)}");
             writer.WriteLine();
 
             // HTTP Response Body
             writer.WriteLine(response);
 
-            writer.Close();
-            connectedClients[0].Close();
-            connectedClients.RemoveAt(0);
         }
 
-        private HTTPHeader ParseHTTPHeader(StreamReader reader)
+        public HTTPHeader ParseHTTPHeader(StreamReader reader)
         {
             string? line;
             line = reader.ReadLine();
@@ -216,7 +95,7 @@ namespace MTCG.HTTP
             return headers;
         }
 
-        private string? ParseHTTPBody(StreamReader reader, HTTPHeader headers)
+        public string? ParseHTTPBody(StreamReader reader, HTTPHeader headers)
         {
             if (headers.Headers.ContainsKey("Content-Length"))
             {

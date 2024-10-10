@@ -13,15 +13,13 @@ namespace MTCG
 {
     internal class Program
     {
-        public static AuthService AuthService = new AuthService();
-        public static UserService UserService = new UserService();
-        public static HTTPService HTTPService = new HTTPService();
+        private static ServerService ServerService = new ServerService();
 
         static void Main(string[] args)
         {
             while (true)
             {
-                (HTTPHeader headers, string? body) = HTTPService.AcceptConnection();
+                ServerService.AcceptConnections();
             }
         }
     }
