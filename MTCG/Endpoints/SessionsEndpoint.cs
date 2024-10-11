@@ -37,7 +37,7 @@ namespace MTCG.Endpoints
                 {
                     var jsonObject = new Dictionary<string, string>
                     {
-                        { $"{user.Username}-mtcgToken", user.authToken }
+                        { "Token", user.authToken }
                     };
 
                     string jsonString = JsonSerializer.Serialize(jsonObject);

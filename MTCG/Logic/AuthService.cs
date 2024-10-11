@@ -51,8 +51,8 @@ namespace MTCG.Logic
                     // Check if password is correct
                     if (VerifyPassword(password, user.Password))
                     {
-                        // Generate unique token for user
-                        string token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+                        // Generate token for user
+                        string token = $"{user.Username}-mtcgToken";
                         user.authToken = token;
                         return user;
                     }
