@@ -19,12 +19,13 @@ namespace MTCG.HTTP
         private HandlerService HandlerService = new HandlerService();
 
         private TcpListener server;
+        private int PortNo = 10001;
         
         // Constructor
         public ServerService()
         {
             // Start server
-            server = new TcpListener(IPAddress.Any, 10001);
+            server = new TcpListener(IPAddress.Any, PortNo);
             server.Start();
 
             Console.WriteLine("Server started!");
@@ -33,9 +34,8 @@ namespace MTCG.HTTP
         public void AcceptConnections()
         {
             // Accept client
-            Console.WriteLine("Waiting for clients...");
+            Console.WriteLine($"Listening on http://localhost:{PortNo}...");
             var client = server.AcceptTcpClient();
-            Console.WriteLine("Client connected.");
 
             HandlerService.HandleClient(client);
         }
