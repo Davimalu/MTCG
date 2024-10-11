@@ -4,6 +4,7 @@
     {
         public string Username { get; private set; }
         public string Password { get; private set; }
+        public string authToken { get; set; }
         public Stack Stack { get; private set; }
         public Deck Deck { get; private set; }
 

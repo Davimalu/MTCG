@@ -13,10 +13,7 @@ namespace MTCG.Logic
 
     public class AuthService
     {
-        public List<User> registeredUsers = new List<User>();
-
-        public List<string> activeSessions = new List<string>();
-        // TODO: Refactor separate class for Sessions, SessionService
+        public static List<User> registeredUsers = new List<User>();
 
         public AuthService()
         {
@@ -44,7 +41,7 @@ namespace MTCG.Logic
             return true;
         }
 
-        public string? Login(string username, string password)
+        public User? Login(string username, string password)
         {
             // Check if user exists
             foreach (User user in registeredUsers)
@@ -56,8 +53,8 @@ namespace MTCG.Logic
                     {
                         // Generate unique token for user
                         string token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-                        activeSessions.Add(token);
-                        return token;
+                        user.authToken = token;
+                        return user;
                     }
                     else
                     {

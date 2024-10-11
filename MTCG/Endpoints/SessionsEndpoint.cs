@@ -27,9 +27,9 @@ namespace MTCG.Endpoints
                     return (400, "Invalid data provided");
                 }
 
-                string? token = AuthService.Login(tempUser.Username, tempUser.Password);
+                User? user = AuthService.Login(tempUser.Username, tempUser.Password);
 
-                if (token == null)
+                if (user == null)
                 {
                     return (401, "Login failed");
                 }
@@ -37,7 +37,7 @@ namespace MTCG.Endpoints
                 {
                     var jsonObject = new Dictionary<string, string>
                     {
-                        { $"{tempUser.Username}-mtcgToken", token }
+                        { $"{user.Username}-mtcgToken", user.authToken }
                     };
 
                     string jsonString = JsonSerializer.Serialize(jsonObject);
