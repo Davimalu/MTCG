@@ -37,7 +37,7 @@ namespace MTCG.HTTP
             HTTPHeader headers = HTTPService.ParseHTTPHeader(reader);
             string? body = HTTPService.ParseHTTPBody(reader, headers);
 
-            Console.WriteLine($"Client connected: {headers.Version} {headers.Path} {headers.Method}");
+            Console.WriteLine($"[INFO] Client connected: {headers.Version} {headers.Path} {headers.Method}");
 
             // === Handle Request ===
 

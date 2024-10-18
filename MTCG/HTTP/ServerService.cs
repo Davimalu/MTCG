@@ -28,13 +28,13 @@ namespace MTCG.HTTP
             server = new TcpListener(IPAddress.Any, PortNo);
             server.Start();
 
-            Console.WriteLine("Server started!");
+            Console.WriteLine("[INFO] Server started!");
         }
 
         public void AcceptConnections()
         {
             // Accept client
-            Console.WriteLine($"Listening on http://localhost:{PortNo}...");
+            Console.WriteLine($"[INFO] Listening on http://localhost:{PortNo}...");
             var client = server.AcceptTcpClient();
 
             HandlerService.HandleClient(client);

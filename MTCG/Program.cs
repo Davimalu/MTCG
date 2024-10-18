@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using MTCG.Models;
 using MTCG.Logic;
 using MTCG.HTTP;
+using MTCG.DAL;
 
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -17,6 +18,10 @@ namespace MTCG
 
         static void Main(string[] args)
         {
+            // Create database tables
+            Initializer initializer = new Initializer();
+            initializer.CreateTables();
+
             while (true)
             {
                 ServerService.AcceptConnections();

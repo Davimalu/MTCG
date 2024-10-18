@@ -2,13 +2,15 @@
 {
     public class User
     {
-        public string Username { get; private set; }
-        public string Password { get; private set; }
-        public string authToken { get; set; }
-        public Stack Stack { get; private set; }
-        public Deck Deck { get; private set; }
+        public int Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string AuthToken { get; set; } = string.Empty;
+        public int EloPoints { get; set; } = 100;
+        public Stack Stack { get; set; }
+        public Deck Deck { get; set; }
 
-        private int _coinCount;
+        private int _coinCount = 20;
         public int CoinCount
         {
             get
@@ -29,17 +31,24 @@
             }
         }
 
-        private int elo;
-
         // Constructor
         public User(string username, string password)
         {
             this.Username = username;
             this.Password = password;
-            elo = 0;
+            EloPoints = 100;
             _coinCount = 20;
 
             // Initalize empty stack and deck
+            Stack = new Stack();
+            Deck = new Deck();
+        }
+
+        public User()
+        {
+            EloPoints = 100;
+            _coinCount = 20;
+
             Stack = new Stack();
             Deck = new Deck();
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using MTCG.Models;
+using MTCG.Repository;
 
 namespace MTCG.Logic
 {
@@ -13,7 +14,7 @@ namespace MTCG.Logic
 
     public class AuthService
     {
-        public static List<User> registeredUsers = new List<User>();
+        private static UserRepository userRepository = new UserRepository();
 
         public AuthService()
         {
@@ -22,21 +23,19 @@ namespace MTCG.Logic
 
         public bool Register(string username, string password) {
             // Check if user already exists
-            foreach (User user in registeredUsers)
+            if (userRepository.GetUserByName(username) != null)
             {
-                if (user.Username == username)
-                {
-                    // User already exists
-                    return false;
-                }
+                // User already exists
+                return false;
             }
+            
             // Create user
 
             // Hash password
             string hashedPassword = HashPassword(password);
 
-            // Add user to list (replace with database)
-            registeredUsers.Add(new User(username, hashedPassword));
+            // Add user to database
+            userRepository.AddUser(new User(username, hashedPassword));
 
             return true;
         }
@@ -44,25 +43,29 @@ namespace MTCG.Logic
         public User? Login(string username, string password)
         {
             // Check if user exists
-            foreach (User user in registeredUsers)
+            User? tempUser = userRepository.GetUserByName(username);
+
+            if (tempUser != null)
             {
-                if (user.Username == username)
+                if (VerifyPassword(password, tempUser.Password))
                 {
-                    // Check if password is correct
-                    if (VerifyPassword(password, user.Password))
-                    {
-                        // Generate token for user
-                        string token = $"{user.Username}-mtcgToken";
-                        user.authToken = token;
-                        return user;
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                    // Generate token for user
+                    string token = $"{tempUser.Username}-mtcgToken";
+                    tempUser.AuthToken = token;
+
+                    // Update authToken in Database
+                    userRepository.UpdateUser(tempUser);
+
+                    return tempUser;
+                }
+                else
+                {
+                    // Wrong credentials
+                    return null;
                 }
             }
 
+            // User doesn't exist
             return null;
         }
 
