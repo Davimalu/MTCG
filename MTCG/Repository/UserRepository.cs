@@ -7,15 +7,16 @@ using System.Threading.Tasks;
 
 using MTCG.Models;
 using System.Data;
+using MTCG.Interfaces;
 
 namespace MTCG.Repository
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly DataLayer dataLayer;
 
         public UserRepository()
-        { 
+        {
             dataLayer = DataLayer.Instance;
         }
 
@@ -35,7 +36,7 @@ namespace MTCG.Repository
             DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
             DataLayer.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
             DataLayer.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
-            DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32 , user.EloPoints);
+            DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.EloPoints);
 
             user.Id = (int)(dbCommand.ExecuteScalar() ?? 0);
 

@@ -11,14 +11,21 @@ namespace MTCG.Logic
 {
     // Has to be moved inside the namespace for some reason
     using BCrypt.Net;
+    using MTCG.Interfaces;
 
     public class AuthService
     {
-        private static UserRepository userRepository = new UserRepository();
+        private readonly IUserRepository userRepository;
 
         public AuthService()
         {
+            userRepository = new UserRepository();
+        }
 
+        // Dependency Injection über den Konstruktor
+        public AuthService(IUserRepository userRepository)
+        {
+            this.userRepository = userRepository;
         }
 
         public bool Register(string username, string password) {
