@@ -49,7 +49,8 @@ namespace MTCG.DAL
                     id VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     damage INT NOT NULL,
-                    type VARCHAR(255) NOT NULL
+                    cardType VARCHAR(255) NOT NULL,
+                    elementType VARCHAR(255) NOT NULL
                 );
                 """);
 
