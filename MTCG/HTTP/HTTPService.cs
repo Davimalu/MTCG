@@ -89,7 +89,7 @@ namespace MTCG.HTTP
                 var headerName = headerParts[0].Trim();
                 var headerValue = headerParts[1].Trim();
 
-                headers.Headers.Add(headerParts[0], headerParts[1]);
+                headers.Headers.Add(headerName, headerValue);
             }
 
             return headers;

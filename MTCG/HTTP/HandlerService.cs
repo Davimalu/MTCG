@@ -55,7 +55,7 @@ namespace MTCG.HTTP
             try
             {
                 var endpoint = _endpoints[headers.Path];
-                (responseCode, responseBody) = endpoint.HandleRequest(headers.Method, body);
+                (responseCode, responseBody) = endpoint.HandleRequest(headers, body);
             }
             catch
             {

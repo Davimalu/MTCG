@@ -16,10 +16,10 @@ namespace MTCG.Endpoints
     {
         private readonly AuthService _authService = AuthService.Instance;
 
-        public (int, string?) HandleRequest(string method, string body)
+        public (int, string?) HandleRequest(HTTPHeader headers, string body)
         {
             // User Registration
-            if (method == "POST")
+            if (headers.Method == "POST")
             {
                 User? tempUser = JsonSerializer.Deserialize<User>(body);
 

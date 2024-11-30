@@ -9,5 +9,6 @@ namespace MTCG.Interfaces
         User? GetUserById(int id);
         User? GetUserByName(string username);
         void UpdateUser(User user);
+        User? GetUserByToken(string token);
     }
 }

@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MTCG.Models;
 
 namespace MTCG.Interfaces
 {
     public interface IHttpEndpoint
     {
-        (int, string?) HandleRequest(string method, string body);
+        (int, string?) HandleRequest(HTTPHeader headers, string body);
     }
 }

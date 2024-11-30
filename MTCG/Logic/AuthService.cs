@@ -33,22 +33,22 @@ namespace MTCG.Logic
         }
         #endregion
 
-        private readonly IUserRepository userRepository;
+        private readonly IUserRepository _userRepository;
 
         public AuthService()
         {
-            userRepository = new UserRepository();
+            _userRepository = new UserRepository();
         }
 
         // Dependency Injection über den Konstruktor
         public AuthService(IUserRepository userRepository)
         {
-            this.userRepository = userRepository;
+            this._userRepository = userRepository;
         }
 
         public bool Register(string username, string password) {
             // Check if user already exists
-            if (userRepository.GetUserByName(username) != null)
+            if (_userRepository.GetUserByName(username) != null)
             {
                 // User already exists
                 return false;
@@ -60,7 +60,7 @@ namespace MTCG.Logic
             string hashedPassword = HashPassword(password);
 
             // Add user to database
-            userRepository.AddUser(new User(username, hashedPassword));
+            _userRepository.AddUser(new User(username, hashedPassword));
 
             return true;
         }
@@ -68,7 +68,7 @@ namespace MTCG.Logic
         public User? Login(string username, string password)
         {
             // Check if user exists
-            User? tempUser = userRepository.GetUserByName(username);
+            User? tempUser = _userRepository.GetUserByName(username);
 
             if (tempUser != null)
             {
@@ -79,7 +79,7 @@ namespace MTCG.Logic
                     tempUser.AuthToken = token;
 
                     // Update authToken in Database
-                    userRepository.UpdateUser(tempUser);
+                    _userRepository.UpdateUser(tempUser);
 
                     return tempUser;
                 }
@@ -92,6 +92,11 @@ namespace MTCG.Logic
 
             // User doesn't exist
             return null;
+        }
+
+        public bool CheckToken(string token)
+        {
+            return _userRepository.GetUserByToken(token) != null;
         }
 
         public static string HashPassword(string password)

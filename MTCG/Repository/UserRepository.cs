@@ -106,5 +106,34 @@ namespace MTCG.Repository
 
             dbCommand.ExecuteNonQuery();
         }
+
+        public User? GetUserByToken(string token)
+        {
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                                                                  SELECT id, username, password, authToken, coinCount, elopoints
+                                                                  FROM users
+                                                                  WHERE authToken = @token
+                                                                  """);
+            DataLayer.AddParameterWithValue(dbCommand, "@token", DbType.String, token);
+
+            using IDataReader reader = dbCommand.ExecuteReader();
+
+            if (reader.Read())
+            {
+                Console.WriteLine($"[INFO] User {reader.GetString(1)} retrieved from database!");
+
+                return new User()
+                {
+                    Id = reader.GetInt32(0),
+                    Username = reader.GetString(1),
+                    Password = reader.GetString(2),
+                    AuthToken = reader.GetString(3),
+                    CoinCount = reader.GetInt32(4),
+                    EloPoints = reader.GetInt32(5)
+                };
+            }
+
+            return null;
+        }
     }
 }
