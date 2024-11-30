@@ -13,21 +13,11 @@ namespace MTCG.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly DataLayer dataLayer;
-
-        public UserRepository()
-        {
-            dataLayer = DataLayer.Instance;
-        }
-
-        public DataLayer GetDataLayer()
-        {
-            return dataLayer;
-        }
+        private readonly DataLayer _dataLayer = DataLayer.Instance;
 
         public void AddUser(User user)
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 INSERT INTO users (username, password, authToken, coinCount)
                 VALUES (@username, @password, @authToken, @coinCount);
                 """);
@@ -45,7 +35,7 @@ namespace MTCG.Repository
 
         public User? GetUserById(int id)
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 SELECT id, username, password, authToken, coinCount, elopoints
                 FROM users
                 WHERE id = @id
@@ -73,7 +63,7 @@ namespace MTCG.Repository
 
         public User? GetUserByName(string username)
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 SELECT id, username, password, authToken, coinCount, elopoints
                 FROM users
                 WHERE username = @username
@@ -101,7 +91,7 @@ namespace MTCG.Repository
 
         public void UpdateUser(User user)
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 UPDATE users
                 SET username = @username, password = @password, authToken = @authToken, coinCount = @coinCount, eloPoints = @eloPoints
                 WHERE id = @id

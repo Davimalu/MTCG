@@ -34,7 +34,7 @@ namespace MTCG.Logic
         {
             foreach (Card card in user.Stack.Cards)
             {
-                card.printCard();
+                card.PrintCard();
             }
         }
     }

@@ -16,12 +16,6 @@ namespace MTCG.Logic
         {
             Package package = new Package();
 
-            // Fill package with 5 random cards
-            for (int i = 0; i < 5; i++)
-            {
-                package.Cards.Add(CardService.GetRandomCard());
-            }
-
             return package;
         }
     }

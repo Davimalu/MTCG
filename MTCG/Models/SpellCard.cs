@@ -8,16 +8,16 @@ namespace MTCG.Models
 {
     public class SpellCard : Card
     {
-        public SpellCard(string name, int damage, ElementType elementType) : base(name, damage, elementType)
+        public SpellCard(string id, string name, float damage, ElementType elementType) : base(id, name, damage, elementType)
         {
 
         }
 
-        public override void printCard()
+        public override void PrintCard()
         {
-            Console.WriteLine($"Name: {name}");
-            Console.WriteLine($"Damage: {damage}");
-            Console.WriteLine($"Element Type: {elementType}");
+            Console.WriteLine($"Name: {Name}");
+            Console.WriteLine($"Damage: {Damage}");
+            Console.WriteLine($"Element Type: {ElementType}");
             Console.WriteLine("Card Type: Spell");
         }
     }

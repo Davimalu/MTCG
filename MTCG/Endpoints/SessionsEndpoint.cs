@@ -14,7 +14,9 @@ namespace MTCG.Endpoints
 {
     public class SessionsEndpoint : IHttpEndpoint
     {
-        public (int, string?) HandleRequest(string method, string body, AuthService AuthService)
+        private readonly AuthService _authService = AuthService.Instance;
+
+        public (int, string?) HandleRequest(string method, string body)
         {
             // User Login
             if (method == "POST")
@@ -27,7 +29,7 @@ namespace MTCG.Endpoints
                     return (400, "Invalid data provided");
                 }
 
-                User? user = AuthService.Login(tempUser.Username, tempUser.Password);
+                User? user = _authService.Login(tempUser.Username, tempUser.Password);
 
                 if (user == null)
                 {

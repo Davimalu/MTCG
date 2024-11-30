@@ -14,15 +14,16 @@ namespace MTCG.HTTP
 {
     public class HandlerService
     {
-        private static AuthService AuthService = new AuthService();
-        private Dictionary<string, IHttpEndpoint> endpoints = new Dictionary<string, IHttpEndpoint>();
-        private HTTPService HTTPService = new HTTPService();
+        private static AuthService _authService = new AuthService();
+        private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
+        private HTTPService _httpService = new HTTPService();
 
         public HandlerService()
         {
             // Add endpoints
-            endpoints.Add("/users", new UsersEndpoint());
-            endpoints.Add("/sessions", new SessionsEndpoint());
+            _endpoints.Add("/users", new UsersEndpoint());
+            _endpoints.Add("/sessions", new SessionsEndpoint());
+            _endpoints.Add("/packages", new PackagesEndpoint());
         }
 
         public void HandleClient(TcpClient client)
@@ -34,8 +35,8 @@ namespace MTCG.HTTP
                 AutoFlush = true
             };
 
-            HTTPHeader headers = HTTPService.ParseHTTPHeader(reader);
-            string? body = HTTPService.ParseHTTPBody(reader, headers);
+            HTTPHeader headers = _httpService.ParseHTTPHeader(reader);
+            string? body = _httpService.ParseHTTPBody(reader, headers);
 
             Console.WriteLine($"[INFO] Client connected: {headers.Version} {headers.Path} {headers.Method}");
 
@@ -44,18 +45,7 @@ namespace MTCG.HTTP
             // Handle empty body
             if (body == null)
             {
-                HTTPService.SendResponseToClient(writer, 400, "No data provided");
-                return;
-            }
-
-            // Handle invalid JSON
-            try
-            {
-                JsonSerializer.Deserialize<User>(body);
-            }
-            catch (JsonException E)
-            {
-                HTTPService.SendResponseToClient(writer, 400, E.Message);
+                _httpService.SendResponseToClient(writer, 400, "No data provided");
                 return;
             }
 
@@ -64,15 +54,15 @@ namespace MTCG.HTTP
 
             try
             {
-                var endpoint = endpoints[headers.Path];
-                (responseCode, responseBody) = endpoint.HandleRequest(headers.Method, body, AuthService);
+                var endpoint = _endpoints[headers.Path];
+                (responseCode, responseBody) = endpoint.HandleRequest(headers.Method, body);
             }
             catch
             {
                 responseBody = null;
             }
 
-            HTTPService.SendResponseToClient(writer, responseCode, responseBody);
+            _httpService.SendResponseToClient(writer, responseCode, responseBody);
         }
     }
 }

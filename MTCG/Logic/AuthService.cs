@@ -11,10 +11,28 @@ namespace MTCG.Logic
 {
     // Has to be moved inside the namespace for some reason
     using BCrypt.Net;
+    using MTCG.DAL;
     using MTCG.Interfaces;
 
     public class AuthService
     {
+        #region Singleton
+        private static AuthService? instance;
+
+        public static AuthService Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new AuthService();
+                }
+
+                return instance;
+            }
+        }
+        #endregion
+
         private readonly IUserRepository userRepository;
 
         public AuthService()

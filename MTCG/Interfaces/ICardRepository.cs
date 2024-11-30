@@ -1,4 +1,5 @@
-﻿using MTCG.Logic;
+﻿using MTCG.DAL;
+using MTCG.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace MTCG.Interfaces
 {
-    public interface IHttpEndpoint
+    public interface ICardRepository
     {
-        (int, string?) HandleRequest(string method, string body);
+        bool AddCard(Card card);
     }
 }

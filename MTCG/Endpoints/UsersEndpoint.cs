@@ -14,7 +14,9 @@ namespace MTCG.Endpoints
 {
     public class UsersEndpoint : IHttpEndpoint
     {
-        public (int, string?) HandleRequest(string method, string body, AuthService AuthService)
+        private readonly AuthService _authService = AuthService.Instance;
+
+        public (int, string?) HandleRequest(string method, string body)
         {
             // User Registration
             if (method == "POST")
@@ -28,7 +30,7 @@ namespace MTCG.Endpoints
                 }
 
                 // Try registering the user
-                if (AuthService.Register(tempUser.Username, tempUser.Password))
+                if (_authService.Register(tempUser.Username, tempUser.Password))
                 {
                     return (201, "User Created");
                 }

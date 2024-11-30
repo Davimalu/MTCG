@@ -12,17 +12,25 @@ namespace MTCG.Models
 
     public abstract class Card
     {
-        protected string name;
-        protected readonly int damage; // The damage of a card is constant and does not change
-        protected ElementType elementType;
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public float Damage { get; set; }
+        public ElementType ElementType { get; set; }
 
-        public Card(string name, int damage, ElementType elementType)
+        public Card(string id, string name, float damage, ElementType elementType)
         {
-            this.name = name;
-            this.damage = damage;
-            this.elementType = elementType;
+            this.Id = id;
+            this.Name = name;
+            this.Damage = damage;
+            this.ElementType = elementType;
         }
 
-        public abstract void printCard();
+        public Card() // Parameterless constructor is required for deserialization with System.Text.JSON
+        {
+            // TODO: Replace this
+            ElementType = ElementType.Fire;
+        } 
+
+        public abstract void PrintCard();
     }
 }
