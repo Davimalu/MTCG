@@ -285,3 +285,58 @@ Authorization: Bearer admin-mtcgToken
     }
 ]
 ### "Should return HTTP 201"
+
+
+#### 4) acquire packages kienboec
+
+POST http://localhost:10001/transactions/packages
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{}
+### "Should return HTTP 201"
+
+POST http://localhost:10001/transactions/packages
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{}
+### "Should return HTTP 201"
+
+POST http://localhost:10001/transactions/packages
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{}
+### "Should return HTTP 201"
+
+POST http://localhost:10001/transactions/packages
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{}
+### "Should return HTTP 201"
+
+POST http://localhost:10001/transactions/packages
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{}
+### Should return HTTP 4xx - Not enough money
+
+#### 5) acquire packages altenhof
+
+POST http://localhost:10001/transactions/packages
+Authorization: Bearer altenhof-mtcgToken
+Content-Type: application/json
+### "Should return HTTP 201"
+
+POST http://localhost:10001/transactions/packages
+Authorization: Bearer altenhof-mtcgToken
+Content-Type: application/json
+### "Should return HTTP 201"
+
+POST http://localhost:10001/transactions/packages
+Authorization: Bearer altenhof-mtcgToken
+Content-Type: application/json
+### "Should return HTTP 4xx - No packages available"

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using MTCG.Models;
+using MTCG.Repository;
 
 namespace MTCG.Logic
 {
@@ -27,6 +28,8 @@ namespace MTCG.Logic
         }
         #endregion
 
+        private readonly PackageRepository _packageRepository = PackageRepository.Instance;
+
         public bool AddCardToPackage(Card card, Package package)
         {
             // Check if package is already full
@@ -38,6 +41,20 @@ namespace MTCG.Logic
             // Add card to package
             package.Cards.Add(card);
             return true;
+        }
+
+        public Package? GetRandomPackage()
+        {
+            // TODO: THREAD SAFETY
+
+            // Get random package from database
+            int randomPackageId = _packageRepository.GetRandomPackageId();
+            Package? tmpPackage = _packageRepository.GetPackageFromId(randomPackageId);
+
+            // Delete retrieved package from database
+            _packageRepository.DeletePackageById(randomPackageId);
+
+            return tmpPackage;
         }
     }
 }

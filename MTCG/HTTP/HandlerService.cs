@@ -24,6 +24,7 @@ namespace MTCG.HTTP
             _endpoints.Add("/users", new UsersEndpoint());
             _endpoints.Add("/sessions", new SessionsEndpoint());
             _endpoints.Add("/packages", new PackagesEndpoint());
+            _endpoints.Add("/transactions/packages", new TransactionsEndpoint());
         }
 
         public void HandleClient(TcpClient client)

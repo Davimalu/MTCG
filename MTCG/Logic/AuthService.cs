@@ -94,9 +94,20 @@ namespace MTCG.Logic
             return null;
         }
 
-        public bool CheckToken(string token)
+        public User? CheckAuthorization(HTTPHeader headers)
         {
-            return _userRepository.GetUserByToken(token) != null;
+            // Provided authorization string should be something like "Bearer admin-mtcgToken"
+
+            // Check for correct number of words in string
+            string authString = headers.Headers["Authorization"];
+            if (headers.Headers["Authorization"].Split(' ').Length != 2)
+            {
+                return null;
+            }
+
+            // Check token against database
+            return _userRepository.GetUserByToken(authString.Split(' ')[1]);
+
         }
 
         public static string HashPassword(string password)

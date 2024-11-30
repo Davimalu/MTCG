@@ -5,12 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 
 using MTCG.Models;
+using MTCG.Repository;
 
 namespace MTCG.Logic
 {
     public class StackService
     {
-        private PackageService packageService = new PackageService();
+        #region Singleton
+        private static StackService? _instance;
+
+        public static StackService Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new StackService();
+                }
+
+                return _instance;
+            }
+        }
+        #endregion
 
         public void AddCardToStack(Card card, Stack stack)
         {

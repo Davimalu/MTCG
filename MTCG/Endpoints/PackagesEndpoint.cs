@@ -24,7 +24,7 @@ namespace MTCG.Endpoints
             if (headers.Method == "POST")
             {
                 // Check if user is authorized to add a package
-                if (!CheckAuthorization(headers))
+                if (_authService.CheckAuthorization(headers) == null)
                 {
                     return (403, "User not authorized!");
                 }
@@ -54,6 +54,7 @@ namespace MTCG.Endpoints
                     // Check if all cards were successfully added
                     if (cardsAdded != numberOfCards)
                     {
+                        // TODO: Catch duplicate errors in repository and allow for packages to be added anyway if the card already exists in the database
                         return (500, "Error adding package");
                     }
 
@@ -70,23 +71,6 @@ namespace MTCG.Endpoints
             }
 
             return (400, "Invalid Request");
-        }
-
-        private bool CheckAuthorization(HTTPHeader headers)
-        {
-            // Provided string should be something like "Bearer admin-mtcgToken"
-
-            // Check for correct number of words in string
-            string tmp = headers.Headers["Authorization"];
-            Console.WriteLine($"[DEBUG] Authorization:{tmp}");
-            if (headers.Headers["Authorization"].Split(' ').Length != 2)
-            {
-                return false;
-            }
-
-            // Check token against database
-            return _authService.CheckToken(headers.Headers["Authorization"].Split(' ')[1]);
-
         }
     }
 }
