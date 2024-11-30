@@ -22,6 +22,8 @@ namespace MTCG.DAL
             DropAllTables();
             CreateUserTable();
             CreateCardsTable();
+            CreatePackagesTable();
+            CreateCardsPackagesTable();
         }
 
         public void CreateUserTable()
@@ -46,7 +48,7 @@ namespace MTCG.DAL
             // TODO: Replace type with enum
             using IDbCommand dbCommand = dataLayer.CreateCommand("""
                 CREATE TABLE IF NOT EXISTS cards (
-                    id VARCHAR(255) PRIMARY KEY,
+                    cardId VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     damage INT NOT NULL,
                     cardType VARCHAR(255) NOT NULL,
@@ -58,11 +60,41 @@ namespace MTCG.DAL
             Console.WriteLine("[INFO] Cards Table created!");
         }
 
+        public void CreatePackagesTable()
+        {
+            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+                                                                 CREATE TABLE IF NOT EXISTS packages (
+                                                                     packageId SERIAL PRIMARY KEY
+                                                                 );
+                                                                 """);
+
+            dbCommand.ExecuteNonQuery();
+            Console.WriteLine("[INFO] Packages Table created!");
+        }
+
+        public void CreateCardsPackagesTable()
+        {
+            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+                                                                 CREATE TABLE IF NOT EXISTS cardsPackages (
+                                                                     packageId INT NOT NULL,
+                                                                     cardId VARCHAR(255) NOT NULL,
+                                                                     PRIMARY KEY (cardId, packageId),
+                                                                     FOREIGN KEY (packageId) REFERENCES packages(packageId) ON DELETE CASCADE,
+                                                                     FOREIGN KEY (cardId) REFERENCES cards(cardId) ON DELETE CASCADE
+                                                                 );
+                                                                 """);
+
+            dbCommand.ExecuteNonQuery();
+            Console.WriteLine("[INFO] CardsPackages Table created!");
+        }
+
         public void DropAllTables()
         {
             using IDbCommand dbCommand = dataLayer.CreateCommand("""
                 DROP TABLE IF EXISTS users;
+                DROP TABLE IF EXISTS cardsPackages;
                 DROP TABLE IF EXISTS cards;
+                DROP TABLE IF EXISTS packages;
              """);
 
             dbCommand.ExecuteNonQuery();

@@ -18,7 +18,7 @@ namespace MTCG.DAL
             {
                 if (instance == null)
                 {
-                    instance = new DataLayer("Host=localhost;Database=mtcg;Username=swen1;Password=passwordswen1;Persist Security Info=True");
+                    instance = new DataLayer("Host=localhost;Database=mtcg;Username=swen1;Password=passwordswen1;Persist Security Info=True; Include Error Detail=True");
                 }
                 return instance;
             }

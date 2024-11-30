@@ -10,13 +10,34 @@ namespace MTCG.Logic
 {
     public class PackageService
     {
-        private CardService CardService = new CardService();
+        #region Singleton
+        private static PackageService? _instance;
 
-        public Package CreatePackage()
+        public static PackageService Instance
         {
-            Package package = new Package();
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new PackageService();
+                }
 
-            return package;
+                return _instance;
+            }
+        }
+        #endregion
+
+        public bool AddCardToPackage(Card card, Package package)
+        {
+            // Check if package is already full
+            if (package.Cards.Count() >= 5)
+            {
+                return false;
+            }
+
+            // Add card to package
+            package.Cards.Add(card);
+            return true;
         }
     }
 }

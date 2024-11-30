@@ -88,8 +88,6 @@ Content-Type: application/json
 
 
 ### Create Packages (done by "admin")
-
-
 POST http://localhost:10001/packages
 Content-Type: application/json
 Authorization: Bearer admin-mtcgToken

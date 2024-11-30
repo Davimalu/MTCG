@@ -4,13 +4,14 @@ namespace MTCG.Models
 {
     public class Package
     {
-        public List<Card> Cards { get; private set; }
-        private int price = 5; // The price of a package is 5 coins
+        public int? Id { get; set; }
+        public List<Card> Cards { get; set; }
+        public int Price = 5;
 
         // Constructor
         public Package()
         {
-            // Initalize empty package
+            // Initialize empty package
             Cards = new List<Card>(5);
         }
 

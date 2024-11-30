@@ -57,9 +57,9 @@ namespace MTCG.HTTP
                 var endpoint = _endpoints[headers.Path];
                 (responseCode, responseBody) = endpoint.HandleRequest(headers, body);
             }
-            catch
+            catch (Exception ex)
             {
-                responseBody = null;
+                responseBody = ex.ToString();
             }
 
             _httpService.SendResponseToClient(writer, responseCode, responseBody);
