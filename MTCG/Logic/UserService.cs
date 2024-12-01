@@ -31,15 +31,6 @@ namespace MTCG.Logic
         private readonly UserRepository _userRepository = UserRepository.Instance;
         private readonly CardRepository _cardRepository = CardRepository.Instance;
 
-        public void UpdateUser(User user)
-        {
-            // Update static parameters
-            _userRepository.UpdateUser(user);
-
-            // Update stack of user
-            _userRepository.SaveStackOfUser(user);
-        }
-
         /// <summary>
         /// saves a new user to the database or - if the user already exists - updates his information
         /// </summary>
@@ -48,9 +39,11 @@ namespace MTCG.Logic
         public int SaveUserToDatabase(User user)
         {
             // If the user object already has a userId associated with it, there's already an entry in the database for it
-            if (user.Id == 0)
+            if (user.Id != 0)
             {
+                Console.WriteLine($"[DEBUG] User ID before update: {user.Id}");
                 user.Id = _userRepository.UpdateUser(user);
+                Console.WriteLine($"[DEBUG] User ID after update: {user.Id}");
             }
             else
             {
@@ -60,6 +53,7 @@ namespace MTCG.Logic
             // If a stack is associated with the user, add it to the database
             if (user.Stack.Cards.Count > 0)
             {
+                _userRepository.ClearUserStack(user);
                 _userRepository.SaveStackOfUser(user);
             }
 

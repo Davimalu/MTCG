@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using MTCG.Models;
@@ -32,22 +33,11 @@ namespace MTCG.Logic
         }
         #endregion
 
-        private readonly IUserRepository _userRepository;
-
-        public AuthService()
-        {
-            _userRepository = new UserRepository();
-        }
-
-        // Dependency Injection über den Konstruktor
-        public AuthService(IUserRepository userRepository)
-        {
-            this._userRepository = userRepository;
-        }
+        private readonly UserService _userService = UserService.Instance;
 
         public bool Register(string username, string password) {
             // Check if user already exists
-            if (_userRepository.GetUserByName(username) != null)
+            if (_userService.GetUserByName(username) != null)
             {
                 // User already exists
                 return false;
@@ -59,7 +49,7 @@ namespace MTCG.Logic
             string hashedPassword = HashPassword(password);
 
             // Add user to database
-            _userRepository.SaveUserToDatabase(new User(username, hashedPassword));
+            _userService.SaveUserToDatabase(new User(username, hashedPassword));
 
             return true;
         }
@@ -67,7 +57,7 @@ namespace MTCG.Logic
         public User? Login(string username, string password)
         {
             // Check if user exists
-            User? tempUser = _userRepository.GetUserByName(username);
+            User? tempUser = _userService.GetUserByName(username);
 
             if (tempUser != null)
             {
@@ -78,7 +68,7 @@ namespace MTCG.Logic
                     tempUser.AuthToken = token;
 
                     // Update authToken in Database
-                    _userRepository.UpdateUser(tempUser);
+                    _userService.SaveUserToDatabase(tempUser);
 
                     return tempUser;
                 }
@@ -91,22 +81,6 @@ namespace MTCG.Logic
 
             // User doesn't exist
             return null;
-        }
-
-        public User? CheckAuthorization(HTTPHeader headers)
-        {
-            // Provided authorization string should be something like "Bearer admin-mtcgToken"
-
-            // Check for correct number of words in string
-            string authString = headers.Headers["Authorization"];
-            if (headers.Headers["Authorization"].Split(' ').Length != 2)
-            {
-                return null;
-            }
-
-            // Check token against database
-            return _userRepository.GetUserByToken(authString.Split(' ')[1]);
-
         }
 
         public static string HashPassword(string password)

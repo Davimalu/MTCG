@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Repository;
 
@@ -15,7 +16,7 @@ namespace MTCG.Endpoints
     {
         private readonly CardRepository _cardRepository = CardRepository.Instance;
         private readonly PackageRepository _packageRepository = PackageRepository.Instance;
-        private readonly AuthService _authService = AuthService.Instance;
+        private readonly UserService _userService = UserService.Instance;
         private readonly PackageService _packageService = PackageService.Instance;
 
         public (int, string?) HandleRequest(HTTPHeader headers, string body)
@@ -24,7 +25,13 @@ namespace MTCG.Endpoints
             if (headers.Method == "POST")
             {
                 // Check if user is authorized to add a package
-                if (_authService.CheckAuthorization(headers) == null)
+                string? token = HeaderHelper.GetTokenFromHeader(headers);
+                if (token == null)
+                {
+                    return (403, "User not authorized!");
+                }
+
+                if (_userService.GetUserByToken(token) == null)
                 {
                     return (403, "User not authorized!");
                 }

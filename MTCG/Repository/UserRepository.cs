@@ -143,7 +143,7 @@ namespace MTCG.Repository
             int userId;
             try
             {
-                userId = dbCommand.ExecuteNonQuery();
+                userId = (int)(dbCommand.ExecuteScalar() ?? 0);
             }
             catch (Exception ex)
             {
@@ -197,8 +197,17 @@ namespace MTCG.Repository
             return null;
         }
 
+        /// <summary>
+        /// delete the stack of a user form the database
+        /// </summary>
+        /// <param name="user">user object, must contain at least the userId</param>
+        /// <returns>
+        /// <para>true on success</para>
+        /// <para>false if user or his stack were not yet added to database or on error</para>
+        /// </returns>
         public bool ClearUserStack(User user)
         {
+            // Prepare SQL query
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                   DELETE FROM userCards
                                                                   WHERE userid = @userId;
@@ -206,11 +215,26 @@ namespace MTCG.Repository
 
             DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
-            int rowsAffected = dbCommand.ExecuteNonQuery();
+            // Execute query and error handling
+            int rowsAffected;
 
+            try
+            {
+                rowsAffected = dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"[ERROR] Error deleting stack of {user.Username} from the database!");
+                Console.WriteLine($"[ERROR] {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
+
+            // Check if at least one row was affected
             if (rowsAffected <= 0)
             {
-                Console.WriteLine($"[Error] Cards of User {user.Username} couldn't be removed from database!");
                 return false;
             }
 

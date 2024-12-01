@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
@@ -13,7 +14,6 @@ namespace MTCG.Endpoints
     public class TransactionsEndpoint : IHttpEndpoint
     {
         private readonly UserService _userService = UserService.Instance;
-        private readonly AuthService _authService= AuthService.Instance;
         private readonly PackageService _packageService = PackageService.Instance;
         private readonly StackService _stackService = StackService.Instance;
 
@@ -23,8 +23,13 @@ namespace MTCG.Endpoints
             if (headers is { Method: "POST", Path: "/transactions/packages" })
             {
                 // Check for authorization
-                User? user = _authService.CheckAuthorization(headers);
+                string? token = HeaderHelper.GetTokenFromHeader(headers);
+                if (token == null)
+                {
+                    return (403, "User not authorized!");
+                }
 
+                User? user = _userService.GetUserByToken(token);
                 if (user == null)
                 {
                     return (403, "User not authorized!");
@@ -48,7 +53,7 @@ namespace MTCG.Endpoints
 
                 // Save changes into database
                 user.CoinCount -= 5;
-                _userService.UpdateUser(user);
+                _userService.SaveUserToDatabase(user);
 
                 return (201, "Package retrieved successfully and added cards to user's stack!");
             }

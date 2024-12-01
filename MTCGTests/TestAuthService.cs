@@ -19,16 +19,6 @@ namespace MTCGTests
         public void Setup()
         {
             var hashedPassword = BCrypt.HashPassword("testPassword");
-
-            // Create mock for testing
-            userRepositoryMock = Substitute.For<IUserRepository>();
-
-            // Define mock behaviour
-            userRepositoryMock.GetUserByName("testUser").Returns(new User("testUser", hashedPassword));
-            userRepositoryMock.GetUserByName("anotherTestUser").ReturnsNull();
-
-            // Dependency Injection in AuthService
-            authService = new AuthService(userRepositoryMock);
         }
 
         [Test]
