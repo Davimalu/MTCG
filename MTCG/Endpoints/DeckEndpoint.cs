@@ -30,7 +30,7 @@ namespace MTCG.Endpoints
                 }
 
                 // Convert user deck into JSON
-                string json = JsonSerializer.Serialize(user.Deck);
+                string json = JsonSerializer.Serialize(user.Deck.Cards);
 
                 return (200, json);
             }

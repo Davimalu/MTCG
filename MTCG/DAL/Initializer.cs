@@ -23,7 +23,8 @@ namespace MTCG.DAL
             CreateUserTable();
             CreateCardsTable();
             CreatePackagesTable();
-            CreateUserCardsTable();
+            CreateUserStacksTable();
+            CreateUserDecksTable();
             CreateCardsPackagesTable();
         }
 
@@ -93,11 +94,11 @@ namespace MTCG.DAL
             Console.WriteLine("[INFO] CardsPackages Table created!");
         }
 
-        // Saves which cards a user owns
-        public void CreateUserCardsTable()
+        // Saves which cards a user has in his stack
+        public void CreateUserStacksTable()
         {
             using IDbCommand dbCommand = dataLayer.CreateCommand("""
-                                                                 CREATE TABLE IF NOT EXISTS userCards (
+                                                                 CREATE TABLE IF NOT EXISTS userStacks (
                                                                      userId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
                                                                      PRIMARY KEY (userId, cardId),
@@ -107,13 +108,31 @@ namespace MTCG.DAL
                                                                  """);
 
             dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] UserCards Table created!");
+            Console.WriteLine("[INFO] UserStacks Table created!");
+        }
+
+        // Saves which cards a user has in his deck
+        public void CreateUserDecksTable()
+        {
+            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+                                                                 CREATE TABLE IF NOT EXISTS userDecks (
+                                                                     userId INT NOT NULL,
+                                                                     cardId VARCHAR(255) NOT NULL,
+                                                                     PRIMARY KEY (userId, cardId),
+                                                                     FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE,
+                                                                     FOREIGN KEY (cardId) REFERENCES cards(cardId) ON DELETE CASCADE
+                                                                 );
+                                                                 """);
+
+            dbCommand.ExecuteNonQuery();
+            Console.WriteLine("[INFO] UserDecks Table created!");
         }
 
         public void DropAllTables()
         {
             using IDbCommand dbCommand = dataLayer.CreateCommand("""
-                DROP TABLE IF EXISTS userCards;
+                DROP TABLE IF EXISTS userStacks;
+                DROP TABLE IF EXISTS userDecks;
                 DROP TABLE IF EXISTS cardsPackages;
                 DROP TABLE IF EXISTS users;
                 DROP TABLE IF EXISTS cards;

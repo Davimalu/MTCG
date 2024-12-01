@@ -55,8 +55,12 @@ namespace MTCG.Logic
                 _userRepository.SaveStackOfUser(user);
             }
 
-            // TODO: If a deck is associated with the user, add it to the database
-            // TODO: If a stack/deck is already saved to the database, update it
+            // If a deck is associated with the user, add it to the database
+            if (user.Deck.Cards.Count > 0)
+            {
+                _userRepository.ClearUserDeck(user);
+                _userRepository.SaveDeckOfUser(user);
+            }
             
             return user.Id;
         }

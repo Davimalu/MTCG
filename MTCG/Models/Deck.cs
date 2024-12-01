@@ -2,14 +2,12 @@
 {
     public class Deck
     {
-        private List<Card> _cards;
+        public int? Id { get; set; }
+        private List<Card> _cards = new List<Card>();
 
         public List<Card> Cards
         {
-            get
-            {
-                return _cards;
-            }
+            get => _cards;
             set
             {
                 // Check if deck has more than 4 cards
@@ -22,13 +20,6 @@
                     _cards = value;
                 }
             }
-        }
-
-        // Constructor
-        public Deck()
-        {
-            // Initalize empty deck
-            _cards = new List<Card>();
         }
     }
 }
