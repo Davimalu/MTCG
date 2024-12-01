@@ -63,8 +63,11 @@ namespace MTCG.Repository
             }
             catch (Exception ex)
             {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"[ERROR] Card {card.Name} couldn't be added to database!");
                 Console.WriteLine($"[ERROR] {ex.Message}");
+                Console.ResetColor();
                 return false;
             }
 

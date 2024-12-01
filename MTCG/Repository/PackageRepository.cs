@@ -30,18 +30,40 @@ namespace MTCG.Repository
 
         private readonly DataLayer _dataLayer = DataLayer.Instance;
 
-        public bool AddPackage(Package package)
+        /// <summary>
+        /// saves a new package to the database
+        /// </summary>
+        /// <param name="package">package object containing all cards that belong to this package</param>
+        /// <returns>
+        ///<para>true if package was added successfully</para>
+        ///<para>false if package couldn't be added to database</para>
+        /// </returns>
+        public bool AddPackageToDatabase(Package package)
         {
+            // Prepare SQL Statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("INSERT INTO packages DEFAULT VALUES RETURNING packageId;");
 
-            package.Id = (int)(dbCommand.ExecuteScalar() ?? 0);
-
-            // Check if query executed successfully
-            if (package.Id == 0)
+            // Execute query and save packageId of the newly created entry
+            try
+            {
+                package.Id = (int)(dbCommand.ExecuteScalar() ?? 0);
+            }
+            catch (Exception ex)
             {
                 Console.BackgroundColor = ConsoleColor.Red;
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"[ERROR] Package couldn't be added to database!");
+                Console.WriteLine($"[ERROR] {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
+
+            // Check if packageId was returned
+            if (package.Id == 0)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"[ERROR] Unknown error while adding package to database!");
                 Console.ResetColor();
                 return false;
             }
@@ -50,10 +72,20 @@ namespace MTCG.Repository
             return AddCardsToPackage(package);
         }
 
+        /// <summary>
+        /// saves the information on which cards belong to this package in the database
+        /// </summary>
+        /// <param name="package">package object containing the packageId of the database entry in table 'packages' and all cards that belong to this package</param>
+        /// <returns>
+        ///<para>true if all associations were successfully saved to the database</para>
+        /// <para>false if at least one association couldn't be saved in the database</para>
+        /// </returns>
         public bool AddCardsToPackage(Package package)
         {
+            // for all cards in the package...
             foreach (var card in package.Cards)
             {
+                // Prepare SQL query
                 using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                       INSERT INTO cardsPackages (packageId, cardId)
                                                                       VALUES (@packageId, @cardId);
@@ -62,11 +94,30 @@ namespace MTCG.Repository
                 DataLayer.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, package.Id);
                 DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
 
-                int rowsAffected = dbCommand.ExecuteNonQuery();
+                // Execute query and error handling
+                int rowsAffected;
 
+                try
+                {
+                    rowsAffected = dbCommand.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine($"[ERROR] Card {card.Name} couldn't be associated with package!");
+                    Console.WriteLine($"[ERROR] {ex.Message}");
+                    Console.ResetColor();
+                    return false;
+                } 
+
+                // Check if query executed successfully
                 if (rowsAffected <= 0)
                 {
-                    Console.WriteLine($"[Error] Card {card.Name} couldn't be added to database!");
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine($"[Error] Card {card.Name} couldn't be associated with package!");
+                    Console.ResetColor();
                     return false;
                 }
             }
@@ -74,14 +125,23 @@ namespace MTCG.Repository
             return true;
         }
 
+        /// <summary>
+        /// gets the packageId of a random package from the packages table
+        /// </summary>
+        /// <returns>
+        /// <para>packageId of a random package on success</para>
+        /// <para>0 if no packages available</para>
+        /// </returns>
         public int GetRandomPackageId()
         {
+            // Prepare SQL statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                   SELECT packageId FROM packages
                                                                   ORDER BY RANDOM()
                                                                   LIMIT 1
                                                                   """);
 
+            // TODO: Add error handling?
             using IDataReader reader = dbCommand.ExecuteReader();
 
             if (reader.Read())
@@ -92,8 +152,17 @@ namespace MTCG.Repository
             return 0;
         }
 
+        /// <summary>
+        /// retrieves a package from the database using its packageId
+        /// </summary>
+        /// <param name="packageId"></param>
+        /// <returns>
+        /// <para>package containing all metadata and associated cards on success</para>
+        /// <para>null if the package doesn't exist or has no cards associated with it</para>
+        /// </returns>
         public Package? GetPackageFromId(int packageId)
         {
+            // Prepare SQL statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                   SELECT cards.cardId, name, damage, cardType, elementType FROM cards
                                                                   JOIN cardsPackages USING (cardId)
@@ -102,10 +171,12 @@ namespace MTCG.Repository
 
             DataLayer.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
 
+            // TODO: Add error handling?
             using IDataReader reader = dbCommand.ExecuteReader();
 
             List<Card> cards = new List<Card>(5);
 
+            // Create a card object out of each entry that was returned
             while (reader.Read())
             {
                 string id = reader.GetString(0);
@@ -137,8 +208,17 @@ namespace MTCG.Repository
             };
         }
 
+        /// <summary>
+        /// delete a package from the database using its packageId; does NOT delete the cards that were added with that package
+        /// </summary>
+        /// <param name="packageId"></param>
+        /// <returns>
+        /// <para>true if package was deleted successfully</para>
+        /// <para>false if there was no package with that packageId or if SQL error occured</para>
+        /// </returns>
         public bool DeletePackageById(int packageId)
         {
+            // Prepare SQL statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                   DELETE FROM packages
                                                                   WHERE packageId = @packageId;
@@ -146,11 +226,29 @@ namespace MTCG.Repository
 
             DataLayer.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
 
-            int rowsAffected = dbCommand.ExecuteNonQuery();
+            // Execute query and error handling
+            int rowsAffected;
+            try
+            {
+                rowsAffected = dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"[ERROR] Package with ID {packageId} couldn't be removed from database!");
+                Console.WriteLine($"[ERROR] {ex.Message}");
+                Console.ResetColor();
+                return false;
+            }
 
+            // Check if at least one row was affected
             if (rowsAffected <= 0)
             {
-                Console.WriteLine($"[Error] Package with ID {packageId} couldn't be removed from database!");
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"[ERROR] Package with ID {packageId} couldn't be removed from database!");
+                Console.ResetColor();
                 return false;
             }
 

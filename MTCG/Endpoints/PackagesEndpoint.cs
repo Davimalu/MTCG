@@ -59,7 +59,7 @@ namespace MTCG.Endpoints
                     }
 
                     // Add package to database
-                    if (!_packageRepository.AddPackage(tmpPackage))
+                    if (!_packageRepository.AddPackageToDatabase(tmpPackage))
                     {
                         return (500, "Error adding package");
                     }
