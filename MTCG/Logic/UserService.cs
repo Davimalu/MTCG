@@ -40,6 +40,68 @@ namespace MTCG.Logic
             _userRepository.SaveStackOfUser(user);
         }
 
+        /// <summary>
+        /// saves a new user to the database or - if the user already exists - updates his information
+        /// </summary>
+        /// <param name="user">user object | Stack and Deck are optional</param>
+        /// <returns>ID of the newly created or updated database entry</returns>
+        public int SaveUserToDatabase(User user)
+        {
+            // If the user object already has a userId associated with it, there's already an entry in the database for it
+            if (user.Id == 0)
+            {
+                user.Id = _userRepository.UpdateUser(user);
+            }
+            else
+            {
+                user.Id = _userRepository.SaveUserToDatabase(user);
+            }
+
+            // If a stack is associated with the user, add it to the database
+            if (user.Stack.Cards.Count > 0)
+            {
+                _userRepository.SaveStackOfUser(user);
+            }
+
+            // TODO: If a deck is associated with the user, add it to the database
+            // TODO: If a stack/deck is already saved to the database, update it
+            
+            return user.Id;
+        }
+
+        /// <summary>
+        /// retrieve a user from the database using his unique username
+        /// </summary>
+        /// <param name="username">the username of the user</param>
+        /// <returns>
+        /// <para>user object containing all information + deck and stack on success</para>
+        /// <para>null if there is no user with that username or an error occured</para>
+        ///</returns>
+        public User? GetUserByName(string username)
+        {
+            // Get static user information
+            User? user = _userRepository.GetUserByName(username);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            user = AddStackToUser(user);
+
+            // TODO: Also retrieve the user's deck
+
+            return user;
+        }
+
+        /// <summary>
+        /// retrieve a user from the database using his authentication token
+        /// </summary>
+        /// <param name="token">the authentication token in format "xxx-mtcgToken"</param>
+        /// <returns>
+        /// <para>user object containing all information + deck and stack on success</para>
+        /// <para>null if there is no user with that token or an error occured</para>
+        /// </returns>
         public User? GetUserByToken(string token)
         {
             // Get static user information
@@ -50,6 +112,15 @@ namespace MTCG.Logic
                 return null;
             }
 
+            user = AddStackToUser(user);
+
+            // TODO: Also retrieve the user's deck
+
+            return user;
+        }
+
+        private User AddStackToUser(User user)
+        {
             // Get the IDs of the cards the user has in his stack
             List<string>? cardIds = _userRepository.GetCardIdsOfUserStack(user);
 
@@ -66,8 +137,6 @@ namespace MTCG.Logic
                 userStack.Cards.Add(_cardRepository.GetCardById(cardId));
             }
             user.Stack = userStack;
-
-            // TODO: Also retrieve the user's deck
 
             return user;
         }

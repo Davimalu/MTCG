@@ -68,7 +68,7 @@ namespace MTCGTests
             //// Assert ////
 
             // Use Arg.Is - otherwise the mock will check if it’s the exact same instance of the user
-            userRepositoryMock.Received(1).AddUser(Arg.Is<User>(u => u.Username == "anotherTestUser"));
+            userRepositoryMock.Received(1).SaveUserToDatabase(Arg.Is<User>(u => u.Username == "anotherTestUser"));
         }
 
         [Test]

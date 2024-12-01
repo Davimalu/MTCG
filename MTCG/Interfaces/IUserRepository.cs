@@ -5,10 +5,9 @@ namespace MTCG.Interfaces
 {
     public interface IUserRepository
     {
-        void AddUser(User user);
-        User? GetUserById(int id);
+        int SaveUserToDatabase(User user);
         User? GetUserByName(string username);
-        void UpdateUser(User user);
+        int UpdateUser(User user);
         User? GetUserByToken(string token);
     }
 }

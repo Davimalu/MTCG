@@ -59,7 +59,7 @@ namespace MTCG.Logic
             string hashedPassword = HashPassword(password);
 
             // Add user to database
-            _userRepository.AddUser(new User(username, hashedPassword));
+            _userRepository.SaveUserToDatabase(new User(username, hashedPassword));
 
             return true;
         }
