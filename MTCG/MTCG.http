@@ -384,7 +384,7 @@ Content-Type: application/json
 ### "Should return HTTP 201"
 
 
-#### acquire newly created packages altenhof
+#### 7) acquire newly created packages altenhof
 POST http://localhost:10001/transactions/packages
 Authorization: Bearer altenhof-mtcgToken
 Content-Type: application/json
@@ -399,3 +399,19 @@ POST http://localhost:10001/transactions/packages
 Authorization: Bearer altenhof-mtcgToken
 Content-Type: application/json
 ### "Should return HTTP 4xx - Not enough money"
+
+
+#### 8) show all acquired cards kienboec
+
+GET http://localhost:10001/cards
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 200 - and a list of all cards
+
+GET http://localhost:10001/cards
+### Should return HTTP 4xx - Unauthorized
+
+
+#### 9) show all acquired cards altenhof
+GET http://localhost:10001/cards
+Authorization: Bearer altenhof-mtcgToken
+### Should return HTTP 200 - and a list of all cards

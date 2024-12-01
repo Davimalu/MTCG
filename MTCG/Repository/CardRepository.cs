@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using MTCG.Models;
 using System.Data;
 using MTCG.Logic;
+using static System.Net.Mime.MediaTypeNames;
+using System.Xml.Linq;
 
 namespace MTCG.Repository
 {
@@ -57,6 +59,41 @@ namespace MTCG.Repository
                 Console.WriteLine($"[Error] Card {card.Name} couldn't be added to database!");
                 return false;
             }
+        }
+
+        public Card? GetCardById(string cardId)
+        {
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                                                                  SELECT cardId, name, damage, cardType, elementType
+                                                                  FROM cards
+                                                                  WHERE cardId = @cardId
+                                                                  """);
+            DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardId);
+
+            using IDataReader reader = dbCommand.ExecuteReader();
+
+            if (reader.Read())
+            {
+
+                Console.WriteLine($"[INFO] Card {reader.GetString(1)} retrieved from database!");
+
+                string id = reader.GetString(0);
+                string name = reader.GetString(1);
+                float damage = reader.GetFloat(2);
+                ElementType elementType = Enum.Parse<ElementType>(reader.GetString(4));
+
+                // Generate appropriate card type
+                if (reader.GetString(3) == "Spell") // Spell Card
+                {
+                    return new SpellCard(id, name, damage, elementType);
+                }
+                else // Monster Card
+                {
+                    return new MonsterCard(id, name, damage, elementType);
+                }
+            }
+
+            return null;
         }
     }
 }

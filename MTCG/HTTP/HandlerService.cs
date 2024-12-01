@@ -25,6 +25,7 @@ namespace MTCG.HTTP
             _endpoints.Add("/sessions", new SessionsEndpoint());
             _endpoints.Add("/packages", new PackagesEndpoint());
             _endpoints.Add("/transactions/packages", new TransactionsEndpoint());
+            _endpoints.Add("/cards", new CardsEndpoint());
         }
 
         public void HandleClient(TcpClient client)
@@ -42,14 +43,6 @@ namespace MTCG.HTTP
             Console.WriteLine($"[INFO] Client connected: {headers.Version} {headers.Path} {headers.Method}");
 
             // === Handle Request ===
-
-            // Handle empty body
-            if (body == null)
-            {
-                _httpService.SendResponseToClient(writer, 400, "No data provided");
-                return;
-            }
-
             int responseCode = 400;
             string? responseBody = null;
 

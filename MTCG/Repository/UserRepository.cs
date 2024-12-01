@@ -30,6 +30,7 @@ namespace MTCG.Repository
         }
         #endregion
 
+        private readonly CardRepository _cardRepository = CardRepository.Instance;
         private readonly DataLayer _dataLayer = DataLayer.Instance;
 
         public void AddUser(User user)
@@ -195,6 +196,27 @@ namespace MTCG.Repository
             }
 
             return true;
+        }
+
+        public List<string>? GetCardIdsOfUserStack(User user)
+        {
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                                                                  SELECT cardId FROM userCards
+                                                                  WHERE userId = @userId
+                                                                  """);
+
+            DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+
+            using IDataReader reader = dbCommand.ExecuteReader();
+
+            List<string> cardsOfUser = new List<string>();
+
+            while (reader.Read())
+            {
+                cardsOfUser.Add(reader.GetString(0));
+            }
+
+            return cardsOfUser;
         }
     }
 }
