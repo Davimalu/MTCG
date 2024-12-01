@@ -84,8 +84,7 @@ namespace MTCG.Logic
             }
 
             user = AddStackToUser(user);
-
-            // TODO: Also retrieve the user's deck
+            user = AddDeckToUser(user);
 
             return user;
         }
@@ -109,8 +108,7 @@ namespace MTCG.Logic
             }
 
             user = AddStackToUser(user);
-
-            // TODO: Also retrieve the user's deck
+            user = AddDeckToUser(user);
 
             return user;
         }
@@ -133,6 +131,29 @@ namespace MTCG.Logic
                 userStack.Cards.Add(_cardRepository.GetCardById(cardId));
             }
             user.Stack = userStack;
+
+            return user;
+        }
+
+        // TODO: This function is very similar to AddStackToUser -> Refactor
+        private User AddDeckToUser(User user)
+        {
+            // Get the IDs of the cards the user has in his deck
+            List<string>? cardIds = _userRepository.GetCardIdsOfUserDeck(user);
+
+            if (cardIds == null || cardIds.Count == 0)
+            {
+                // User has no cards in his deck
+                return user;
+            }
+
+            // Fill user's deck with cards
+            Deck userDeck = new Deck();
+            foreach (string cardId in cardIds)
+            {
+                userDeck.Cards.Add(_cardRepository.GetCardById(cardId));
+            }
+            user.Deck = userDeck;
 
             return user;
         }

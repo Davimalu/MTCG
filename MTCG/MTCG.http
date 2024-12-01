@@ -425,3 +425,67 @@ Authorization: Bearer kienboec-mtcgToken
 GET http://localhost:10001/deck
 Authorization: Bearer altenhof-mtcgToken
 ### Should return HTTP 200 - and a empty-list
+
+
+#### 11) configure deck
+PUT http://localhost:10001/deck
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+[
+  "171f6076-4eb5-4a7d-b3f2-2d650cc3d237",
+  "84d276ee-21ec-4171-a509-c1b88162831c",
+  "d60e23cf-2238-4d49-844f-c7589ee5342e",
+  "4ec8b269-0dfa-4f97-809a-2c63fe2a0025"
+]
+### Should return HTTP 2xx
+
+GET http://localhost:10001/deck
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 200 - and a list of all cards
+
+PUT http://localhost:10001/deck
+Content-Type: application/json
+Authorization: Bearer altenhof-mtcgToken
+
+[
+  "166c1fd5-4dcb-41a8-91cb-f45dcd57cef3",
+  "44c82fbc-ef6d-44ab-8c7a-9fb19a0e7c6e",
+  "99f8f8dc-e25e-4a95-aa2c-782823f36e2a",
+  "e85e3976-7c86-4d06-9a80-641c2019a79f"
+]
+### Should return HTTP 2xx
+
+GET http://localhost:10001/deck
+Authorization: Bearer altenhof-mtcgToken
+### Should return HTTP 200 - and a list of all cards
+
+
+PUT http://localhost:10001/deck
+Content-Type: application/json
+Authorization: Bearer altenhof-mtcgToken
+
+[
+  "171f6076-4eb5-4a7d-b3f2-2d650cc3d237",
+  "84d276ee-21ec-4171-a509-c1b88162831c",
+  "d60e23cf-2238-4d49-844f-c7589ee5342e",
+  "4ec8b269-0dfa-4f97-809a-2c63fe2a0025"
+]
+### Should return HTTP 4xx
+
+GET http://localhost:10001/deck
+Authorization: Bearer altenhof-mtcgToken
+### Should return HTTP 200 - and a list of all cards (original list from before)
+
+
+### Configure deck for altenhof with only 3 cards (should fail)
+PUT http://localhost:10001/deck
+Content-Type: application/json
+Authorization: Bearer altenhof-mtcgToken
+
+[
+  "aa9999a0-734c-49c6-8f4a-651864b14e62",
+  "d6e9c720-9b5a-40c7-a6b2-bc34752e3463",
+  "d60e23cf-2238-4d49-844f-c7589ee5342e"
+]
+### Should return HTTP 4xx - Bad request
