@@ -34,8 +34,17 @@ namespace MTCG.Repository
         private readonly DataLayer _dataLayer = DataLayer.Instance;
         private readonly CardService _cardService = CardService.Instance;
 
-        public bool AddCard(Card card)
+        /// <summary>
+        /// saves a new card to the database
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns>
+        /// <para>true if card was successfully added to database</para>
+        /// <para>false if card couldn't be added to database</para>
+        /// </returns>>
+        public bool AddCardToDatabase(Card card)
         {
+            // Prepare SQL Statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                  INSERT INTO cards (cardId, name, damage, cardType, elementType)
                                                                  VALUES (@id, @name, @damage, @cardType, @elementType);
@@ -47,22 +56,32 @@ namespace MTCG.Repository
             DataLayer.AddParameterWithValue(dbCommand, "@cardType", DbType.String, _cardService.GetCardType(card));
             DataLayer.AddParameterWithValue(dbCommand, "@elementType", DbType.String, _cardService.GetElementType(card));
 
-            int rowsAffected = dbCommand.ExecuteNonQuery();
-
-            if (rowsAffected > 0)
+            // Execute query and catch errors
+            try
             {
-                Console.WriteLine($"[INFO] Card {card.Name} added to database!");
-                return true;
+                dbCommand.ExecuteNonQuery();
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"[Error] Card {card.Name} couldn't be added to database!");
+                Console.WriteLine($"[ERROR] Card {card.Name} couldn't be added to database!");
+                Console.WriteLine($"[ERROR] {ex.Message}");
                 return false;
             }
+
+            return true;
         }
 
+        /// <summary>
+        /// Retrieves a card - identified by its cardId - from the database
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns>
+        /// <para>Monster- or Spellcard object</para>
+        /// <para>null if there is no card in the database with the specified Id</para>
+        /// </returns>
         public Card? GetCardById(string cardId)
         {
+            // Prepare SQL Statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                   SELECT cardId, name, damage, cardType, elementType
                                                                   FROM cards
@@ -70,13 +89,13 @@ namespace MTCG.Repository
                                                                   """);
             DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardId);
 
+            // Execute query
+            // TODO: Add error handling?
             using IDataReader reader = dbCommand.ExecuteReader();
 
+            // Check if query returned a result
             if (reader.Read())
             {
-
-                Console.WriteLine($"[INFO] Card {reader.GetString(1)} retrieved from database!");
-
                 string id = reader.GetString(0);
                 string name = reader.GetString(1);
                 float damage = reader.GetFloat(2);
@@ -93,6 +112,7 @@ namespace MTCG.Repository
                 }
             }
 
+            // Return null if no results
             return null;
         }
     }

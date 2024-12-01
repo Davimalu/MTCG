@@ -45,7 +45,7 @@ namespace MTCG.Endpoints
                     foreach (var card in cardsToAdd)
                     {
                         // Add cards to database and temporary package
-                        if (_cardRepository.AddCard(card) && _packageService.AddCardToPackage(card, tmpPackage))
+                        if (_cardRepository.AddCardToDatabase(card) && _packageService.AddCardToPackage(card, tmpPackage))
                         {
                             cardsAdded++;
                         }
