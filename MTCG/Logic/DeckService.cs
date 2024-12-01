@@ -10,7 +10,16 @@ namespace MTCG.Logic
 {
     public class DeckService
     {
-        public bool AddCardToDeck(Card card, Deck deck)
+        /// <summary>
+        /// adds a card to the user's deck
+        /// </summary>
+        /// <param name="card">the card to add</param>
+        /// <param name="deck">the deck of the user</param>
+        /// <returns>
+        /// <para>true if card was added to deck</para>
+        /// <para>false if card couldn't be added to deck (e.g. because there were already 4 cards in the deck)</para>
+        /// </returns>
+        public bool AddCardToUserDeck(Card card, Deck deck)
         {
             try
             {
@@ -22,24 +31,25 @@ namespace MTCG.Logic
                 deck.Cards.Add(card);
                 return true;
             }
-            catch (ArgumentException e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.Message);
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"[WARNING] Couldn't add card with ID {card.Id} to deck");
+                Console.WriteLine($"[WARNING] {ex.Message}");
+                Console.ResetColor();
                 return false;
             }
         }
-
-        public bool RemoveCardFromDeck(Card card, Deck deck)
+        
+        /// <summary>
+        /// removes a card from the user's deck
+        /// </summary>
+        /// <param name="cardToRemove">the card to remove</param>
+        /// <param name="deck">the deck of the user</param>
+        public void RemoveCardFromUserDeck(Card cardToRemove, Deck deck)
         {
-            if (deck.Cards.Contains(card))
-            {
-                deck.Cards.Remove(card);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            deck.Cards.RemoveAll(card => card.Id == cardToRemove.Id);
         }
     }
 }

@@ -415,3 +415,13 @@ GET http://localhost:10001/cards
 GET http://localhost:10001/cards
 Authorization: Bearer altenhof-mtcgToken
 ### Should return HTTP 200 - and a list of all cards
+
+
+#### 10) show unconfigured deck
+GET http://localhost:10001/deck
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 200 - and a empty-list
+
+GET http://localhost:10001/deck
+Authorization: Bearer altenhof-mtcgToken
+### Should return HTTP 200 - and a empty-list

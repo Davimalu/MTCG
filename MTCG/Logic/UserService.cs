@@ -41,9 +41,7 @@ namespace MTCG.Logic
             // If the user object already has a userId associated with it, there's already an entry in the database for it
             if (user.Id != 0)
             {
-                Console.WriteLine($"[DEBUG] User ID before update: {user.Id}");
                 user.Id = _userRepository.UpdateUser(user);
-                Console.WriteLine($"[DEBUG] User ID after update: {user.Id}");
             }
             else
             {
