@@ -49,7 +49,8 @@ namespace MTCG.HTTP
 
             try
             {
-                var endpoint = _endpoints[headers.Path];
+                // Look up the path (without any query parameters) in the endpoints dictionary
+                var endpoint = _endpoints[HeaderHelper.GetPathWithoutQueryParameters(headers)];
                 (responseCode, responseBody) = endpoint.HandleRequest(headers, body);
             }
             catch (Exception ex)

@@ -10,6 +10,23 @@ namespace MTCG.Logic
 {
     public class DeckService
     {
+        #region Singleton
+        private static DeckService? _instance;
+
+        public static DeckService Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new DeckService();
+                }
+
+                return _instance;
+            }
+        }
+        #endregion
+
         /// <summary>
         /// adds a card to the user's deck
         /// </summary>
@@ -50,6 +67,25 @@ namespace MTCG.Logic
         public void RemoveCardFromUserDeck(Card cardToRemove, Deck deck)
         {
             deck.Cards.RemoveAll(card => card.Id == cardToRemove.Id);
+        }
+
+        /// <summary>
+        /// serializes a given deck into a human-readable plaintext representation
+        /// </summary>
+        /// <param name="deck"></param>
+        /// <returns></returns>
+        public string SerializeDeckToPlaintext(Deck deck)
+        {
+            string returnString = String.Empty;
+
+            foreach (Card card in deck.Cards)
+            {
+                returnString +=
+                    $"ID: {card.Id}, Name: {card.Name}, Damage: {card.Damage}, Card Type: {(card is MonsterCard ? "Monster Card" : "Spell Card")}, Element Type: {card.ElementType.ToString()}\n";
+                    // use is operator to determine type of card: https://learn.microsoft.com/de-de/dotnet/csharp/language-reference/operators/is
+            }
+
+            return returnString;
         }
     }
 }

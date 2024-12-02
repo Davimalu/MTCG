@@ -17,6 +17,7 @@ namespace MTCG.Endpoints
     {
         private readonly CardRepository _cardRepository = CardRepository.Instance;
         private readonly UserService _userService = UserService.Instance;
+        private readonly DeckService _deckService = DeckService.Instance;
 
         public (int, string?) HandleRequest(HTTPHeader headers, string body)
         {
@@ -32,10 +33,30 @@ namespace MTCG.Endpoints
             // GET => List deck of user
             if (headers.Method == "GET")
             {
-                // Convert user deck into JSON
-                string json = JsonSerializer.Serialize(user.Deck.Cards);
+                // Check for query Parameters
+                Dictionary<string, string> queryParameters = HeaderHelper.GetQueryParameters(headers);
 
-                return (200, json);
+                // https://learn.microsoft.com/de-de/dotnet/api/system.collections.generic.dictionary-2.trygetvalue?view=net-8.0
+                if (queryParameters.TryGetValue("format", out string? format))
+                {
+                    // Query Parameter format present
+                    if (format == "plain")
+                    {
+                        string plainText = _deckService.SerializeDeckToPlaintext(user.Deck);
+                        return (200, plainText);
+                    }
+                    else
+                    {
+                        return (400, "Bad request");
+                    }
+                }
+                else // No Query Parameters
+                {
+                    // Convert user deck into JSON
+                    string json = JsonSerializer.Serialize(user.Deck.Cards);
+
+                    return (200, json);
+                }
             }
 
             // PUT => Update deck of user
