@@ -510,3 +510,77 @@ GET http://localhost:10001/deck?format=plain
 Authorization: Bearer altenhof-mtcgToken
 ### Should return HTTP 200 - and a list of all cards
 
+
+#### 14) edit user data
+
+GET http://localhost:10001/users/kienboec
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 200 - and current user data
+
+GET http://localhost:10001/users/altenhof
+Authorization: Bearer altenhof-mtcgToken 
+### Should return HTTP 200 - and current user data
+
+PUT http://localhost:10001/users/kienboec
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{
+  "Name": "Kienboeck",
+  "Bio": "me playin...",
+  "Image": ":-)"
+}
+### Should return HTTP 2xx
+
+PUT http://localhost:10001/users/altenhof
+Content-Type: application/json
+Authorization: Bearer altenhof-mtcgToken
+
+{
+  "Name": "Altenhofer",
+  "Bio": "me codin...",
+  "Image": ":-D"
+}
+### Should return HTTP 2xx
+
+GET http://localhost:10001/users/kienboec
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 200 - and new user data
+
+GET http://localhost:10001/users/altenhof
+Authorization: Bearer altenhof-mtcgToken
+### Should return HTTP 200 - and new user data
+
+GET http://localhost:10001/users/altenhof
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 4xx - Invalid Authorization token for Altenhof
+
+GET http://localhost:10001/users/kienboec
+Authorization: Bearer altenhof-mtcgToken
+### Should return HTTP 4xx - Invalid Authorization token for Kienboec
+
+PUT http://localhost:10001/users/kienboec
+Content-Type: application/json
+Authorization: Bearer altenhof-mtcgToken
+
+{
+  "Name": "Hoax",
+  "Bio": "me playin...",
+  "Image": ":-)"
+}
+### Should return HTTP 4xx - Unauthorized PUT on Kienboec with Altenhof token
+
+PUT http://localhost:10001/users/altenhof
+Content-Type: application/json
+Authorization: Bearer kienboec-mtcgToken
+
+{
+  "Name": "Hoax",
+  "Bio": "me codin...",
+  "Image": ":-D"
+}
+### Should return HTTP 4xx - Unauthorized PUT on Altenhof with Kienboec token
+
+GET http://localhost:10001/users/someGuy
+Authorization: Bearer kienboec-mtcgToken
+### Should return HTTP 4xx - Non-existent user
