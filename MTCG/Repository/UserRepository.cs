@@ -481,5 +481,31 @@ namespace MTCG.Repository
 
             return true;
         }
+
+        /// <summary>
+        /// returns a list of usernames of all users currently in the database
+        /// </summary>
+        /// <returns>
+        /// <para>A list of strings containing the usernames (Primary Key) of each user</para>
+        /// </returns>
+        public List<string> GetListOfUsers()
+        {
+            List<string> users = new List<string>();
+
+            // Prepare SQL statement
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("SELECT username FROM users");
+
+            // Execute query
+            // TODO: Add error handling?
+            using IDataReader reader = dbCommand.ExecuteReader();
+
+            while (reader.Read())
+            {
+                users.Add(reader.GetString(0));
+            }
+
+            // If no entries were returned...
+            return users;
+        }
     }
 }

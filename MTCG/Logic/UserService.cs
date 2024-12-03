@@ -157,5 +157,17 @@ namespace MTCG.Logic
 
             return user;
         }
+
+        /// <summary>
+        /// returns a list of usernames of all users currently registered to the game
+        /// </summary>
+        /// <returns>
+        /// <para>A list of strings containing the usernames (unique) of each user</para>
+        /// </returns>
+        public List<string> GetListOfUsers()
+        {
+            // TODO: Is this function necessary? It's purpose is so that no one but the userService interacts with userRepository
+            return _userRepository.GetListOfUsers();
+        }
     }
 }
