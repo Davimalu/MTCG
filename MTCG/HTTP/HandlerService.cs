@@ -47,15 +47,25 @@ namespace MTCG.HTTP
             int responseCode = 400;
             string? responseBody = null;
 
-            try
+            // Get request path without query parameters | e.g. /deck?format=plain -> /deck
+            string path = HeaderHelper.GetPathWithoutQueryParameters(headers);
+
+            // Only look up the first "directory" of the path in the dictionary | e.g. /users/kienboec -> /users
+            var matchingKey = _endpoints.Keys.FirstOrDefault(key =>
+                path.StartsWith(key));
+
+            if (matchingKey != null)
             {
-                // Look up the path (without any query parameters) in the endpoints dictionary
-                var endpoint = _endpoints[HeaderHelper.GetPathWithoutQueryParameters(headers)];
-                (responseCode, responseBody) = endpoint.HandleRequest(headers, body);
-            }
-            catch (Exception ex)
-            {
-                responseBody = ex.ToString();
+                try
+                {
+                    // Look up the path in the endpoints dictionary
+                    var endpoint = _endpoints[matchingKey];
+                    (responseCode, responseBody) = endpoint.HandleRequest(headers, body);
+                }
+                catch (Exception ex)
+                {
+                    responseBody = ex.ToString();
+                }
             }
 
             _httpService.SendResponseToClient(writer, responseCode, responseBody);
