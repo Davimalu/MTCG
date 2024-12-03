@@ -15,6 +15,7 @@ namespace MTCG.Models
         public string Id { get; set; }
         public string Name { get; set; }
         public float Damage { get; set; }
+        public float TemporaryDamage { get; set; }
         public ElementType ElementType { get; set; }
 
         public Card(string id, string name, float damage, ElementType elementType)
