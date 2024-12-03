@@ -19,7 +19,7 @@ namespace MTCG.Endpoints
         private readonly UserService _userService = UserService.Instance;
         private readonly PackageService _packageService = PackageService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string body)
+        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
         {
             // Add new package
             if (headers.Method == "POST")

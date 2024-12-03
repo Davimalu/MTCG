@@ -4,13 +4,17 @@
     {
         public int Id { get; set; } = 0;
         public string Username { get; set; } = string.Empty;
+        public string ChosenName { get; set; } = string.Empty;
+        public string Biography { get; set; } = string.Empty;
+        public string Image { get; set; } = string.Empty;
+        public UserStatistics Stats { get; set; } = new UserStatistics();
         public string Password { get; set; } = string.Empty;
         public string AuthToken { get; set; } = string.Empty;
-        public int EloPoints { get; set; } = 100;
         public Stack Stack { get; set; } = new Stack();
         public Deck Deck { get; set; } = new Deck();
 
         private int _coinCount = 20;
+
         public int CoinCount
         {
             get
@@ -36,13 +40,11 @@
         {
             this.Username = username;
             this.Password = password;
-            EloPoints = 100;
             _coinCount = 20;
         }
 
         public User()
         {
-            EloPoints = 100;
             _coinCount = 20;
         }
     }

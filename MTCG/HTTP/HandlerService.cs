@@ -44,8 +44,8 @@ namespace MTCG.HTTP
             Console.WriteLine($"[INFO] Client connected: {headers.Version} {headers.Path} {headers.Method}");
 
             // === Handle Request ===
-            int responseCode = 400;
-            string? responseBody = null;
+            int responseCode = 404;
+            string? responseBody = "Not Found";
 
             // Get request path without query parameters | e.g. /deck?format=plain -> /deck
             string path = HeaderHelper.GetPathWithoutQueryParameters(headers);

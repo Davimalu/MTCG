@@ -433,10 +433,10 @@ Content-Type: application/json
 Authorization: Bearer kienboec-mtcgToken
 
 [
-  "4a2757d6-b1c3-47ac-b9a3-91deab093531",
-  "4ec8b269-0dfa-4f97-809a-2c63fe2a0025",
+  "55ef46c4-016c-4168-bc43-6b9b1e86414f",
+  "9e8238a4-8a7a-487f-9f7d-a8c97899eb48",
   "e85e3976-7c86-4d06-9a80-641c2019a79f",
-  "44c82fbc-ef6d-44ab-8c7a-9fb19a0e7c6e"
+  "4ec8b269-0dfa-4f97-809a-2c63fe2a0025"
 ]
 ### Should return HTTP 2xx
 

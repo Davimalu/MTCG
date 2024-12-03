@@ -19,7 +19,7 @@ namespace MTCG
         static void Main(string[] args)
         {
             // Create database tables
-            Initializer initializer = new Initializer();
+            DatabaseInitializer initializer = new DatabaseInitializer();
             initializer.CreateTables();
 
             while (true)

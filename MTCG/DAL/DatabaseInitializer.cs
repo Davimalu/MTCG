@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace MTCG.DAL
 {
-    public class Initializer
+    public class DatabaseInitializer
     {
-        private readonly DataLayer dataLayer;
-
-        public Initializer()
-        {
-            dataLayer = DataLayer.Instance;
-        }
+        private readonly DataLayer _dataLayer = DataLayer.Instance;
 
         public void CreateTables()
         {
@@ -31,13 +26,19 @@ namespace MTCG.DAL
         // Saves all users that registered
         public void CreateUserTable()
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 CREATE TABLE IF NOT EXISTS users (
                     userId SERIAL PRIMARY KEY,
                     username VARCHAR(255) NOT NULL,
+                    chosenName VARCHAR (255),
+                    biography TEXT,
+                    image VARCHAR(255),
                     password VARCHAR(255) NOT NULL,
                     authToken VARCHAR(255),
                     coinCount INT DEFAULT 20,
+                    wins INT DEFAULT 0,
+                    losses INT DEFAULT 0,
+                    ties INT DEFAULT 0,
                     eloPoints INT DEFAULT 100 );
                 """);
 
@@ -50,7 +51,7 @@ namespace MTCG.DAL
         public void CreateCardsTable()
         {
             // TODO: Replace type with enum
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 CREATE TABLE IF NOT EXISTS cards (
                     cardId VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
@@ -67,7 +68,7 @@ namespace MTCG.DAL
         // Saves all packages that were created
         public void CreatePackagesTable()
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS packages (
                                                                      packageId SERIAL PRIMARY KEY
                                                                  );
@@ -80,7 +81,7 @@ namespace MTCG.DAL
         // Saves which cards are contained by a package
         public void CreateCardsPackagesTable()
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS cardsPackages (
                                                                      packageId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
@@ -97,7 +98,7 @@ namespace MTCG.DAL
         // Saves which cards a user has in his stack
         public void CreateUserStacksTable()
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS userStacks (
                                                                      userId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
@@ -114,7 +115,7 @@ namespace MTCG.DAL
         // Saves which cards a user has in his deck
         public void CreateUserDecksTable()
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS userDecks (
                                                                      userId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
@@ -130,7 +131,7 @@ namespace MTCG.DAL
 
         public void DropAllTables()
         {
-            using IDbCommand dbCommand = dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 DROP TABLE IF EXISTS userStacks;
                 DROP TABLE IF EXISTS userDecks;
                 DROP TABLE IF EXISTS cardsPackages;

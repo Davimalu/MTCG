@@ -10,6 +10,6 @@ namespace MTCG.Interfaces
 {
     public interface IHttpEndpoint
     {
-        (int, string?) HandleRequest(HTTPHeader headers, string body);
+        (int, string?) HandleRequest(HTTPHeader headers, string? body);
     }
 }

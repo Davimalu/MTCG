@@ -15,8 +15,9 @@ namespace MTCG.Endpoints
     public class UsersEndpoint : IHttpEndpoint
     {
         private readonly AuthService _authService = AuthService.Instance;
+        private readonly UserService _userService = UserService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string body)
+        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
         {
             // User Registration
             if (headers.Method == "POST")
@@ -38,6 +39,17 @@ namespace MTCG.Endpoints
                 {
                     return (409, "User already exists");
                 }
+            }
+            
+            // Retrieve user data
+            if (headers.Method == "GET")
+            {
+                // TODO: WIP
+
+                // Get username from path
+                string username = headers.Path.Split('/').Last();
+
+                User? tmpUser = _userService.GetUserByName(username);
             }
 
             return (400, "Bad Request");

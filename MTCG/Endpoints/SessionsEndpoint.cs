@@ -16,7 +16,7 @@ namespace MTCG.Endpoints
     {
         private readonly AuthService _authService = AuthService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string body)
+        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
         {
             // User Login
             if (headers.Method == "POST")

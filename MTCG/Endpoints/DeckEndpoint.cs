@@ -19,7 +19,7 @@ namespace MTCG.Endpoints
         private readonly UserService _userService = UserService.Instance;
         private readonly DeckService _deckService = DeckService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string body)
+        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
         {
             // Check if user is authorized
             string token = HeaderHelper.GetTokenFromHeader(headers)!;

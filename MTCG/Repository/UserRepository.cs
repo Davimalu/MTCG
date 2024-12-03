@@ -45,16 +45,22 @@ namespace MTCG.Repository
         {
             // Prepare SQL Query
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
-                INSERT INTO users (username, password, authToken, coinCount)
-                VALUES (@username, @password, @authToken, @coinCount)
+                INSERT INTO users (username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints)
+                VALUES (@username, @chosenName, @biography, @image, @password, @authToken, @coinCount, @wins, @losses, @ties, @eloPoints)
                 RETURNING userId;
                 """);
 
             DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
+            DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.ChosenName);
+            DataLayer.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
+            DataLayer.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
             DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
             DataLayer.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
             DataLayer.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
-            DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.EloPoints);
+            DataLayer.AddParameterWithValue(dbCommand, "@wins", DbType.Int32, user.Stats.Wins);
+            DataLayer.AddParameterWithValue(dbCommand, "@losses", DbType.Int32, user.Stats.Losses);
+            DataLayer.AddParameterWithValue(dbCommand, "@ties", DbType.Int32, user.Stats.Ties);
+            DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.Stats.EloPoints);
 
             // Execute query and error handling
             try
@@ -87,7 +93,7 @@ namespace MTCG.Repository
         {
             // Prepare SQL statement
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
-                SELECT userId, username, password, authToken, coinCount, eloPoints
+                SELECT userId, username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints
                 FROM users
                 WHERE username = @username
                 """);
@@ -99,14 +105,25 @@ namespace MTCG.Repository
 
             if (reader.Read())
             {
+                UserStatistics stats = new UserStatistics()
+                {
+                    Wins = reader.GetInt32(8),
+                    Losses = reader.GetInt32(9),
+                    Ties = reader.GetInt32(10),
+                    EloPoints = reader.GetInt32(11)
+                };
+
                 return new User()
                 {
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
-                    Password = reader.GetString(2),
-                    AuthToken = reader.GetString(3),
-                    CoinCount = reader.GetInt32(4),
-                    EloPoints = reader.GetInt32(5)
+                    ChosenName = reader.GetString(2),
+                    Biography = reader.GetString(3),
+                    Image = reader.GetString(4),
+                    Password = reader.GetString(5),
+                    AuthToken = reader.GetString(6),
+                    CoinCount = reader.GetInt32(7),
+                    Stats = stats
                 };
             }
 
@@ -127,16 +144,22 @@ namespace MTCG.Repository
             // Prepare SQL Query
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 UPDATE users
-                SET username = @username, password = @password, authToken = @authToken, coinCount = @coinCount, eloPoints = @eloPoints
+                SET username = @username, chosenName = @chosenName, biography = @biography, image = @image, password = @password, authToken = @authToken, coinCount = @coinCount, wins = @wins, losses = @losses, ties = @ties, eloPoints = @eloPoints
                 WHERE userId = @id
                 RETURNING userId
                 """);
 
             DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
+            DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.ChosenName);
+            DataLayer.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
+            DataLayer.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
             DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
             DataLayer.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
             DataLayer.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
-            DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.EloPoints);
+            DataLayer.AddParameterWithValue(dbCommand, "@wins", DbType.Int32, user.Stats.Wins);
+            DataLayer.AddParameterWithValue(dbCommand, "@losses", DbType.Int32, user.Stats.Losses);
+            DataLayer.AddParameterWithValue(dbCommand, "@ties", DbType.Int32, user.Stats.Ties);
+            DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.Stats.EloPoints);
             DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.Int32, user.Id);
 
             // Execute query and error handling
@@ -170,7 +193,7 @@ namespace MTCG.Repository
         {
             // Prepare SQL query
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
-                                                                  SELECT userId, username, password, authToken, coinCount, eloPoints
+                                                                  SELECT userId, username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints
                                                                   FROM users
                                                                   WHERE authToken = @token
                                                                   """);
@@ -182,14 +205,25 @@ namespace MTCG.Repository
 
             if (reader.Read())
             {
+                UserStatistics stats = new UserStatistics()
+                {
+                    Wins = reader.GetInt32(8),
+                    Losses = reader.GetInt32(9),
+                    Ties = reader.GetInt32(10),
+                    EloPoints = reader.GetInt32(11)
+                };
+
                 return new User()
                 {
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
-                    Password = reader.GetString(2),
-                    AuthToken = reader.GetString(3),
-                    CoinCount = reader.GetInt32(4),
-                    EloPoints = reader.GetInt32(5)
+                    ChosenName = reader.GetString(2),
+                    Biography = reader.GetString(3),
+                    Image = reader.GetString(4),
+                    Password = reader.GetString(5),
+                    AuthToken = reader.GetString(6),
+                    CoinCount = reader.GetInt32(7),
+                    Stats = stats
                 };
             }
 
