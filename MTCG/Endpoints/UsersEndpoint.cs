@@ -4,8 +4,9 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
@@ -44,15 +45,136 @@ namespace MTCG.Endpoints
             // Retrieve user data
             if (headers.Method == "GET")
             {
-                // TODO: WIP
+                // Check if path is valid
+                if (!IsValidPath(headers.Path))
+                {
+                    return (400, "Bad Request");
+                }
 
                 // Get username from path
                 string username = headers.Path.Split('/').Last();
+                User? userByName = _userService.GetUserByName(username);
 
-                User? tmpUser = _userService.GetUserByName(username);
+                if (userByName == null)
+                {
+                    return (404, "User doesn't exist");
+                }
+
+                // Check if user is authorized
+                string token = HeaderHelper.GetTokenFromHeader(headers)!;
+                User? userByToken = _userService.GetUserByToken(token);
+
+                if (userByToken == null)
+                {
+                    return (403, "User not authorized!");
+                }
+
+                // Requested username doesn't match authorized user
+                if (userByName.Username != userByToken.Username)
+                {
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"[WARNING] User {userByToken.Username} tried to illegitimately access information of User {userByName.Username}");
+                    Console.ResetColor();
+
+                    return (403, "User not authorized!");
+                }
+
+                // TODO: Return JSON instead of plaintext
+                return (200, userByName.ToString());
+            }
+
+            // Update user data
+            if (headers.Method == "PUT")
+            {
+                // Check if path is valid
+                if (!IsValidPath(headers.Path))
+                {
+                    return (400, "Bad Request");
+                }
+
+                // TODO: Code is very similar to GET Method -> REFACTOR
+
+                // Get username from path
+                string username = headers.Path.Split('/').Last();
+                User? userByName = _userService.GetUserByName(username);
+
+                if (userByName == null)
+                {
+                    return (404, "User doesn't exist");
+                }
+
+                // Check if user is authorized
+                string token = HeaderHelper.GetTokenFromHeader(headers)!;
+                User? userByToken = _userService.GetUserByToken(token);
+
+                if (userByToken == null)
+                {
+                    return (403, "User not authorized!");
+                }
+
+                // Provided username doesn't match authorized user
+                if (userByName.Username != userByToken.Username)
+                {
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"[WARNING] User {userByToken.Username} tried to illegitimately edit information of User {userByName.Username}");
+                    Console.ResetColor();
+
+                    return (403, "User not authorized!");
+                }
+
+                // Update user information
+                if (body == null)
+                {
+                    return (400, "Bad Request");
+                }
+
+                // Deserialize request body into dictionary
+                var updatedInformation = JsonSerializer.Deserialize<Dictionary<string, string>>(body);
+
+                if (updatedInformation == null)
+                {
+                    return (400, "No new information provided");
+                }
+
+                if (updatedInformation.TryGetValue("Name", out string? chosenName))
+                {
+                    userByName.ChosenName = chosenName;
+                }
+
+                if (updatedInformation.TryGetValue("Bio", out string? biography))
+                {
+                    userByName.Biography = biography;
+                }
+
+                if (updatedInformation.TryGetValue("Image", out string? image))
+                {
+                    userByName.Image = image;
+                }
+
+                // Update user
+                _userService.SaveUserToDatabase(userByName);
+
+                return (200, "User Information updated");
             }
 
             return (400, "Bad Request");
+        }
+
+        /// <summary>
+        /// checks if the provided path is in format "/users/username"
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>
+        /// <para>true if the path matches the format</para>
+        /// <para>false if the path doesn't match the format</para>
+        /// </returns>
+        private bool IsValidPath(string path)
+        {
+            // Regex pattern
+            string pattern = @"^/users/[a-zA-Z0-9_-]+$";
+            return Regex.IsMatch(path, pattern);
         }
     }
 }

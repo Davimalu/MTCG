@@ -19,22 +19,18 @@ namespace MTCG.Endpoints
 
         public (int, string?) HandleRequest(HTTPHeader headers, string? body)
         {
+            // Check if user is authorized
+            string token = HeaderHelper.GetTokenFromHeader(headers)!;
+            User? user = _userService.GetUserByToken(token);
+
+            if (user == null)
+            {
+                return (403, "User not authorized!");
+            }
+
             // Buy new package
             if (headers is { Method: "POST", Path: "/transactions/packages" })
             {
-                // Check for authorization
-                string? token = HeaderHelper.GetTokenFromHeader(headers);
-                if (token == null)
-                {
-                    return (403, "User not authorized!");
-                }
-
-                User? user = _userService.GetUserByToken(token);
-                if (user == null)
-                {
-                    return (403, "User not authorized!");
-                }
-
                 // Check if user has enough coins
                 if (user.CoinCount < 5)
                 {

@@ -434,9 +434,9 @@ Authorization: Bearer kienboec-mtcgToken
 
 [
   "55ef46c4-016c-4168-bc43-6b9b1e86414f",
-  "9e8238a4-8a7a-487f-9f7d-a8c97899eb48",
-  "e85e3976-7c86-4d06-9a80-641c2019a79f",
-  "4ec8b269-0dfa-4f97-809a-2c63fe2a0025"
+  "4ec8b269-0dfa-4f97-809a-2c63fe2a0025",
+  "4a2757d6-b1c3-47ac-b9a3-91deab093531",
+  "b2237eca-0271-43bd-87f6-b22f70d42ca4"
 ]
 ### Should return HTTP 2xx
 
@@ -449,10 +449,10 @@ Content-Type: application/json
 Authorization: Bearer altenhof-mtcgToken
 
 [
-  "88221cfe-1f84-41b9-8152-8e36c6a354de",
-  "b017ee50-1c14-44e2-bfd6-2c0c5653a37c",
-  "70962948-2bf7-44a9-9ded-8c68eeac7793",
-  "ce6bcaee-47e1-4011-a49e-5a4d7d4245f3"
+  "27051a20-8580-43ff-a473-e986b52f297a",
+  "1d3f175b-c067-4359-989d-96562bfa382c",
+  "dfdd758f-649c-40f9-ba3a-8657f4b3439f",
+  "02a9c76e-b17d-427f-9240-2dd49b0d3bfd"
 ]
 ### Should return HTTP 2xx
 

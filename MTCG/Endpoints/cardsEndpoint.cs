@@ -20,10 +20,10 @@ namespace MTCG.Endpoints
             // Get list of cards
             if (headers.Method == "GET")
             {
+                // Check if user is authorized
                 string token = HeaderHelper.GetTokenFromHeader(headers)!;
                 User? user = _userService.GetUserByToken(token);
 
-                // If the user doesn't exist, NULL is returned
                 if (user == null)
                 {
                     return (403, "User not authorized!");

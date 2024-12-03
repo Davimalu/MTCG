@@ -21,21 +21,18 @@ namespace MTCG.Endpoints
 
         public (int, string?) HandleRequest(HTTPHeader headers, string? body)
         {
+            // Check if user is authorized
+            string token = HeaderHelper.GetTokenFromHeader(headers)!;
+            User? user = _userService.GetUserByToken(token);
+
+            if (user == null)
+            {
+                return (403, "User not authorized!");
+            }
+
             // Add new package
             if (headers.Method == "POST")
             {
-                // Check if user is authorized to add a package
-                string? token = HeaderHelper.GetTokenFromHeader(headers);
-                if (token == null)
-                {
-                    return (403, "User not authorized!");
-                }
-
-                if (_userService.GetUserByToken(token) == null)
-                {
-                    return (403, "User not authorized!");
-                }
-
                 // Each request contains an array of cards
                 List<MonsterCard>? cardsToAdd = JsonSerializer.Deserialize<List<MonsterCard>>(body);
 

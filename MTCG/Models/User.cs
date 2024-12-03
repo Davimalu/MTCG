@@ -47,5 +47,10 @@
         {
             _coinCount = 20;
         }
+
+        public override string ToString()
+        {
+            return $"Username: {Username}\nChosen Name: {ChosenName}\nBio: {Biography}\nImage: {Image}\nWins: {Stats.Wins}\nLosses: {Stats.Losses}\nTies: {Stats.Ties}\nElo: {Stats.EloPoints}";
+        }
     }
 }
