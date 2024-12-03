@@ -140,7 +140,7 @@ namespace MTCG.Endpoints
 
                 if (updatedInformation.TryGetValue("Name", out string? chosenName))
                 {
-                    userByName.ChosenName = chosenName;
+                    userByName.DisplayName = chosenName;
                 }
 
                 if (updatedInformation.TryGetValue("Bio", out string? biography))

@@ -4,7 +4,7 @@
     {
         public int Id { get; set; } = 0;
         public string Username { get; set; } = string.Empty;
-        public string ChosenName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public string Biography { get; set; } = string.Empty;
         public string Image { get; set; } = string.Empty;
         public UserStatistics Stats { get; set; } = new UserStatistics();
@@ -50,7 +50,7 @@
 
         public override string ToString()
         {
-            return $"Username: {Username}\nChosen Name: {ChosenName}\nBio: {Biography}\nImage: {Image}\nWins: {Stats.Wins}\nLosses: {Stats.Losses}\nTies: {Stats.Ties}\nElo: {Stats.EloPoints}";
+            return $"Username: {Username}\nChosen Name: {DisplayName}\nBio: {Biography}\nImage: {Image}\nWins: {Stats.Wins}\nLosses: {Stats.Losses}\nTies: {Stats.Ties}\nElo: {Stats.EloPoints}";
         }
     }
 }

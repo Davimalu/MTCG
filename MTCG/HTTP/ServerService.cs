@@ -37,9 +37,15 @@ namespace MTCG.HTTP
             Console.WriteLine($"[INFO] Listening on http://localhost:{PortNo}...");
             var client = server.AcceptTcpClient();
 
-            HandlerService.HandleClient(client);
-        }
+            // Get client IP Address
+            IPEndPoint remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+            Console.WriteLine($"[INFO] Received a request from {remoteIpEndPoint.Address}");
 
-        
+            // Start new thread for client
+            Console.WriteLine($"[INFO] Starting new thread for request...");
+            Task.Run(() => HandlerService.HandleClient(client));
+
+            // TODO: Go through the whole code again and guard critical sections
+        }
     }
 }

@@ -599,3 +599,14 @@ Authorization: Bearer altenhof-mtcgToken
 GET http://localhost:10001/scoreboard
 Authorization: Bearer kienboec-mtcgToken
 ### Should return HTTP 200 - and the scoreboard
+
+
+#### 17) battle
+POST http://localhost:10001/battles
+Authorization: Bearer kienboec-mtcgToken
+### Should initiate a battle for kienboec
+
+POST http://localhost:10001/battles
+Authorization: Bearer altenhof-mtcgToken
+### Should initiate a battle for altenhof
+

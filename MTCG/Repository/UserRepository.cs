@@ -51,7 +51,7 @@ namespace MTCG.Repository
                 """);
 
             DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
-            DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.ChosenName);
+            DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.DisplayName);
             DataLayer.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
             DataLayer.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
             DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
@@ -117,7 +117,7 @@ namespace MTCG.Repository
                 {
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
-                    ChosenName = reader.GetString(2),
+                    DisplayName = reader.GetString(2),
                     Biography = reader.GetString(3),
                     Image = reader.GetString(4),
                     Password = reader.GetString(5),
@@ -150,7 +150,7 @@ namespace MTCG.Repository
                 """);
 
             DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
-            DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.ChosenName);
+            DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.DisplayName);
             DataLayer.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
             DataLayer.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
             DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
@@ -217,7 +217,7 @@ namespace MTCG.Repository
                 {
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
-                    ChosenName = reader.GetString(2),
+                    DisplayName = reader.GetString(2),
                     Biography = reader.GetString(3),
                     Image = reader.GetString(4),
                     Password = reader.GetString(5),

@@ -40,7 +40,7 @@ namespace MTCG.Logic
                 ScoreboardEntry newEntry = new ScoreboardEntry()
                 {
                     Username = tmpUser.Username,
-                    ChosenName = tmpUser.ChosenName,
+                    ChosenName = tmpUser.DisplayName,
                     EloPoints = tmpUser.Stats.EloPoints,
                     Losses = tmpUser.Stats.Losses,
                     Ties = tmpUser.Stats.Ties,
