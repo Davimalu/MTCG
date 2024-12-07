@@ -3,6 +3,7 @@ using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -18,6 +19,8 @@ namespace MTCG.HTTP
         private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
         private HTTPService _httpService = new HTTPService();
 
+        private ConcurrentQueue<TcpClient> _battleQueue = new ConcurrentQueue<TcpClient>();
+
         public HandlerService()
         {
             // Add endpoints
@@ -29,6 +32,7 @@ namespace MTCG.HTTP
             _endpoints.Add("/deck", new DeckEndpoint());
             _endpoints.Add("/stats", new StatsEndpoint());
             _endpoints.Add("/scoreboard", new ScoreboardEndpoint());
+            _endpoints.Add("/battles", new BattlesEndpoint());
         }
 
         public void HandleClient(TcpClient client)
@@ -62,7 +66,7 @@ namespace MTCG.HTTP
                 {
                     // Look up the path in the endpoints dictionary
                     var endpoint = _endpoints[matchingKey];
-                    (responseCode, responseBody) = endpoint.HandleRequest(headers, body);
+                    (responseCode, responseBody) = endpoint.HandleRequest(client, headers, body);
                 }
                 catch (Exception ex)
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using MTCG.HTTP;
@@ -17,7 +18,7 @@ namespace MTCG.Endpoints
         private readonly PackageService _packageService = PackageService.Instance;
         private readonly StackService _stackService = StackService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
             string token = HeaderHelper.GetTokenFromHeader(headers)!;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.Json;
@@ -16,7 +17,7 @@ namespace MTCG.Endpoints
     {
         private readonly AuthService _authService = AuthService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body)
         {
             // User Login
             if (headers.Method == "POST")

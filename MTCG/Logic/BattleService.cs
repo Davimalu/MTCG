@@ -11,7 +11,7 @@ namespace MTCG.Logic
     {
         private static Random _rnd = new Random();
 
-        public User? StartBattle(User playerA, User playerB)
+        public string StartBattle(User playerA, User playerB)
         {
             int counter = 0;
 
@@ -63,11 +63,11 @@ namespace MTCG.Logic
 
             if (playerA.Deck.Cards.Count > playerB.Deck.Cards.Count)
             {
-                return playerA; // A wins
+                return "A wins!"; // A wins
             }
             else if (playerB.Deck.Cards.Count > playerA.Deck.Cards.Count)
             {
-                return playerB; // B wins
+                return "B wins!"; // B wins
             }
             else
             {

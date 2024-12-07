@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace MTCG.Endpoints
     {
         private readonly UserService _userService = UserService.Instance;
 
-        public (int, string?) HandleRequest(HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body)
         {
             // Get stats of user
             if (headers.Method == "GET")
