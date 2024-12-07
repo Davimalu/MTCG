@@ -192,5 +192,29 @@ namespace MTCG.Logic
 
             return JsonSerializer.Serialize(jsonObject);
         }
+
+        public void UpdateUserStats(User winner, User loser, bool tie)
+        {
+            // Empty deck since we don't want to store the deck updated by the battle in the database
+            winner.Deck = new Deck();
+            loser.Deck = new Deck();
+
+            if (tie == true)
+            {
+                winner.Stats.Ties += 1;
+                loser.Stats.Ties += 1;
+            }
+            else
+            {
+                winner.Stats.EloPoints += 3;
+                loser.Stats.EloPoints -= 5;
+
+                winner.Stats.Wins += 1;
+                loser.Stats.Losses += 1;
+            }
+
+            SaveUserToDatabase(winner);
+            SaveUserToDatabase(loser);
+        }
     }
 }

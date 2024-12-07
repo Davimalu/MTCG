@@ -5,11 +5,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using MTCG.Models;
+using MTCG.Repository;
 
 namespace MTCG.Logic
 {
     public class BattleService
     {
+        private UserService _userService = UserService.Instance;
+
         private static Random _rnd = new Random();
         private List<string>? _battleLog = null;
 
@@ -74,16 +77,19 @@ namespace MTCG.Logic
             if (playerA.Deck.Cards.Count > playerB.Deck.Cards.Count) // A wins
             {
                 _battleLog.Add($"{playerA.Username} defeated {playerB.Username} in {counter-1} rounds. Well done!");
+                _userService.UpdateUserStats(playerA, playerB, false);
                 return JsonSerializer.Serialize(_battleLog);
             } 
             else if (playerB.Deck.Cards.Count > playerA.Deck.Cards.Count) // B wins
             {
                 _battleLog.Add($"{playerB.Username} defeated {playerA.Username} in {counter-1} rounds. Well done!");
+                _userService.UpdateUserStats(playerB, playerA, false);
                 return JsonSerializer.Serialize(_battleLog);
             }
             else // Draw
             {
                 _battleLog.Add($"None of the players managed to win within 100 rounds. It's a tie!");
+                _userService.UpdateUserStats(playerA, playerB, true);
                 return JsonSerializer.Serialize(_battleLog);
             }
         }
