@@ -29,6 +29,8 @@ namespace MTCG.Logic
         #endregion
 
         private readonly UserRepository _userRepository = UserRepository.Instance;
+        private readonly StackRepository _stackRepository = StackRepository.Instance;
+        private readonly DeckRepository _deckRepository = DeckRepository.Instance;
         private readonly CardRepository _cardRepository = CardRepository.Instance;
 
         /// <summary>
@@ -51,15 +53,15 @@ namespace MTCG.Logic
             // If a stack is associated with the user, add it to the database
             if (user.Stack.Cards.Count > 0)
             {
-                _userRepository.ClearUserStack(user);
-                _userRepository.SaveStackOfUser(user);
+                _stackRepository.ClearUserStack(user);
+                _stackRepository.SaveStackOfUser(user);
             }
 
             // If a deck is associated with the user, add it to the database
             if (user.Deck.Cards.Count > 0)
             {
-                _userRepository.ClearUserDeck(user);
-                _userRepository.SaveDeckOfUser(user);
+                _deckRepository.ClearUserDeck(user);
+                _deckRepository.SaveDeckOfUser(user);
             }
             
             return user.Id;
@@ -116,7 +118,7 @@ namespace MTCG.Logic
         private User AddStackToUser(User user)
         {
             // Get the IDs of the cards the user has in his stack
-            List<string>? cardIds = _userRepository.GetCardIdsOfUserStack(user);
+            List<string>? cardIds = _stackRepository.GetCardIdsOfUserStack(user);
 
             if (cardIds == null || cardIds.Count == 0)
             {
@@ -139,7 +141,7 @@ namespace MTCG.Logic
         private User AddDeckToUser(User user)
         {
             // Get the IDs of the cards the user has in his deck
-            List<string>? cardIds = _userRepository.GetCardIdsOfUserDeck(user);
+            List<string>? cardIds = _deckRepository.GetCardIdsOfUserDeck(user);
 
             if (cardIds == null || cardIds.Count == 0)
             {

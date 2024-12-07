@@ -19,8 +19,6 @@ namespace MTCG.HTTP
         private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
         private HTTPService _httpService = new HTTPService();
 
-        private ConcurrentQueue<TcpClient> _battleQueue = new ConcurrentQueue<TcpClient>();
-
         public HandlerService()
         {
             // Add endpoints
