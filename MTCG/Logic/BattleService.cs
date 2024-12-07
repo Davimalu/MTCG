@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MTCG.Models;
 
@@ -10,14 +11,18 @@ namespace MTCG.Logic
     public class BattleService
     {
         private static Random _rnd = new Random();
+        private List<string>? _battleLog = null;
 
         public string StartBattle(User playerA, User playerB)
         {
-            int counter = 0;
+            _battleLog = new List<string>();
+            int counter = 1;
 
             // The fight continues as long as both players still have cards in their deck and less than 100 rounds have been played
             while (playerA.Deck.Cards.Count > 0 && playerB.Deck.Cards.Count > 0)
             {
+                _battleLog.Add($">>> Round {counter} <<<");
+
                 Card? playerACard = GetRandomCardFromDeck(playerA.Deck);
                 Card? playerBCard = GetRandomCardFromDeck(playerB.Deck);
 
@@ -31,6 +36,12 @@ namespace MTCG.Logic
                     return null;
                 }
 
+                _battleLog.Add($"{playerA.Username} plays Card {playerACard.Name}!");
+                _battleLog.Add($"Card Type: {(playerACard is MonsterCard ? "Monster" : "Spell")} | Damage: {playerACard.Damage} | Element Type: {playerACard.ElementType.ToString()}");
+
+                _battleLog.Add($"{playerB.Username} plays Card {playerBCard.Name}!");
+                _battleLog.Add($"Card Type: {(playerBCard is MonsterCard ? "Monster" : "Spell")} | Damage: {playerBCard.Damage} | Element Type: {playerBCard.ElementType.ToString()}");
+
                 Card? winnerCard = FightOneRound(playerACard, playerBCard);
 
                 // Continue on draw
@@ -42,6 +53,7 @@ namespace MTCG.Logic
                 // If A wins, transfer B's card to him
                 if (playerA.Deck.Cards.Contains(winnerCard))
                 {
+                    _battleLog.Add($"{playerA.Username} has won Round {counter}!");
                     playerA.Deck.Cards.Add(playerBCard);
                     playerB.Deck.Cards.Remove(playerBCard);
                 }
@@ -49,6 +61,7 @@ namespace MTCG.Logic
                 // If B wins, transfer A's card to him
                 if (playerB.Deck.Cards.Contains(winnerCard))
                 {
+                    _battleLog.Add($"{playerB.Username} has won Round {counter}!");
                     playerB.Deck.Cards.Add(playerACard);
                     playerA.Deck.Cards.Remove(playerACard);
                 }
@@ -57,21 +70,25 @@ namespace MTCG.Logic
                 // If the counter reaches 100, the fight is over
                 if (counter >= 100)
                 {
-                    return null; // Draw
+                    break;
                 }
             }
 
-            if (playerA.Deck.Cards.Count > playerB.Deck.Cards.Count)
+            _battleLog.Add($">>> Result <<<");
+            if (playerA.Deck.Cards.Count > playerB.Deck.Cards.Count) // A wins
             {
-                return "A wins!"; // A wins
+                _battleLog.Add($"{playerA.Username} defeated {playerB.Username} in {counter} rounds. Well done!");
+                return JsonSerializer.Serialize(_battleLog);
+            } 
+            else if (playerB.Deck.Cards.Count > playerA.Deck.Cards.Count) // B wins
+            {
+                _battleLog.Add($"{playerB.Username} defeated {playerA.Username} in {counter} rounds. Well done!");
+                return JsonSerializer.Serialize(_battleLog);
             }
-            else if (playerB.Deck.Cards.Count > playerA.Deck.Cards.Count)
+            else // Draw
             {
-                return "B wins!"; // B wins
-            }
-            else
-            {
-                return null; // Draw
+                _battleLog.Add($"None of the players managed to win within 100 rounds. It's a tie!");
+                return JsonSerializer.Serialize(_battleLog);
             }
         }
 
@@ -88,6 +105,8 @@ namespace MTCG.Logic
         {
             if (cardA is MonsterCard && cardB is MonsterCard)
             {
+                _battleLog.Add($"Both players have played monster cards -> Element types have no effect in this round!");
+
                 // Pure Monster Fight (both cards are monsters) -> fights are not affected by the element type
                 cardA.TemporaryDamage = cardA.Damage;
                 cardB.TemporaryDamage = cardB.Damage;
@@ -105,12 +124,18 @@ namespace MTCG.Logic
                 {
                     cardA.TemporaryDamage *= 2;
                     cardB.TemporaryDamage /= 2;
+
+                    _battleLog.Add($"Water is very effective against fire, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
+                    _battleLog.Add($"Fire is not effective against water, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
                 }
 
                 if (cardB.ElementType == ElementType.Water && cardA.ElementType == ElementType.Fire)
                 {
                     cardB.TemporaryDamage *= 2;
                     cardA.TemporaryDamage /= 2;
+
+                    _battleLog.Add($"Water is very effective against fire, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
+                    _battleLog.Add($"Fire is not effective against water, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
                 }
 
                 // fire is effective against normal, so damage is doubled
@@ -119,12 +144,18 @@ namespace MTCG.Logic
                 {
                     cardA.TemporaryDamage *= 2;
                     cardB.TemporaryDamage /= 2;
+
+                    _battleLog.Add($"Fire is very effective against normal, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
+                    _battleLog.Add($"Normal is not effective against fire, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
                 }
 
                 if (cardB.ElementType == ElementType.Fire && cardA.ElementType == ElementType.Normal)
                 {
                     cardB.TemporaryDamage *= 2;
                     cardA.TemporaryDamage /= 2;
+
+                    _battleLog.Add($"Fire is very effective against normal, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
+                    _battleLog.Add($"Normal is not effective against fire, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
                 }
 
                 // normal is effective against water, so damage is doubled
@@ -133,12 +164,18 @@ namespace MTCG.Logic
                 {
                     cardA.TemporaryDamage *= 2;
                     cardB.TemporaryDamage /= 2;
+
+                    _battleLog.Add($"Normal is very effective against water, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
+                    _battleLog.Add($"Water is not effective against normal, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
                 }
 
                 if (cardB.ElementType == ElementType.Normal && cardA.ElementType == ElementType.Water)
                 {
                     cardB.TemporaryDamage *= 2;
                     cardA.TemporaryDamage /= 2;
+
+                    _battleLog.Add($"Normal is very effective against water, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
+                    _battleLog.Add($"Water is not effective against normal, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
                 }
 
                 return CardFight(cardA, cardB);
