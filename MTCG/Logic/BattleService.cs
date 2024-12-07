@@ -19,7 +19,7 @@ namespace MTCG.Logic
             int counter = 1;
 
             // The fight continues as long as both players still have cards in their deck and less than 100 rounds have been played
-            while (playerA.Deck.Cards.Count > 0 && playerB.Deck.Cards.Count > 0)
+            while (playerA.Deck.Cards.Count > 0 && playerB.Deck.Cards.Count > 0 && counter <= 100)
             {
                 _battleLog.Add($">>> Round {counter} <<<");
 
@@ -47,6 +47,7 @@ namespace MTCG.Logic
                 // Continue on draw
                 if (winnerCard == null)
                 {
+                    counter++;
                     continue;
                 }
 
@@ -67,11 +68,6 @@ namespace MTCG.Logic
                 }
 
                 counter++;
-                // If the counter reaches 100, the fight is over
-                if (counter >= 100)
-                {
-                    break;
-                }
             }
 
             _battleLog.Add($">>> Result <<<");

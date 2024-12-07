@@ -22,7 +22,7 @@ namespace MTCG.Endpoints
             if (headers.Method == "GET")
             {
                 // Check if user is authorized
-                string token = HeaderHelper.GetTokenFromHeader(headers)!;
+                string? token = HeaderHelper.GetTokenFromHeader(headers)!;
                 User? user = _userService.GetUserByToken(token);
 
                 if (user == null)

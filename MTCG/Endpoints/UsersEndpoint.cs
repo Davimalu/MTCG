@@ -58,7 +58,7 @@ namespace MTCG.Endpoints
 
                 if (userByName == null)
                 {
-                    return (404, "User doesn't exist");
+                    return (404, JsonSerializer.Serialize("User doesn't exist"));
                 }
 
                 // Check if user is authorized
@@ -67,7 +67,7 @@ namespace MTCG.Endpoints
 
                 if (userByToken == null)
                 {
-                    return (401, JsonSerializer.Serialize("User not authorized!"));
+                    return (401, JsonSerializer.Serialize("User not authorized"));
                 }
 
                 // Requested username doesn't match authorized user
@@ -78,7 +78,7 @@ namespace MTCG.Endpoints
                     Console.WriteLine($"[WARNING] User {userByToken.Username} tried to illegitimately access information of User {userByName.Username}");
                     Console.ResetColor();
 
-                    return (401, JsonSerializer.Serialize("User not authorized!"));
+                    return (401, JsonSerializer.Serialize("User not authorized"));
                 }
 
                 return (200, _userService.UserToJson(userByName));

@@ -15,15 +15,10 @@ namespace MTCG.HTTP
             // Provided authorization string should be something like "Bearer admin-mtcgToken"
 
             // Check if authorization header was provided
-            if (!headers.Headers.ContainsKey("Authorization"))
+            if (!headers.Headers.ContainsKey("Authorization") ||
+                !IsValidAuthorizationField(headers.Headers["Authorization"]))
             {
-                throw new ArgumentException("No Authorization Header provided!");
-            }
-
-            // Check for correct format of the authorization header
-            if (!IsValidAuthorizationField(headers.Headers["Authorization"]))
-            {
-                throw new ArgumentException("Authorization Header is not in the correct format!");
+                return null;
             }
 
             // Return token
