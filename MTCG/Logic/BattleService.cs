@@ -77,12 +77,12 @@ namespace MTCG.Logic
             _battleLog.Add($">>> Result <<<");
             if (playerA.Deck.Cards.Count > playerB.Deck.Cards.Count) // A wins
             {
-                _battleLog.Add($"{playerA.Username} defeated {playerB.Username} in {counter} rounds. Well done!");
+                _battleLog.Add($"{playerA.Username} defeated {playerB.Username} in {counter-1} rounds. Well done!");
                 return JsonSerializer.Serialize(_battleLog);
             } 
             else if (playerB.Deck.Cards.Count > playerA.Deck.Cards.Count) // B wins
             {
-                _battleLog.Add($"{playerB.Username} defeated {playerA.Username} in {counter} rounds. Well done!");
+                _battleLog.Add($"{playerB.Username} defeated {playerA.Username} in {counter-1} rounds. Well done!");
                 return JsonSerializer.Serialize(_battleLog);
             }
             else // Draw
@@ -103,6 +103,15 @@ namespace MTCG.Logic
         /// </returns>
         private Card? FightOneRound(Card cardA, Card cardB)
         {
+            // Check if specialties apply to battle
+            Card? winner = BattleWithSpecialties(cardA, cardB);
+
+            if (winner != null)
+            {
+                return winner;
+            }
+
+            // Regular battle
             if (cardA is MonsterCard && cardB is MonsterCard)
             {
                 _battleLog.Add($"Both players have played monster cards -> Element types have no effect in this round!");
@@ -210,6 +219,76 @@ namespace MTCG.Logic
         {
             int r = _rnd.Next(deck.Cards.Count);
             return deck.Cards[r];
+        }
+
+        private Card? BattleWithSpecialties(Card cardA, Card cardB)
+        {
+            // Goblins are too afraid of Dragons to attack
+            if (cardA.Name.Contains("Goblin") && cardB.Name.Contains("Dragon"))
+            {
+                _battleLog.Add("The goblin is too afraid of the dragon and refuses to attack!");
+                return cardB;
+            }
+
+            if (cardB.Name.Contains("Goblin") && cardA.Name.Contains("Dragon"))
+            {
+                _battleLog.Add("The goblin is too afraid of the dragon and refuses to attack!");
+                return cardA;
+            }
+
+            // Wizards can control Orks so they are not able to damage them.
+            if (cardA.Name.Contains("Wizard") && cardB.Name.Contains("Ork"))
+            {
+                _battleLog.Add("The wizard is able to control the ork and has thus won instantly!");
+                return cardA;
+            }
+
+            if (cardB.Name.Contains("Wizard") && cardA.Name.Contains("Ork"))
+            {
+                _battleLog.Add("The wizard is able to control the ork and has thus won instantly!");
+                return cardB;
+            }
+
+            // The armor of Knights is so heavy that WaterSpells make them drown them instantly.
+            if (cardA.Name.Contains("Knight") && cardB.Name.Contains("WaterSpell"))
+            {
+                _battleLog.Add("The knight's heavy armour pulls him down and he drowns under the water spell!");
+                return cardB;
+            }
+
+            if (cardB.Name.Contains("Knight") && cardA.Name.Contains("WaterSpell"))
+            {
+                _battleLog.Add("The knight's heavy armour pulls him down and he drowns under the water spell!");
+                return cardA;
+            }
+
+            // The Kraken is immune against spells.
+            if (cardA.Name.Contains("Kraken") && cardB.Name.Contains("Spell"))
+            {
+                _battleLog.Add("The kraken is unimpressed as it is immune to spells. It defeats the card with ease!");
+                return cardA;
+            }
+
+            if (cardB.Name.Contains("Kraken") && cardA.Name.Contains("Spell"))
+            {
+                _battleLog.Add("The kraken is unimpressed as it is immune to spells. It defeats the card with ease!");
+                return cardB;
+            }
+
+            // The FireElves know Dragons since they were little and can evade their attacks.
+            if (cardA.Name.Contains("FireElf") && cardB.Name.Contains("Dragon"))
+            {
+                _battleLog.Add("The fire elf knows the dragon since they were kids and thus knows all his moves. The fire elf wins easily!");
+                return cardA;
+            }
+
+            if (cardB.Name.Contains("FireElf") && cardA.Name.Contains("Dragon"))
+            {
+                _battleLog.Add("The fire elf knows the dragon since they were kids and thus knows all his moves. The fire elf wins easily!");
+                return cardB;
+            }
+
+            return null;
         }
     }
 }
