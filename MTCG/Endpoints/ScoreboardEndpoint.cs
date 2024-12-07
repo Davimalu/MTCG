@@ -25,7 +25,7 @@ namespace MTCG.Endpoints
 
             if (user == null)
             {
-                return (403, "User not authorized!");
+                return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
             // Get scoreboard

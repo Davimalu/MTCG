@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using MTCG.Models;
@@ -170,6 +171,26 @@ namespace MTCG.Logic
         {
             // TODO: Is this function necessary? It's purpose is so that no one but the userService interacts with userRepository
             return _userRepository.GetListOfUsers();
+        }
+
+        public string UserToJson(User user)
+        {
+            var jsonObject = new
+            {
+                Username = user.Username,
+                DisplayName = user.DisplayName,
+                Biography = user.Biography,
+                Image = user.Image,
+                Stats = new
+                {
+                    Wins = user.Stats.Wins,
+                    Losses = user.Stats.Losses,
+                    Ties = user.Stats.Ties,
+                    EloPoints = user.Stats.EloPoints
+                }
+            };
+
+            return JsonSerializer.Serialize(jsonObject);
         }
     }
 }

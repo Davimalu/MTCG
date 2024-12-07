@@ -27,14 +27,14 @@ namespace MTCG.Endpoints
                 // Check if Username and Password were provided
                 if (tempUser == null)
                 {
-                    return (400, "Invalid data provided");
+                    return (400, JsonSerializer.Serialize("Invalid request body"));
                 }
 
                 User? user = _authService.Login(tempUser.Username, tempUser.Password);
 
                 if (user == null)
                 {
-                    return (401, "Login failed");
+                    return (401, JsonSerializer.Serialize("Wrong username or password"));
                 }
                 else
                 {
@@ -49,7 +49,7 @@ namespace MTCG.Endpoints
                 }
             }
 
-            return (400, "Invalid Request");
+            return (405, JsonSerializer.Serialize("Method Not Allowed"));
         }
     }
 }

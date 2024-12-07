@@ -1,4 +1,7 @@
-﻿namespace MTCG.Models
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace MTCG.Models
 {
     public class User
     {
@@ -46,11 +49,6 @@
         public User()
         {
             _coinCount = 20;
-        }
-
-        public override string ToString()
-        {
-            return $"Username: {Username}\nChosen Name: {DisplayName}\nBio: {Biography}\nImage: {Image}\nWins: {Stats.Wins}\nLosses: {Stats.Losses}\nTies: {Stats.Ties}\nElo: {Stats.EloPoints}";
         }
     }
 }

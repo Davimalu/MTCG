@@ -27,11 +27,23 @@ namespace MTCG.HTTP
                 case 401:
                     reasonPhrase = "Unauthorized";
                     break;
+                case 402:
+                    reasonPhrase = "Payment Required";
+                    break;
                 case 403:
                     reasonPhrase = "Forbidden";
                     break;
                 case 404:
                     reasonPhrase = "Not Found";
+                    break;
+                case 405:
+                    reasonPhrase = "Method Not Allowed";
+                    break;
+                case 409:
+                    reasonPhrase = "Conflict";
+                    break;
+                case 410:
+                    reasonPhrase = "Gone";
                     break;
                 case 500:
                     reasonPhrase = "Internal Server Error";

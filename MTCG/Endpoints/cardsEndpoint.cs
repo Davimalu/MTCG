@@ -27,7 +27,7 @@ namespace MTCG.Endpoints
 
                 if (user == null)
                 {
-                    return (403, "User not authorized!");
+                    return (401, JsonSerializer.Serialize("User not authorized"));
                 }
 
                 // Convert user stack into JSON
@@ -36,7 +36,7 @@ namespace MTCG.Endpoints
                 return (200, json);
             }
 
-            return (405, "Method Not Allowed");
+            return (405, JsonSerializer.Serialize("Method not allowed"));
         }
     }
 }

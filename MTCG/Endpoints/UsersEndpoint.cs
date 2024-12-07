@@ -29,17 +29,17 @@ namespace MTCG.Endpoints
                 // Check if Username and Password were provided
                 if (tempUser == null)
                 {
-                    return (400, "Invalid data provided");
+                    return (400, JsonSerializer.Serialize("Invalid request body"));
                 }
 
                 // Try registering the user
                 if (_authService.Register(tempUser.Username, tempUser.Password))
                 {
-                    return (201, "User Created");
+                    return (201, JsonSerializer.Serialize("User Created"));
                 }
                 else
                 {
-                    return (409, "User already exists");
+                    return (409, JsonSerializer.Serialize("User already exists"));
                 }
             }
             
@@ -49,7 +49,7 @@ namespace MTCG.Endpoints
                 // Check if path is valid
                 if (!IsValidPath(headers.Path))
                 {
-                    return (400, "Bad Request");
+                    return (400, JsonSerializer.Serialize("Invalid path"));
                 }
 
                 // Get username from path
@@ -67,7 +67,7 @@ namespace MTCG.Endpoints
 
                 if (userByToken == null)
                 {
-                    return (403, "User not authorized!");
+                    return (401, JsonSerializer.Serialize("User not authorized!"));
                 }
 
                 // Requested username doesn't match authorized user
@@ -78,11 +78,10 @@ namespace MTCG.Endpoints
                     Console.WriteLine($"[WARNING] User {userByToken.Username} tried to illegitimately access information of User {userByName.Username}");
                     Console.ResetColor();
 
-                    return (403, "User not authorized!");
+                    return (401, JsonSerializer.Serialize("User not authorized!"));
                 }
 
-                // TODO: Return JSON instead of plaintext
-                return (200, userByName.ToString());
+                return (200, _userService.UserToJson(userByName));
             }
 
             // Update user data
@@ -91,7 +90,7 @@ namespace MTCG.Endpoints
                 // Check if path is valid
                 if (!IsValidPath(headers.Path))
                 {
-                    return (400, "Bad Request");
+                    return (400, JsonSerializer.Serialize("Invalid path"));
                 }
 
                 // TODO: Code is very similar to GET Method -> REFACTOR
@@ -102,7 +101,7 @@ namespace MTCG.Endpoints
 
                 if (userByName == null)
                 {
-                    return (404, "User doesn't exist");
+                    return (404, JsonSerializer.Serialize("User doesn't exist"));
                 }
 
                 // Check if user is authorized
@@ -111,7 +110,7 @@ namespace MTCG.Endpoints
 
                 if (userByToken == null)
                 {
-                    return (403, "User not authorized!");
+                    return (401, JsonSerializer.Serialize("User not authorized"));
                 }
 
                 // Provided username doesn't match authorized user
@@ -122,13 +121,13 @@ namespace MTCG.Endpoints
                     Console.WriteLine($"[WARNING] User {userByToken.Username} tried to illegitimately edit information of User {userByName.Username}");
                     Console.ResetColor();
 
-                    return (403, "User not authorized!");
+                    return (401, JsonSerializer.Serialize("User not authorized"));
                 }
 
                 // Update user information
                 if (body == null)
                 {
-                    return (400, "Bad Request");
+                    return (400, JsonSerializer.Serialize("No information provided"));
                 }
 
                 // Deserialize request body into dictionary
@@ -136,7 +135,7 @@ namespace MTCG.Endpoints
 
                 if (updatedInformation == null)
                 {
-                    return (400, "No new information provided");
+                    return (400, JsonSerializer.Serialize("Invalid Request Body"));
                 }
 
                 if (updatedInformation.TryGetValue("Name", out string? chosenName))
@@ -157,10 +156,10 @@ namespace MTCG.Endpoints
                 // Update user
                 _userService.SaveUserToDatabase(userByName);
 
-                return (200, "User Information updated");
+                return (200, JsonSerializer.Serialize("User information updated"));
             }
 
-            return (400, "Bad Request");
+            return (405, "Method Not Allowed");
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace MTCG.Endpoints
 
             if (user == null)
             {
-                return (403, "User not authorized!");
+                return (401, "User not authorized");
             }
 
             // User wants to start battle

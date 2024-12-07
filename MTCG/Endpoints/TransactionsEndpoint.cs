@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MTCG.HTTP;
 using MTCG.Interfaces;
@@ -26,7 +28,7 @@ namespace MTCG.Endpoints
 
             if (user == null)
             {
-                return (403, "User not authorized!");
+                return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
             // Buy new package
@@ -35,14 +37,14 @@ namespace MTCG.Endpoints
                 // Check if user has enough coins
                 if (user.CoinCount < 5)
                 {
-                    return (402, "Not enough money");
+                    return (402, JsonSerializer.Serialize("Not enough money"));
                 }
 
                 Package? package = _packageService.GetRandomPackage();
 
                 if (package == null)
                 {
-                    return (410, "No packages available");
+                    return (410, JsonSerializer.Serialize("No packages available"));
                 }
 
                 // Add cards to user's stack
@@ -52,10 +54,10 @@ namespace MTCG.Endpoints
                 user.CoinCount -= 5;
                 _userService.SaveUserToDatabase(user);
 
-                return (201, "Package retrieved successfully and added cards to user's stack!");
+                return (201, JsonSerializer.Serialize("Package retrieved successfully and added to stack"));
             }
 
-            return (405, "Invalid request");
+            return (405, JsonSerializer.Serialize("Method Not Allowed"));
         }
     }
 }

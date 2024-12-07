@@ -28,7 +28,7 @@ namespace MTCG.Endpoints
 
             if (user == null)
             {
-                return (403, "User not authorized!");
+                return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
             // Add new package
@@ -60,22 +60,22 @@ namespace MTCG.Endpoints
                     if (cardsAdded != numberOfCards)
                     {
                         // TODO: Catch duplicate errors in repository and allow for packages to be added anyway if the card already exists in the database
-                        return (500, "Error adding package");
+                        return (500, JsonSerializer.Serialize("Error writing cards to database"));
                     }
 
                     // Add package to database
                     if (!_packageRepository.AddPackageToDatabase(tmpPackage))
                     {
-                        return (500, "Error adding package");
+                        return (500, JsonSerializer.Serialize("Error writing package to database"));
                     }
 
-                    return (201, "Package created successfully!");
+                    return (201, JsonSerializer.Serialize("Package created successfully"));
                 }
 
-                return (400, "Invalid Request");
+                return (400, JsonSerializer.Serialize("Invalid card format used"));
             }
 
-            return (400, "Invalid Request");
+            return (405, JsonSerializer.Serialize("Method Not Allowed"));
         }
     }
 }

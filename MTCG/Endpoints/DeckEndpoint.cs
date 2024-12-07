@@ -28,7 +28,7 @@ namespace MTCG.Endpoints
 
             if (user == null)
             {
-                return (403, "User not authorized!");
+                return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
             // GET => List deck of user
@@ -43,12 +43,13 @@ namespace MTCG.Endpoints
                     // Query Parameter format present
                     if (format == "plain")
                     {
+                        // TODO: HTTP Header application/json is wrong
                         string plainText = _deckService.SerializeDeckToPlaintext(user.Deck);
                         return (200, plainText);
                     }
                     else
                     {
-                        return (400, "Bad request");
+                        return (400, JsonSerializer.Serialize("Invalid query parameter"));
                     }
                 }
                 else // No Query Parameters
@@ -67,7 +68,7 @@ namespace MTCG.Endpoints
 
                 if (configuredDeck == null)
                 {
-                    return (400, "Bad request");
+                    return (400, JsonSerializer.Serialize("Invalid deck configuration provided"));
                 }
 
                 user.Deck.Cards = configuredDeck;
@@ -75,10 +76,10 @@ namespace MTCG.Endpoints
                 // Save changes to database
                 _userService.SaveUserToDatabase(user);
 
-                return (200, "Deck updated");
+                return (200, JsonSerializer.Serialize("Deck updated"));
             }
 
-            return (405, "Method not allowed");
+            return (405, JsonSerializer.Serialize("Method Not Allowed"));
         }
 
         /// <summary>
