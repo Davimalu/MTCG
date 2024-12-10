@@ -20,6 +20,7 @@ namespace MTCG.DAL
             CreatePackagesTable();
             CreateUserStacksTable();
             CreateUserDecksTable();
+            CreateTradeDealsTable();
             CreateCardsPackagesTable();
         }
 
@@ -55,7 +56,7 @@ namespace MTCG.DAL
                 CREATE TABLE IF NOT EXISTS cards (
                     cardId VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
-                    damage INT NOT NULL,
+                    damage REAL NOT NULL,
                     cardType VARCHAR(255) NOT NULL,
                     elementType VARCHAR(255) NOT NULL
                 );
@@ -129,12 +130,33 @@ namespace MTCG.DAL
             Console.WriteLine("[INFO] UserDecks Table created!");
         }
 
+        // Saves all open trade deals
+        public void CreateTradeDealsTable()
+        {
+            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                                                                  CREATE TABLE IF NOT EXISTS tradeDeals (
+                                                                      tradeId SERIAL PRIMARY KEY,
+                                                                      userId INT NOT NULL,
+                                                                      cardId VARCHAR(255) NOT NULL,
+                                                                      requestedCardType VARCHAR(255) NOT NULL,
+                                                                      requestedDamage REAL NOT NULL,
+                                                                      active BOOLEAN NOT NULL DEFAULT true,
+                                                                      FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE,
+                                                                      FOREIGN KEY (cardId) REFERENCES cards(cardId) ON DELETE CASCADE
+                                                                  );
+                                                                  """);
+
+            dbCommand.ExecuteNonQuery();
+            Console.WriteLine("[INFO] TradeDeals Table created!");
+        }
+
         public void DropAllTables()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 DROP TABLE IF EXISTS userStacks;
                 DROP TABLE IF EXISTS userDecks;
                 DROP TABLE IF EXISTS cardsPackages;
+                DROP TABLE IF EXISTS tradeDeals;
                 DROP TABLE IF EXISTS users;
                 DROP TABLE IF EXISTS cards;
                 DROP TABLE IF EXISTS packages;

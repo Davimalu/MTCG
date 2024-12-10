@@ -1,4 +1,5 @@
-﻿using static MTCG.Models.Card;
+﻿using System.Text.Json.Serialization;
+using static MTCG.Models.Card;
 
 namespace MTCG.Models
 {
@@ -15,6 +16,7 @@ namespace MTCG.Models
         public string Id { get; set; }
         public string Name { get; set; }
         public float Damage { get; set; }
+        [JsonIgnore]
         public float TemporaryDamage { get; set; }
         public ElementType ElementType { get; set; }
 

@@ -116,6 +116,30 @@ namespace MTCG.Logic
             return user;
         }
 
+        /// <summary>
+        /// retrieve a user from the database using his unique Id
+        /// </summary>
+        /// <param name="userId">the id of the user</param>
+        /// <returns>
+        /// <para>user object containing all information + deck and stack on success</para>
+        /// <para>null if there is no user with that Id or an error occured</para>
+        ///</returns>
+        public User? GetUserById(int userId)
+        {
+            // Get static user information
+            User? user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            user = AddStackToUser(user);
+            user = AddDeckToUser(user);
+
+            return user;
+        }
+
         private User AddStackToUser(User user)
         {
             // Get the IDs of the cards the user has in his stack

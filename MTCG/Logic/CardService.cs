@@ -56,5 +56,17 @@ namespace MTCG.Logic
                 return "Normal";
             }
         }
+
+        public bool UserOwnsCard(User user, Card card)
+        {
+            // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
+            return user.Stack.Cards.Any(cardsInStack => cardsInStack.Id == card.Id);
+        }
+
+        public bool UserHasCardInDeck(User user, Card card)
+        {
+            // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
+            return user.Deck.Cards.Any(cardsInDeck => cardsInDeck.Id == card.Id);
+        }
     }
 }

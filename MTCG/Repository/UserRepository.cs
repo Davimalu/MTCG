@@ -244,6 +244,59 @@ namespace MTCG.Repository
         }
 
         /// <summary>
+        /// retrieve a user from the database using his Id
+        /// </summary>
+        /// <param name="userId">the unique id of the user</param>
+        /// <returns>
+        /// <para>user object containing all information from the users table on success (NO Stack/Deck)</para>
+        /// <para>null if there's no user with that id or an error occured</para>
+        /// </returns>
+        public User? GetUserById(int userId)
+        {
+            lock (ThreadSync.DatabaseLock)
+            {
+                // Prepare SQL query
+                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                                                                      SELECT userId, username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints
+                                                                      FROM users
+                                                                      WHERE userId = @userId
+                                                                      """);
+                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, userId);
+
+                // Execute query
+                // TODO: Add error handling?
+                using IDataReader reader = dbCommand.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    UserStatistics stats = new UserStatistics()
+                    {
+                        Wins = reader.GetInt32(8),
+                        Losses = reader.GetInt32(9),
+                        Ties = reader.GetInt32(10),
+                        EloPoints = reader.GetInt32(11)
+                    };
+
+                    return new User()
+                    {
+                        Id = reader.GetInt32(0),
+                        Username = reader.GetString(1),
+                        DisplayName = reader.GetString(2),
+                        Biography = reader.GetString(3),
+                        Image = reader.GetString(4),
+                        Password = reader.GetString(5),
+                        AuthToken = reader.GetString(6),
+                        CoinCount = reader.GetInt32(7),
+                        Stats = stats
+                    };
+                }
+
+                // If no entries were returned...
+                return null;
+            }
+        }
+
+        /// <summary>
         /// returns a list of usernames of all users currently in the database
         /// </summary>
         /// <returns>

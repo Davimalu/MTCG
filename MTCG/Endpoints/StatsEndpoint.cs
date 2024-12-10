@@ -25,8 +25,6 @@ namespace MTCG.Endpoints
                 string token = HeaderHelper.GetTokenFromHeader(headers)!;
                 User? user = _userService.GetUserByToken(token);
 
-                Thread.Sleep(5000);
-
                 if (user == null)
                 {
                     return (401, JsonSerializer.Serialize("User not authorized"));

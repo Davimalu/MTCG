@@ -32,6 +32,7 @@ namespace MTCG.HTTP
             _endpoints.Add("/stats", new StatsEndpoint());
             _endpoints.Add("/scoreboard", new ScoreboardEndpoint());
             _endpoints.Add("/battles", new BattlesEndpoint());
+            _endpoints.Add("/tradings", new TradingsEndpoint());
         }
 
         public void HandleClient(TcpClient client)

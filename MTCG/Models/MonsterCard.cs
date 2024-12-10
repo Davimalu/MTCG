@@ -13,6 +13,11 @@ namespace MTCG.Models
 
         }
 
+        public MonsterCard()
+        {
+
+        }
+
         public override void PrintCard()
         {
             Console.WriteLine($"Name: {Name}");
