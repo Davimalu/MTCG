@@ -1,7 +1,10 @@
-﻿namespace MTCG.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MTCG.Models
 {
     public class Deck
     {
+        [JsonIgnore]
         public int? Id { get; set; }
         private List<Card> _cards = new List<Card>();
 
