@@ -59,22 +59,24 @@ namespace MTCG.HTTP
             var matchingKey = _endpoints.Keys.FirstOrDefault(key =>
                 path.StartsWith(key));
 
+
             // Ensure that only one request of a specific user is processed at a time
             lock (ThreadSync.UserLock)
             {
-                if (headers.Headers.ContainsKey("Authorization") && ThreadSync.ConnectedUsers.ContainsKey(headers.Headers["Authorization"]))
+                if (headers.Headers.TryGetValue("Authorization", out var authorization))
                 {
-                    responseCode = 409;
-                    responseBody = JsonSerializer.Serialize("User already connected");
-                }
-                else if (headers.Headers.TryGetValue("Authorization", out var authorization))
-                {
+                    while (ThreadSync.ConnectedUsers.ContainsKey(authorization))
+                    {
+                        Monitor.Wait(ThreadSync.UserLock);
+                    }
+
                     ThreadSync.ConnectedUsers[authorization] = true;
                 }
             }
 
+
             // Answer the request
-            if (matchingKey != null && responseCode != 409)
+            if (matchingKey != null)
             {
                 try
                 {
@@ -91,9 +93,12 @@ namespace MTCG.HTTP
             // User can connect again now
             lock (ThreadSync.UserLock)
             {
-                if (headers.Headers.ContainsKey("Authorization") && ThreadSync.ConnectedUsers.ContainsKey(headers.Headers["Authorization"]))
+                if (headers.Headers.ContainsKey("Authorization") && headers.Headers.TryGetValue("Authorization", out var authorization))
                 {
-                    ThreadSync.ConnectedUsers.Remove(headers.Headers["Authorization"], out _);
+                    ThreadSync.ConnectedUsers.Remove(authorization, out _);
+
+                    // Notify waiting threads
+                    Monitor.PulseAll(ThreadSync.UserLock);
                 }
             }
 
