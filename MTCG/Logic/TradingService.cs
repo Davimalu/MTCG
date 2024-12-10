@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MTCG.Interfaces;
 using MTCG.Models;
 using MTCG.Repository;
 
@@ -28,6 +29,8 @@ namespace MTCG.Logic
         #endregion
 
         private readonly TradeRepository _tradeRepository = TradeRepository.Instance;
+        private readonly UserService _userService = UserService.Instance;
+        private readonly CardRepository _cardRepository = CardRepository.Instance;
 
         public TradeDeal? CreateTradeDeal(User user, Card card, bool requestedMonsterCard, float requestedDamage)
         {
@@ -56,9 +59,29 @@ namespace MTCG.Logic
             return false;
         }
 
+        public TradeDeal GetTradeDealById(int tradeId)
+        {
+            TradeDeal deal = _tradeRepository.GetTradeDealById(tradeId);
+
+            // Populate user and card field
+            deal.User = _userService.GetUserById(deal.User.Id);
+            deal.Card = _cardRepository.GetCardById(deal.Card.Id);
+
+            return deal;
+        }
+
         public List<TradeDeal> GetTradeDeals()
         {
-            return _tradeRepository.GetAllTradeDeals();
+            List<TradeDeal> deals = _tradeRepository.GetAllTradeDeals();
+
+            // Populate user and card fields of all results
+            foreach (TradeDeal deal in deals)
+            {
+                deal.User = _userService.GetUserById(deal.User.Id);
+                deal.Card = _cardRepository.GetCardById(deal.Card.Id);
+            }
+
+            return deals;
         }
     }
 }

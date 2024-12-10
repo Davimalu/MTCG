@@ -31,8 +31,6 @@ namespace MTCG.Repository
         #endregion
 
         private readonly DataLayer _dataLayer = DataLayer.Instance;
-        private readonly UserService _userService = UserService.Instance;
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
 
         public int? AddTradeDeal(TradeDeal deal)
         {
@@ -153,16 +151,6 @@ namespace MTCG.Repository
                         });
                 }
 
-                // Explicitly close reader to make sure the query is finished
-                reader.Close();
-
-                // Populate user and card fields of all results
-                foreach (TradeDeal deal in deals)
-                {
-                    deal.User = _userService.GetUserById(deal.User.Id);
-                    deal.Card = _cardRepository.GetCardById(deal.Card.Id);
-                }
-
                 return deals;
             }
         }
@@ -194,8 +182,8 @@ namespace MTCG.Repository
                     return (new TradeDeal()
                     {
                         Id = tradeId,
-                        User = _userService.GetUserById(userId),
-                        Card = _cardRepository.GetCardById(cardId),
+                        User = new User() { Id = userId },
+                        Card = new MonsterCard() { Id = cardId },
                         RequestedMonster = requestedCardType == "Monster" ? true : false,
                         RequestedDamage = requestedDamage
                     });
