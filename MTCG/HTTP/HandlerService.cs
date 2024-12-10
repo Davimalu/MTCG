@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -49,7 +50,7 @@ namespace MTCG.HTTP
 
             // === Handle Request ===
             int responseCode = 404;
-            string? responseBody = "Not Found";
+            string? responseBody = JsonSerializer.Serialize("Not found");
 
             // Get request path without query parameters | e.g. /deck?format=plain -> /deck
             string path = HeaderHelper.GetPathWithoutQueryParameters(headers);
@@ -58,7 +59,22 @@ namespace MTCG.HTTP
             var matchingKey = _endpoints.Keys.FirstOrDefault(key =>
                 path.StartsWith(key));
 
-            if (matchingKey != null)
+            // Ensure that only one request of a specific user is processed at a time
+            lock (ThreadSync.UserLock)
+            {
+                if (headers.Headers.ContainsKey("Authorization") && ThreadSync.ConnectedUsers.ContainsKey(headers.Headers["Authorization"]))
+                {
+                    responseCode = 409;
+                    responseBody = JsonSerializer.Serialize("User already connected");
+                }
+                else if (headers.Headers.TryGetValue("Authorization", out var authorization))
+                {
+                    ThreadSync.ConnectedUsers[authorization] = true;
+                }
+            }
+
+            // Answer the request
+            if (matchingKey != null && responseCode != 409)
             {
                 try
                 {
@@ -69,6 +85,15 @@ namespace MTCG.HTTP
                 catch (Exception ex)
                 {
                     responseBody = ex.ToString();
+                }
+            }
+
+            // User can connect again now
+            lock (ThreadSync.UserLock)
+            {
+                if (headers.Headers.ContainsKey("Authorization") && ThreadSync.ConnectedUsers.ContainsKey(headers.Headers["Authorization"]))
+                {
+                    ThreadSync.ConnectedUsers.Remove(headers.Headers["Authorization"], out _);
                 }
             }
 

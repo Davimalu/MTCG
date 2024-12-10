@@ -27,7 +27,7 @@ namespace MTCG.Endpoints
 
                 if (user == null)
                 {
-                    return (401, JsonSerializer.Serialize("Use not authorized"));
+                    return (401, JsonSerializer.Serialize("User not authorized"));
                 }
 
                 string json = JsonSerializer.Serialize(user.Stats);
