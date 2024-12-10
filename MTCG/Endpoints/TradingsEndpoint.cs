@@ -41,8 +41,14 @@ namespace MTCG.Endpoints
                 {
                     offers.Add(new TradeOffer()
                     {
-                        Username = user.Username,
-                        Card = deal.Card,
+                        Username = deal.User.Username,
+                        Card = new
+                        {
+                            Id = deal.Card.Id,
+                            Name = deal.Card.Name,
+                            Damage = deal.Card.Damage,
+                            Type = deal.Card is MonsterCard ? "Monster" : "Spell"
+                        },
                         RequestedType = deal.RequestedMonster == true ? "Monster" : "Spell",
                         RequestedDamage = deal.RequestedDamage
                     });
@@ -58,13 +64,20 @@ namespace MTCG.Endpoints
                 string? cardId, type;
                 float minimumDamage = -1;
 
-                using (JsonDocument doc = JsonDocument.Parse(body))
+                try
                 {
-                    JsonElement root = doc.RootElement;
+                    using (JsonDocument doc = JsonDocument.Parse(body))
+                    {
+                        JsonElement root = doc.RootElement;
 
-                    cardId = root.GetProperty("CardToTrade").GetString();
-                    type = root.GetProperty("Type").GetString();
-                    minimumDamage = root.GetProperty("MinimumDamage").GetSingle();
+                        cardId = root.GetProperty("CardToTrade").GetString();
+                        type = root.GetProperty("Type").GetString();
+                        minimumDamage = root.GetProperty("MinimumDamage").GetSingle();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return (400, JsonSerializer.Serialize("Invalid request body"));
                 }
 
                 if (cardId == null || type == null || minimumDamage < 0)
@@ -89,7 +102,7 @@ namespace MTCG.Endpoints
                     return (409, JsonSerializer.Serialize("You cannot trade a cade that is currently in your deck"));
                 }
 
-                TradeDeal? deal = _tradingService.CreateTradeDeal(user, cardToTrade, type == "Monster" ? true : false, minimumDamage);
+                TradeDeal? deal = _tradingService.CreateTradeDeal(user, cardToTrade, type == "monster" ? true : false, minimumDamage);
 
                 if (deal == null)
                 {
@@ -100,13 +113,51 @@ namespace MTCG.Endpoints
                 {
                     message = "Trade offer created",
                     Username = user.Username,
-                    Card = deal.Card,
+                    Card = new 
+                    {
+                        Id = deal.Card.Id,
+                        Name = deal.Card.Name,
+                        Damage = deal.Card.Damage,
+                        Type = deal.Card is MonsterCard ? "Monster" : "Spell"
+                    },
                     RequestedType = deal.RequestedMonster == true ? "Monster" : "Spell",
                     RequestedDamage = deal.RequestedDamage
                 };
                 string json = JsonSerializer.Serialize(response);
 
-                return (200, json);
+                return (201, json);
+            }
+
+            // Delete trade deal
+            if (headers.Method == "DELETE")
+            {
+                // Get cardId of the trade the user wants to remove
+
+                // Find the index of the last slash ('/')
+                int index = headers.Path.LastIndexOf('/') + 1;
+                // Extract the substring starting after the last slash
+                string cardIdOfTradeToRemove = headers.Path.Substring(index);
+
+                TradeDeal? dealToRemove = _tradingService.GetTradeDealByCardId(cardIdOfTradeToRemove);
+
+                if (dealToRemove == null)
+                {
+                    return (400, JsonSerializer.Serialize("There is no trade deal for this card"));
+                }
+
+                if (dealToRemove.User.Username != user.Username)
+                {
+                    return (403, JsonSerializer.Serialize("You cannot delete other peoples' trade offers!"));
+                }
+
+                if (_tradingService.RemoveTradeDealByCardId(cardIdOfTradeToRemove))
+                {
+                    return (200, JsonSerializer.Serialize("Trade offer removed"));
+                }
+                else
+                {
+                    return (500, JsonSerializer.Serialize("Unknown error removing trade offer"));
+                }
             }
 
             return (405, "Method Not Allowed");
@@ -114,7 +165,7 @@ namespace MTCG.Endpoints
 
         internal class TradeOffer {
             public string Username { get; set; }
-            public Card Card { get; set; }
+            public Object Card { get; set; }
             public string RequestedType { get; set; } = string.Empty;
             public float RequestedDamage { get; set; }
         }

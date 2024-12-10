@@ -610,3 +610,13 @@ POST http://localhost:10001/battles
 Authorization: Bearer altenhof-mtcgToken
 ### Should initiate a battle for altenhof
 
+
+### Trade that will definitely work
+POST http://localhost:10001/tradings
+Authorization: Bearer kienboec-mtcgToken
+
+{
+  "CardToTrade": "2c98cd06-518b-464c-b911-8d787216cddd",
+  "Type": "monster",
+  "MinimumDamage": 40
+}

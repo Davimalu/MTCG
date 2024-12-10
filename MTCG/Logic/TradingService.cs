@@ -48,15 +48,52 @@ namespace MTCG.Logic
             if (tradeId != null)
             {
                 deal.Id = tradeId;
+
+                // Remove card from stack of user
+                var cardToRemove = user.Stack.Cards.FirstOrDefault(item => item.Id == card.Id);
+                if (cardToRemove != null)
+                {
+                    user.Stack.Cards.Remove(cardToRemove);
+                }
+
+                _userService.SaveUserToDatabase(user);
+
+                // Now that the offer was created, see if there is another trade offer that is compatible with this one
+                TryToTrade(deal);
+
                 return deal;
             }
 
             return null;
         }
 
-        public bool RemoveTradeDeal()
+        public bool RemoveTradeDealByCardId(string cardId)
         {
+            TradeDeal dealToRemove = GetTradeDealByCardId(cardId);
+
+            if (_tradeRepository.RemoveTradeDeal(dealToRemove))
+            {
+                // If the trade offer was successfully deleted, re-add card to stack of user
+                dealToRemove.User.Stack.Cards.Add(dealToRemove.Card);
+                _userService.SaveUserToDatabase(dealToRemove.User);
+                return true;
+            }
+
             return false;
+        }
+
+        public TradeDeal? GetTradeDealByCardId(string cardId)
+        {
+            TradeDeal deal = _tradeRepository.GetTradeDealByCardId(cardId);
+
+            if (deal != null)
+            {
+                // Populate user and card field
+                deal.User = _userService.GetUserById(deal.User.Id);
+                deal.Card = _cardRepository.GetCardById(deal.Card.Id);
+            }
+
+            return deal;
         }
 
         public TradeDeal GetTradeDealById(int tradeId)
@@ -82,6 +119,60 @@ namespace MTCG.Logic
             }
 
             return deals;
+        }
+
+        public bool TryToTrade(TradeDeal newDeal)
+        {
+            // Ensure that no user information is changed while this function is executed - otherwise the User objects might contain outdated information by the time SaveUserToDatabase() is called
+            lock (ThreadSync.UserLock)
+            {
+                List<TradeDeal> allOffers = GetTradeDeals();
+
+                // No other offers exist -> cannot trade
+                if (allOffers.Count < 2)
+                {
+                    return false;
+                }
+
+                foreach (TradeDeal deal in allOffers)
+                {
+                    if (deal.User.Username == newDeal.User.Username || deal.Id == null ||newDeal.Id == null)
+                    {
+                        continue;
+                    }
+
+                    // Check if the card of the new offer is compatible with the requirements of existing offers
+                    if ((newDeal.Card is MonsterCard && deal.RequestedMonster == true) ||
+                        (!(newDeal.Card is MonsterCard) && deal.RequestedMonster == false))
+                    {
+                        if (newDeal.Card.Damage >= deal.RequestedDamage)
+                        {
+                            // The other offer would accept this card
+                            // Now check if the requirements of this offer would accept the card of the other offer
+                            if ((deal.Card is MonsterCard && newDeal.RequestedMonster == true) ||
+                                !(deal.Card is MonsterCard) && newDeal.RequestedMonster == false)
+                            {
+                                if (deal.Card.Damage >= newDeal.RequestedDamage)
+                                {
+                                    // Both trade offers are compatible, commence trade!
+                                    deal.User.Stack.Cards.Add(newDeal.Card);
+                                    newDeal.User.Stack.Cards.Add(deal.Card);
+
+                                    _userService.SaveUserToDatabase(deal.User);
+                                    _userService.SaveUserToDatabase(newDeal.User);
+
+                                    _tradeRepository.SetTradeOfferInactive((int)deal.Id);
+                                    _tradeRepository.SetTradeOfferInactive((int)newDeal.Id);
+
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
         }
     }
 }

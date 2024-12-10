@@ -192,5 +192,76 @@ namespace MTCG.Repository
                 return null;
             }
         }
+
+        public TradeDeal? GetTradeDealByCardId(string cardIdToLookup)
+        {
+            lock (ThreadSync.DatabaseLock)
+            {
+                // Prepare SQL statement
+                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                                                                      SELECT tradeId, userId, cardId, requestedCardType, requestedDamage FROM tradeDeals
+                                                                      WHERE active = true AND cardId = @cardId
+                                                                      """);
+
+                DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardIdToLookup);
+
+                // TODO: Add error handling?
+                using IDataReader reader = dbCommand.ExecuteReader();
+
+                // Check if query returned a result
+                if (reader.Read())
+                {
+                    int tradeId = reader.GetInt32(0);
+                    int userId = reader.GetInt32(1);
+                    string cardId = reader.GetString(2);
+                    string requestedCardType = reader.GetString(3);
+                    float requestedDamage = reader.GetFloat(4);
+
+                    return (new TradeDeal()
+                    {
+                        Id = tradeId,
+                        User = new User() { Id = userId },
+                        Card = new MonsterCard() { Id = cardId },
+                        RequestedMonster = requestedCardType == "Monster" ? true : false,
+                        RequestedDamage = requestedDamage
+                    });
+                }
+
+                return null;
+            }
+        }
+
+        public int SetTradeOfferInactive(int tradeIdToUpdate)
+        {
+            lock (ThreadSync.DatabaseLock)
+            {
+                // Prepare SQL Query
+                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                UPDATE tradeDeals
+                SET active = false
+                WHERE tradeId = @id
+                """);
+
+                DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.Int32, tradeIdToUpdate);
+
+                // Execute query and error handling
+                int tradeId;
+                try
+                {
+                    tradeId = (int)(dbCommand.ExecuteScalar() ?? 0);
+                }
+                catch (Exception ex)
+                {
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine($"[ERROR] Trade offer with ID {tradeIdToUpdate} couldn't be set to inactive");
+                    Console.WriteLine($"[ERROR] {ex.Message}");
+                    Console.ResetColor();
+                    return -1;
+                }
+
+                return tradeId;
+            }
+        }
     }
 }
