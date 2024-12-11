@@ -20,10 +20,12 @@ namespace MTCG.Endpoints
         private readonly UserService _userService = UserService.Instance;
         private readonly DeckService _deckService = DeckService.Instance;
 
-        public (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body)
+        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+
+        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = HeaderHelper.GetTokenFromHeader(headers)!;
+            string token = _headerHelper.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)
@@ -35,7 +37,7 @@ namespace MTCG.Endpoints
             if (headers.Method == "GET")
             {
                 // Check for query Parameters
-                Dictionary<string, string> queryParameters = HeaderHelper.GetQueryParameters(headers);
+                Dictionary<string, string> queryParameters = _headerHelper.GetQueryParameters(headers);
 
                 // https://learn.microsoft.com/de-de/dotnet/api/system.collections.generic.dictionary-2.trygetvalue?view=net-8.0
                 if (queryParameters.TryGetValue("format", out string? format))

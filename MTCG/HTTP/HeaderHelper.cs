@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ using MTCG.Models;
 
 namespace MTCG.HTTP
 {
-    public static class HeaderHelper
+    public class HeaderHelper : IHeaderHelper
     {
-        public static string? GetTokenFromHeader(HTTPHeader headers)
+        public string? GetTokenFromHeader(HTTPHeader headers)
         {
             // Provided authorization string should be something like "Bearer admin-mtcgToken"
 
@@ -25,7 +26,8 @@ namespace MTCG.HTTP
             return headers.Headers["Authorization"].Split(' ')[1];
         }
 
-        public static bool IsValidAuthorizationField(string token)
+
+        public bool IsValidAuthorizationField(string token)
         {
             // Use @ to ignore escape sequences in string: https://stackoverflow.com/questions/556133/whats-the-in-front-of-a-string-in-c
             string regex = @"^Bearer\s+\w+-mtcgToken$"; // https://regex101.com/r/iTbKSU/1
@@ -37,7 +39,7 @@ namespace MTCG.HTTP
         /// </summary>
         /// <param name="headers"></param>
         /// <returns>returns a dictionary containing all query parameters as key value pairs</returns>
-        public static Dictionary<string, string> GetQueryParameters(HTTPHeader headers)
+        public Dictionary<string, string> GetQueryParameters(HTTPHeader headers)
         {
             Dictionary<string, string> queryParameters = new Dictionary<string, string>(); // Dictionary to store key Value Pairs
 
@@ -69,7 +71,7 @@ namespace MTCG.HTTP
         /// </summary>
         /// <param name="headers"></param>
         /// <returns>the Path without any query parameters, e.g. /deck?format=plain -> /deck</returns>
-        public static string GetPathWithoutQueryParameters(HTTPHeader headers)
+        public string GetPathWithoutQueryParameters(HTTPHeader headers)
         {
             if (headers.Path.Contains('?'))
             {

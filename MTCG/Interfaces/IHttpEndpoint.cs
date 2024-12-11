@@ -11,6 +11,6 @@ namespace MTCG.Interfaces
 {
     public interface IHttpEndpoint
     {
-        (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body);
+        (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body);
     }
 }

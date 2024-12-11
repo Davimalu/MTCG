@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MTCG.Models.Enums;
+using MTCG.Interfaces;
 
 namespace MTCG.Logic
 {
-    public class EventService
+    public class EventService : IEventService
     {
-        public static void LogEvent(EventType eventType, string message, Exception? ex)
+        public void LogEvent(EventType eventType, string message, Exception? ex)
         {
             string? consoleText = string.Empty;
 

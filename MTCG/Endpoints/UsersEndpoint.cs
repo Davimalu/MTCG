@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -17,10 +18,28 @@ namespace MTCG.Endpoints
 {
     public class UsersEndpoint : IHttpEndpoint
     {
-        private readonly AuthService _authService = AuthService.Instance;
-        private readonly UserService _userService = UserService.Instance;
+        private readonly IAuthService _authService = AuthService.Instance;
+        private readonly IUserService _userService = UserService.Instance;
+        private readonly IEventService _eventService = new EventService();
+        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
-        public (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body)
+        public UsersEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        // Unit Testing
+        public UsersEndpoint(IAuthService authService, IEventService eventService, IUserService userService, IHeaderHelper headerHelper)
+        {
+            _authService = authService;
+            _eventService = eventService;
+            _userService = userService;
+            _headerHelper = headerHelper;
+        }
+        #endregion
+
+        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             switch (headers.Method)
             {
@@ -54,7 +73,7 @@ namespace MTCG.Endpoints
             }
             catch (Exception ex)
             {
-                EventService.LogEvent(EventType.Warning, "Account creation failed: Error parsing request body", ex);
+                _eventService.LogEvent(EventType.Warning, "Account creation failed: Error parsing request body", ex);
             }
             
             if (tmpUser == null) // Check if Username and Password were provided
@@ -65,7 +84,7 @@ namespace MTCG.Endpoints
             // Try registering the user
             if (_authService.Register(tmpUser.Username, tmpUser.Password))
             {
-                EventService.LogEvent(EventType.Highlight, $"New user account created: {tmpUser.Username}", null);
+                _eventService.LogEvent(EventType.Highlight, $"New user account created: {tmpUser.Username}", null);
 
                 var response = new
                 {
@@ -108,7 +127,7 @@ namespace MTCG.Endpoints
                     return (403, JsonSerializer.Serialize("User not authorized"));
                 default:
                     // Retrieve user information | values != null, otherwise one of the other cases would have happened
-                    string token = HeaderHelper.GetTokenFromHeader(headers)!;
+                    string token = _headerHelper.GetTokenFromHeader(headers)!;
                     User userByToken = _userService.GetUserByToken(token)!;
                     return (200, _userService.UserToJson(userByToken));
             }
@@ -132,7 +151,7 @@ namespace MTCG.Endpoints
                     return (403, JsonSerializer.Serialize("User not authorized"));
                 default:
                     // Retrieve user information | values != null, otherwise one of the other cases would have happened
-                    string token = HeaderHelper.GetTokenFromHeader(headers)!;
+                    string token = _headerHelper.GetTokenFromHeader(headers)!;
                     userToBeUpdated = _userService.GetUserByToken(token)!;
                     break;
             }
@@ -140,7 +159,7 @@ namespace MTCG.Endpoints
             // Update user information
             if (body == null)
             {
-                EventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: No body provided", null);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: No body provided", null);
                 return (400, JsonSerializer.Serialize("No information provided"));
             }
 
@@ -152,13 +171,13 @@ namespace MTCG.Endpoints
             }
             catch (Exception ex)
             {
-                EventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: Invalid request body", ex);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: Invalid request body", ex);
                 return (400, JsonSerializer.Serialize("Invalid Request Body"));
             } 
 
             if (updatedInformation == null)
             {
-                EventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: Invalid request body", null);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: Invalid request body", null);
                 return (400, JsonSerializer.Serialize("Invalid Request Body"));
             }
 
@@ -178,7 +197,7 @@ namespace MTCG.Endpoints
         /// </summary>
         /// <param name="headers"></param>
         /// <returns></returns>
-        private AuthenticationError RequestedUserIsAuthenticatedUser(HTTPHeader headers)
+        public AuthenticationError RequestedUserIsAuthenticatedUser(HTTPHeader headers)
         {
             // Check if path is valid
             if (!IsValidRetrievalPath(headers.Path))
@@ -196,7 +215,7 @@ namespace MTCG.Endpoints
             }
 
             // Get username from authentication token
-            string token = HeaderHelper.GetTokenFromHeader(headers)!;
+            string token = _headerHelper.GetTokenFromHeader(headers)!;
             User? userByToken = _userService.GetUserByToken(token);
 
             if (userByToken == null)
@@ -207,7 +226,7 @@ namespace MTCG.Endpoints
             // Username from path (user to be updated or retrieved) doesn't match username from authentication token
             if (userByName.Username != userByToken.Username)
             {
-                EventService.LogEvent(EventType.Warning, $"User {userByToken.Username} tried to illegitimately edit/access information of User {userByName.Username}", null);
+                _eventService.LogEvent(EventType.Warning, $"User {userByToken.Username} tried to illegitimately edit/access information of User {userByName.Username}", null);
                 return AuthenticationError.UnauthorizedUser;
             }
 

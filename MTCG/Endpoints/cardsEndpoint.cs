@@ -15,14 +15,15 @@ namespace MTCG.Endpoints
     public class CardsEndpoint : IHttpEndpoint
     {
         private readonly UserService _userService = UserService.Instance;
+        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
-        public (int, string?) HandleRequest(TcpClient client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Get list of cards
             if (headers.Method == "GET")
             {
                 // Check if user is authorized
-                string? token = HeaderHelper.GetTokenFromHeader(headers)!;
+                string? token = _headerHelper.GetTokenFromHeader(headers)!;
                 User? user = _userService.GetUserByToken(token);
 
                 if (user == null)

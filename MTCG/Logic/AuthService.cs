@@ -14,7 +14,7 @@ namespace MTCG.Logic
     using MTCG.DAL;
     using MTCG.Interfaces;
 
-    public class AuthService
+    public class AuthService : IAuthService
     {
         #region Singleton
         private static AuthService? instance;
@@ -83,12 +83,12 @@ namespace MTCG.Logic
             return null;
         }
 
-        public static string HashPassword(string password)
+        public string HashPassword(string password)
         {
             return BCrypt.HashPassword(password);
         }
 
-        public static bool VerifyPassword(string password, string hash)
+        public bool VerifyPassword(string password, string hash)
         {
             return BCrypt.Verify(password, hash);
         }

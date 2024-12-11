@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MTCG.HTTP;
 
 namespace MTCG.Models
 {
@@ -20,6 +21,5 @@ namespace MTCG.Models
             // Initialize empty dictionary
             Headers = new Dictionary<string, string>();
         }
-
     }
 }

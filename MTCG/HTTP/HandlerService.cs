@@ -20,6 +20,8 @@ namespace MTCG.HTTP
         private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
         private HTTPService _httpService = new HTTPService();
 
+        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+
         public HandlerService()
         {
             // Add endpoints
@@ -54,7 +56,7 @@ namespace MTCG.HTTP
             string? responseBody = JsonSerializer.Serialize("Not found");
 
             // Get request path without query parameters | e.g. /deck?format=plain -> /deck
-            string path = HeaderHelper.GetPathWithoutQueryParameters(headers);
+            string path = _headerHelper.GetPathWithoutQueryParameters(headers);
 
             // Only look up the first "directory" of the path in the dictionary | e.g. /users/kienboec -> /users
             var matchingKey = _endpoints.Keys.FirstOrDefault(key =>

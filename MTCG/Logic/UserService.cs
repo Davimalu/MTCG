@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-
+using MTCG.Interfaces;
 using MTCG.Models;
 using MTCG.Repository;
 
 namespace MTCG.Logic
 {
-    public class UserService
+    public class UserService : IUserService
     {
         #region Singleton
         private static UserService? _instance;
@@ -140,7 +140,7 @@ namespace MTCG.Logic
             return user;
         }
 
-        private User AddStackToUser(User user)
+        public User AddStackToUser(User user)
         {
             // Get the IDs of the cards the user has in his stack
             List<string>? cardIds = _stackRepository.GetCardIdsOfUserStack(user);
@@ -163,7 +163,7 @@ namespace MTCG.Logic
         }
 
         // TODO: This function is very similar to AddStackToUser -> Refactor
-        private User AddDeckToUser(User user)
+        public User AddDeckToUser(User user)
         {
             // Get the IDs of the cards the user has in his deck
             List<string>? cardIds = _deckRepository.GetCardIdsOfUserDeck(user);
