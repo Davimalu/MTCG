@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Repository;
 
 namespace MTCG.Logic
 {
-    public class BattleService
+    public class BattleService : IBattleService
     {
         private UserService _userService = UserService.Instance;
 
@@ -103,7 +104,7 @@ namespace MTCG.Logic
         /// <para>returns the card that won the round</para>
         /// <para>returns null on draw</para>
         /// </returns>
-        private Card? FightOneRound(Card cardA, Card cardB)
+        public Card? FightOneRound(Card cardA, Card cardB)
         {
             // Check if specialties apply to battle
             Card? winner = BattleWithSpecialties(cardA, cardB);
@@ -193,7 +194,7 @@ namespace MTCG.Logic
             }
         }
 
-        private Card? CardFight(Card cardA, Card cardB)
+        public Card? CardFight(Card cardA, Card cardB)
         {
             if (cardA.TemporaryDamage > cardB.TemporaryDamage)
             {
@@ -217,13 +218,13 @@ namespace MTCG.Logic
         /// <para>a card object on success</para>
         /// <para>null if deck is empty or on error</para>
         /// </returns>
-        private Card? GetRandomCardFromDeck(Deck deck)
+        public Card? GetRandomCardFromDeck(Deck deck)
         {
             int r = _rnd.Next(deck.Cards.Count);
             return deck.Cards[r];
         }
 
-        private Card? BattleWithSpecialties(Card cardA, Card cardB)
+        public Card? BattleWithSpecialties(Card cardA, Card cardB)
         {
             // Goblins are too afraid of Dragons to attack
             if (cardA.Name.Contains("Goblin") && cardB.Name.Contains("Dragon"))

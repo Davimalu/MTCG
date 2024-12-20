@@ -3,12 +3,7 @@ using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Models;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace MTCGTests.Endpoints
 {
@@ -48,7 +43,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/cards", Method = "GET", Version = "1.1" };
-            var stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1", Name = "TestCard" }, new SpellCard { Id = "2", Name = "AnotherTestCard"} } };
+            var stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1", Name = "TestCard" }, new SpellCard { Id = "2", Name = "AnotherTestCard" } } };
             var user = new User { Stack = stack };
 
             _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
