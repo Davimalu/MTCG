@@ -18,6 +18,15 @@ namespace MTCG.Models
 
         }
 
+        // Copy Constructor
+        public MonsterCard(Card card)
+        {
+            Id = card.Id;
+            Name = card.Name;
+            Damage = card.Damage;
+            ElementType = card.ElementType;
+        }
+
         public override void PrintCard()
         {
             Console.WriteLine($"Name: {Name}");

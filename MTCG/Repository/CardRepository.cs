@@ -10,6 +10,8 @@ using MTCG.Logic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Xml.Linq;
 using MTCG.Interfaces;
+using MTCG.Models.Enums;
+using Npgsql;
 
 namespace MTCG.Repository
 {
@@ -33,6 +35,7 @@ namespace MTCG.Repository
         #endregion
 
         private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly IEventService _eventService = new EventService();
 
         /// <summary>
         /// saves a new card to the database
@@ -50,26 +53,26 @@ namespace MTCG.Repository
                                                                  VALUES (@id, @name, @damage, @cardType, @elementType);
                                                                  """);
 
-            ICardService cardService = CardService.Instance;
-
             DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.String, card.Id);
             DataLayer.AddParameterWithValue(dbCommand, "@name", DbType.String, card.Name);
             DataLayer.AddParameterWithValue(dbCommand, "@damage", DbType.Int32, card.Damage);
-            DataLayer.AddParameterWithValue(dbCommand, "@cardType", DbType.String, cardService.GetCardType(card));
-            DataLayer.AddParameterWithValue(dbCommand, "@elementType", DbType.String, cardService.GetElementType(card));
+            DataLayer.AddParameterWithValue(dbCommand, "@cardType", DbType.String, card is MonsterCard ? "Monster" : "Spell");
+            DataLayer.AddParameterWithValue(dbCommand, "@elementType", DbType.String, card.ElementType.ToString());
 
             // Execute query and catch errors
             try
             {
                 dbCommand.ExecuteNonQuery();
             }
+            catch (PostgresException ex) when (ex.SqlState == "23505")
+            {
+                // Handle duplicate key error | For a duplicate key error, the SQL state is 23505
+                _eventService.LogEvent(EventType.Warning, $"Card {card.Name} already exists in the database", ex);
+                return true;
+            }
             catch (Exception ex)
             {
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"[ERROR] Card {card.Name} couldn't be added to database!");
-                Console.WriteLine($"[ERROR] {ex.Message}");
-                Console.ResetColor();
+                _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be added to database", ex);
                 return false;
             }
 

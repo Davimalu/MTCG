@@ -5,7 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MTCG.DAL;
+using MTCG.Interfaces;
+using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Enums;
 
 namespace MTCG.Repository
 {
@@ -29,6 +32,7 @@ namespace MTCG.Repository
         #endregion
 
         private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly IEventService _eventService = new EventService();
 
         /// <summary>
         /// saves a new package to the database
@@ -52,25 +56,18 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Package couldn't be added to database!");
-                    Console.WriteLine($"[ERROR] {ex.Message}");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Error, $"Error adding package to database", ex);
                     return false;
                 }
 
                 // Check if packageId was returned
                 if (package.Id == 0)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Unknown error while adding package to database!");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Warning, $"Unknown error while adding package to database", null);
                     return false;
                 }
 
-                Console.WriteLine($"[INFO] New package with ID {package.Id} added to database!");
+                _eventService.LogEvent(EventType.Highlight, $"New package with ID {package.Id} added to database", null);
                 return AddCardsToPackage(package);
             }
         }
@@ -108,21 +105,16 @@ namespace MTCG.Repository
                     }
                     catch (Exception ex)
                     {
-                        Console.BackgroundColor = ConsoleColor.Red;
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine($"[ERROR] Card {card.Name} couldn't be associated with package!");
-                        Console.WriteLine($"[ERROR] {ex.Message}");
-                        Console.ResetColor();
+                        _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be associated with package", ex);
+                        // TODO: Delete package
                         return false;
                     }
 
                     // Check if query executed successfully
                     if (rowsAffected <= 0)
                     {
-                        Console.BackgroundColor = ConsoleColor.Red;
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine($"[Error] Card {card.Name} couldn't be associated with package!");
-                        Console.ResetColor();
+                        _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be associated with package", null);
+                        // TODO: Delete package | DELETE WHERE Id = packageId
                         return false;
                     }
                 }

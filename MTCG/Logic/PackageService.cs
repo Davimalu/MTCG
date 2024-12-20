@@ -43,6 +43,11 @@ namespace MTCG.Logic
             return true;
         }
 
+        public bool SavePackageToDatabase(Package package)
+        {
+            return _packageRepository.AddPackageToDatabase(package);
+        }
+
         public Package? GetRandomPackage()
         {
             // TODO: THREAD SAFETY

@@ -1,25 +1,21 @@
-﻿using MTCG.Logic;
-using MTCG.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using MTCG.HTTP;
+﻿using MTCG.HTTP;
 using MTCG.Interfaces;
-using MTCG.Repository;
+using MTCG.Logic;
+using MTCG.Models;
+using MTCG.Models.Enums;
+using System.Net.Sockets;
+using System.Text.Json;
 
 namespace MTCG.Endpoints
 {
     public class PackagesEndpoint : IHttpEndpoint
     {
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
-        private readonly PackageRepository _packageRepository = PackageRepository.Instance;
-        private readonly UserService _userService = UserService.Instance;
-        private readonly PackageService _packageService = PackageService.Instance;
+        private readonly ICardService _cardService = CardService.Instance;
+        private readonly IUserService _userService = UserService.Instance;
+        private readonly IPackageService _packageService = PackageService.Instance;
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+
+        private readonly IEventService _eventService = new EventService();
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
@@ -27,56 +23,82 @@ namespace MTCG.Endpoints
             string token = _headerHelper.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
-            if (user == null)
+            if (user == null || user.Username != "admin")
             {
                 return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
-            // Add new package
-            if (headers.Method == "POST")
+
+            switch (headers.Method)
             {
-                // Each request contains an array of cards
-                List<MonsterCard>? cardsToAdd = JsonSerializer.Deserialize<List<MonsterCard>>(body);
+                case "POST":
+                    return HandleAddingPackage(body);
+                default:
+                    return (405, JsonSerializer.Serialize("Method Not Allowed"));
+            }
+        }
 
-                // Check if request was not empty
-                if (cardsToAdd != null)
-                {
-                    int numberOfCards = cardsToAdd.Count();
-                    int cardsAdded = 0;
-
-                    // Temporary package data structure used to save package into database
-                    Package tmpPackage = new Package();
-
-                    // Iterate over all cards
-                    foreach (var card in cardsToAdd)
-                    {
-                        // Add cards to database and temporary package
-                        if (_cardRepository.AddCardToDatabase(card) && _packageService.AddCardToPackage(card, tmpPackage))
-                        {
-                            cardsAdded++;
-                        }
-                    }
-
-                    // Check if all cards were successfully added
-                    if (cardsAdded != numberOfCards)
-                    {
-                        // TODO: Catch duplicate errors in repository and allow for packages to be added anyway if the card already exists in the database
-                        return (500, JsonSerializer.Serialize("Error writing cards to database"));
-                    }
-
-                    // Add package to database
-                    if (!_packageRepository.AddPackageToDatabase(tmpPackage))
-                    {
-                        return (500, JsonSerializer.Serialize("Error writing package to database"));
-                    }
-
-                    return (201, JsonSerializer.Serialize("Package created successfully"));
-                }
-
-                return (400, JsonSerializer.Serialize("Invalid card format used"));
+        private (int, string?) HandleAddingPackage(string? body)
+        {
+            // Check for valid input
+            if (body == null)
+            {
+                return (400, JsonSerializer.Serialize("Empty request body"));
             }
 
-            return (405, JsonSerializer.Serialize("Method Not Allowed"));
+            // Each request contains an array of cards
+            List<MonsterCard>? cardsToAdd = null;
+            try
+            {
+                cardsToAdd = JsonSerializer.Deserialize<List<MonsterCard>>(body);
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't parse request body of cards/package to add", ex);
+                return (400, JsonSerializer.Serialize("Invalid request body"));
+            }
+
+            if (cardsToAdd == null || cardsToAdd.Count != 5)
+            {
+                return (400, JsonSerializer.Serialize("Invalid request format"));
+            }
+
+
+            int numberOfCards = cardsToAdd.Count();
+            int cardsAdded = 0;
+
+            // Temporary package data structure used to save package into database
+            Package tmpPackage = new Package();
+
+            // Iterate over all cards
+            foreach (var card in cardsToAdd)
+            {
+                // Add cards to database and temporary package
+                if (_cardService.SaveCardToDatabase(card) && _packageService.AddCardToPackage(card, tmpPackage))
+                {
+                    cardsAdded++;
+                }
+            }
+
+            // Check if all cards were successfully added
+            if (cardsAdded != numberOfCards)
+            {
+                return (500, JsonSerializer.Serialize("Error writing cards to database"));
+            }
+
+            // Add package to database
+            if (!_packageService.SavePackageToDatabase(tmpPackage))
+            {
+                return (500, JsonSerializer.Serialize("Error writing package to database"));
+            }
+
+            var response = new
+            {
+                message = "Package created successfully",
+                AddedCards = tmpPackage.Cards
+            };
+
+            return (201, JsonSerializer.Serialize(response));
         }
     }
 }

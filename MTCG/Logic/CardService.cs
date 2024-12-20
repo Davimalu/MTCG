@@ -65,6 +65,26 @@ namespace MTCG.Logic
             return _cardRepository.GetCardById(cardId);
         }
 
+        public bool SaveCardToDatabase(Card card)
+        {
+            if (Enum.TryParse(GetElementType(card), out ElementType elementType))
+            {
+                card.ElementType = elementType;
+            }
+
+            Card cardToAdd;
+            if (GetCardType(card) == "Monster")
+            {
+                cardToAdd = new MonsterCard(card);
+            }
+            else
+            {
+                cardToAdd = new SpellCard(card);
+            }
+
+            return _cardRepository.AddCardToDatabase(cardToAdd);
+        }
+
         public bool UserOwnsCard(User user, Card card)
         {
             // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
