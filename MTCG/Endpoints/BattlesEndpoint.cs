@@ -19,6 +19,20 @@ namespace MTCG.Endpoints
         private readonly IBattleService _battleService = new BattleService();
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
+        public BattlesEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public BattlesEndpoint(IUserService userService, IBattleService battleService, IHeaderHelper headerHelper)
+        {
+            _userService = userService;
+            _battleService = battleService;
+            _headerHelper = headerHelper;
+        }
+        #endregion
+
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
