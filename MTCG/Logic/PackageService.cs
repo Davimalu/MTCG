@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MTCG.Interfaces;
 using MTCG.Models;
 using MTCG.Repository;
 
 namespace MTCG.Logic
 {
-    public class PackageService
+    public class PackageService : IPackageService
     {
         #region Singleton
         private static PackageService? _instance;

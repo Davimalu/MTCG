@@ -11,11 +11,27 @@ namespace MTCG.Endpoints
     public class TransactionsEndpoint : IHttpEndpoint
     {
         private readonly IUserService _userService = UserService.Instance;
-        private readonly PackageService _packageService = PackageService.Instance;
-        private readonly StackService _stackService = StackService.Instance;
-        private readonly IEventService _eventService = new EventService();
+        private readonly IPackageService _packageService = PackageService.Instance;
+        private readonly IStackService _stackService = StackService.Instance;
 
+        private readonly IEventService _eventService = new EventService();
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+
+        public TransactionsEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public TransactionsEndpoint(IUserService userService, IPackageService packageService, IStackService stackService, IEventService eventService, IHeaderHelper headerHelper)
+        {
+            _userService = userService;
+            _packageService = packageService;
+            _stackService = stackService;
+            _eventService = eventService;
+            _headerHelper = headerHelper;
+        }
+        #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {

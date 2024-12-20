@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using MTCG.Interfaces;
 using MTCG.Models;
-using MTCG.Repository;
 
 namespace MTCG.Logic
 {
-    public class StackService
+    public class StackService : IStackService
     {
         #region Singleton
         private static StackService? _instance;
