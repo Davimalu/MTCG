@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using MTCG.Endpoints;
+﻿using MTCG.Endpoints;
 using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Models;
 using MTCG.Models.Enums;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
+using System.Text.Json;
 
 namespace MTCGTests.Endpoints
 {
@@ -38,7 +32,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_EmptyBodyReturns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1"};
+            var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
 
             // Act
             var result = _usersEndpoint.HandleRequest(null, headers, null);
@@ -132,7 +126,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_ValidPathReturns200AndUserJson()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "GET", Path = "/users/testuser", Version = "1.1"};
+            var headers = new HTTPHeader { Method = "GET", Path = "/users/testuser", Version = "1.1" };
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 

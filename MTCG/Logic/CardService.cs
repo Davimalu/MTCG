@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MTCG.Interfaces;
 using MTCG.Models;
+using MTCG.Repository;
 
 namespace MTCG.Logic
 {
-    public class CardService
+    public class CardService : ICardService
     {
+        private readonly CardRepository _cardRepository = CardRepository.Instance;
+
         #region Singleton
         private static CardService? _instance;
 
@@ -55,6 +58,11 @@ namespace MTCG.Logic
             {
                 return "Normal";
             }
+        }
+
+        public Card? GetCardById(string cardId)
+        {
+            return _cardRepository.GetCardById(cardId);
         }
 
         public bool UserOwnsCard(User user, Card card)

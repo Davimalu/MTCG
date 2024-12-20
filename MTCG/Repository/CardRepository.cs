@@ -16,24 +16,23 @@ namespace MTCG.Repository
     public class CardRepository
     {
         #region Singleton
-        private static CardRepository? instance;
+        private static CardRepository? _instance;
 
         public static CardRepository Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = new CardRepository();
+                    _instance = new CardRepository();
                 }
 
-                return instance;
+                return _instance;
             }
         }
         #endregion
 
         private readonly DataLayer _dataLayer = DataLayer.Instance;
-        private readonly CardService _cardService = CardService.Instance;
 
         /// <summary>
         /// saves a new card to the database
@@ -51,11 +50,13 @@ namespace MTCG.Repository
                                                                  VALUES (@id, @name, @damage, @cardType, @elementType);
                                                                  """);
 
+            ICardService cardService = CardService.Instance;
+
             DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.String, card.Id);
             DataLayer.AddParameterWithValue(dbCommand, "@name", DbType.String, card.Name);
             DataLayer.AddParameterWithValue(dbCommand, "@damage", DbType.Int32, card.Damage);
-            DataLayer.AddParameterWithValue(dbCommand, "@cardType", DbType.String, _cardService.GetCardType(card));
-            DataLayer.AddParameterWithValue(dbCommand, "@elementType", DbType.String, _cardService.GetElementType(card));
+            DataLayer.AddParameterWithValue(dbCommand, "@cardType", DbType.String, cardService.GetCardType(card));
+            DataLayer.AddParameterWithValue(dbCommand, "@elementType", DbType.String, cardService.GetElementType(card));
 
             // Execute query and catch errors
             try

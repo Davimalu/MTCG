@@ -12,12 +12,28 @@ namespace MTCG.Endpoints
     public class TradingsEndpoint : IHttpEndpoint
     {
         private readonly IUserService _userService = UserService.Instance;
-        private readonly TradingService _tradingService = TradingService.Instance;
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
-        private readonly CardService _cardService = CardService.Instance;
+        private readonly ITradingService _tradingService = TradingService.Instance;
+        private readonly ICardService _cardService = CardService.Instance;
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
         private readonly IEventService _eventService = new EventService();
+
+        public TradingsEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public TradingsEndpoint(IUserService userService, ITradingService tradingService, ICardService cardsService,
+            IHeaderHelper headerHelper, IEventService eventService)
+        {
+            _userService = userService;
+            _tradingService = tradingService;
+            _cardService = cardsService;
+            _headerHelper = headerHelper;
+            _eventService = eventService;
+        }
+        #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
@@ -105,7 +121,7 @@ namespace MTCG.Endpoints
                 return (400, JsonSerializer.Serialize("Trade offer incomplete"));
             }
 
-            Card? cardToTrade = _cardRepository.GetCardById(cardId);
+            Card? cardToTrade = _cardService.GetCardById(cardId);
 
             if (cardToTrade == null)
             {

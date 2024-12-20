@@ -9,7 +9,7 @@ using MTCG.Repository;
 
 namespace MTCG.Logic
 {
-    public class TradingService
+    public class TradingService : ITradingService
     {
         #region Singleton
         private static TradingService? _instance;
