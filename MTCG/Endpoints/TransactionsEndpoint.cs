@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using MTCG.HTTP;
+﻿using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
-using MTCG.Repository;
+using System.Net.Sockets;
+using System.Text.Json;
+using MTCG.Models.Enums;
 
 namespace MTCG.Endpoints
 {
     public class TransactionsEndpoint : IHttpEndpoint
     {
-        private readonly UserService _userService = UserService.Instance;
+        private readonly IUserService _userService = UserService.Instance;
         private readonly PackageService _packageService = PackageService.Instance;
         private readonly StackService _stackService = StackService.Instance;
+        private readonly IEventService _eventService = new EventService();
 
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
@@ -33,6 +28,18 @@ namespace MTCG.Endpoints
                 return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
+            switch (headers.Method)
+            {
+                // Acquire Package
+                case "POST":
+                    return HandlePackageAcquiring(headers, user);
+                default:
+                    return (405, JsonSerializer.Serialize("Method Not Allowed"));
+            }
+        }
+
+        private (int, string?) HandlePackageAcquiring(HTTPHeader headers, User user)
+        {
             // Buy new package
             if (headers is { Method: "POST", Path: "/transactions/packages" })
             {
@@ -56,10 +63,17 @@ namespace MTCG.Endpoints
                 user.CoinCount -= 5;
                 _userService.SaveUserToDatabase(user);
 
-                return (201, JsonSerializer.Serialize("Package retrieved successfully and added to stack"));
+                var response = new
+                {
+                    message = "Package acquired",
+                    AcquiredCards = package.Cards
+                };
+
+                _eventService.LogEvent(EventType.Highlight, $"User {user.Username} acquired a package!", null);
+                return (201, JsonSerializer.Serialize(response));
             }
 
-            return (405, JsonSerializer.Serialize("Method Not Allowed"));
+            return (404, "Not found");
         }
     }
 }
