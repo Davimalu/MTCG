@@ -1,15 +1,10 @@
 ﻿using MTCG.Endpoints;
 using MTCG.HTTP;
-using MTCG.Interfaces.Logic;
 using MTCG.Interfaces;
-using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using NSubstitute;
+using System.Text.Json;
 
 namespace MTCGTests.Endpoints
 {
