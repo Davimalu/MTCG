@@ -7,7 +7,7 @@ using MTCG.Models;
 
 namespace MTCG.Logic
 {
-    public class ScoreboardService
+    public class ScoreboardService : IScoreboardService
     {
         #region Singleton
         private static ScoreboardService? _instance;

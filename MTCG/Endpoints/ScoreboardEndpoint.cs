@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using MTCG.HTTP;
+﻿using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
+using System.Net.Sockets;
+using System.Text.Json;
 
 namespace MTCG.Endpoints
 {
     public class ScoreboardEndpoint : IHttpEndpoint
     {
-        private readonly UserService _userService = UserService.Instance;
-        private readonly ScoreboardService _scoreboardService = ScoreboardService.Instance;
+        private readonly IUserService _userService = UserService.Instance;
+        private readonly IScoreboardService _scoreboardService = ScoreboardService.Instance;
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
@@ -29,17 +24,21 @@ namespace MTCG.Endpoints
                 return (401, JsonSerializer.Serialize("User not authorized"));
             }
 
-            // Get scoreboard
-            if (headers.Method == "GET")
+            switch (headers.Method)
             {
-                Scoreboard scoreboard = new Scoreboard();
-                _scoreboardService.FillScoreboard(scoreboard);
-
-                string json = JsonSerializer.Serialize(scoreboard.Entries);
-                return (200, json);
+                case "GET":
+                    return HandleGetScoreboard();
+                default:
+                    return (405, JsonSerializer.Serialize("Method Not Allowed"));
             }
+        }
 
-            return (405, "Method Not Allowed");
+        private (int, string?) HandleGetScoreboard()
+        {
+            Scoreboard scoreboard = new Scoreboard();
+            _scoreboardService.FillScoreboard(scoreboard);
+
+            return (200, JsonSerializer.Serialize(scoreboard.Entries));
         }
     }
 }
