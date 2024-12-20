@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MTCG.HTTP
@@ -54,7 +55,17 @@ namespace MTCG.HTTP
             }
 
             writer.WriteLine($"HTTP/1.1 {statusCode} {reasonPhrase}");
-            writer.WriteLine("Content-Type: application/json");
+
+            // Check if response is JSON
+            if (IsJson(response))
+            {
+                writer.WriteLine("Content-Type: application/json");
+            }
+            else
+            {
+                writer.WriteLine("Content-Type: text/plain");
+            }
+            
             writer.WriteLine($"Content-Length: {(response?.Length ?? 0)}");
             writer.WriteLine();
 
@@ -124,6 +135,26 @@ namespace MTCG.HTTP
             {
                 // No body to parse
                 return null;
+            }
+        }
+
+        private bool IsJson(string? source)
+        {
+            // https://stackoverflow.com/questions/58629279/validate-if-string-is-valid-json-fastest-way-possible-in-net-core-3-0
+            if (source == null)
+                return false;
+
+            try
+            {
+                using (JsonDocument doc = JsonDocument.Parse(source))
+                {
+                    // dispose any created doc
+                }
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
             }
         }
     }

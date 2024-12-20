@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
 
 namespace MTCG.Logic
 {
-    public class DeckService
+    public class DeckService : IDeckService
     {
         #region Singleton
         private static DeckService? _instance;

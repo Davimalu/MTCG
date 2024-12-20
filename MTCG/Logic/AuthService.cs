@@ -12,7 +12,7 @@ namespace MTCG.Logic
     // Has to be moved inside the namespace for some reason
     using BCrypt.Net;
     using MTCG.DAL;
-    using MTCG.Interfaces;
+    using MTCG.Interfaces.Logic;
 
     public class AuthService : IAuthService
     {

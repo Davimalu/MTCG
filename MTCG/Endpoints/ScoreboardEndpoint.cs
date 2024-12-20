@@ -1,5 +1,6 @@
 ﻿using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
 using System.Net.Sockets;

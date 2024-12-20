@@ -1,6 +1,6 @@
 ﻿using MTCG.Models.Enums;
 
-namespace MTCG.Interfaces;
+namespace MTCG.Interfaces.Logic;
 
 public interface IEventService
 {

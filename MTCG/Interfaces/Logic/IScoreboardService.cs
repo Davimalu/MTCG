@@ -1,6 +1,6 @@
 ﻿using MTCG.Models;
 
-namespace MTCG.Logic;
+namespace MTCG.Interfaces.Logic;
 
 public interface IScoreboardService
 {

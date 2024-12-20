@@ -4,6 +4,7 @@ using MTCG.Models;
 using System.Net.Sockets;
 using System.Text.Json;
 using MTCG.Models.Enums;
+using MTCG.Interfaces.Logic;
 
 namespace MTCG.Endpoints
 {

@@ -1,5 +1,5 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Models.Enums;
 using NSubstitute;

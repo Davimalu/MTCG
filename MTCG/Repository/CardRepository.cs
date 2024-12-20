@@ -9,9 +9,9 @@ using System.Data;
 using MTCG.Logic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Xml.Linq;
-using MTCG.Interfaces;
 using MTCG.Models.Enums;
 using Npgsql;
+using MTCG.Interfaces.Logic;
 
 namespace MTCG.Repository
 {

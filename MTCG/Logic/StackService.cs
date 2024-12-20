@@ -1,4 +1,4 @@
-﻿using MTCG.Interfaces;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Models;
 
 namespace MTCG.Logic

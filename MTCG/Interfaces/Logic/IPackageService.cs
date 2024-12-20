@@ -1,6 +1,6 @@
 ﻿using MTCG.Models;
 
-namespace MTCG.Interfaces;
+namespace MTCG.Interfaces.Logic;
 
 public interface IPackageService
 {

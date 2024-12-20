@@ -1,6 +1,7 @@
 ﻿using MTCG.Endpoints;
 using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Models.Enums;
 using NSubstitute;

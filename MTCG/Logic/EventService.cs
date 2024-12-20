@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MTCG.Models.Enums;
-using MTCG.Interfaces;
+using MTCG.Interfaces.Logic;
 
 namespace MTCG.Logic
 {
