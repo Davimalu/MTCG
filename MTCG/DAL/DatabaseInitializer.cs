@@ -7,9 +7,12 @@ namespace MTCG.DAL
 {
     public class DatabaseInitializer
     {
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
 
+        /// <summary>
+        /// creates all PostgresSQL tables the MonsterTradingCardGame needs; drops all existing tables
+        /// </summary>
         public void CreateTables()
         {
             DropAllTables();
@@ -28,7 +31,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreateUserTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                 CREATE TABLE IF NOT EXISTS users (
                     userId SERIAL PRIMARY KEY,
                     username VARCHAR(255) NOT NULL,
@@ -63,7 +66,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreateCardsTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                 CREATE TABLE IF NOT EXISTS cards (
                     cardId VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
@@ -91,7 +94,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreatePackagesTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS packages (
                                                                      packageId SERIAL PRIMARY KEY
                                                                  );
@@ -116,7 +119,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreateCardsPackagesTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS cardsPackages (
                                                                      packageId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
@@ -145,7 +148,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreateUserStacksTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS userStacks (
                                                                      userId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
@@ -174,7 +177,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreateUserDecksTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                  CREATE TABLE IF NOT EXISTS userDecks (
                                                                      userId INT NOT NULL,
                                                                      cardId VARCHAR(255) NOT NULL,
@@ -203,7 +206,7 @@ namespace MTCG.DAL
         /// </summary>
         public void CreateTradeDealsTable()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                   CREATE TABLE IF NOT EXISTS tradeDeals (
                                                                       tradeId SERIAL PRIMARY KEY,
                                                                       userId INT NOT NULL,
@@ -234,7 +237,7 @@ namespace MTCG.DAL
         /// </summary>
         public void DropAllTables()
         {
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                 DROP TABLE IF EXISTS userStacks;
                 DROP TABLE IF EXISTS userDecks;
                 DROP TABLE IF EXISTS cardsPackages;

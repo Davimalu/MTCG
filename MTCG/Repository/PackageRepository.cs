@@ -31,7 +31,7 @@ namespace MTCG.Repository
         }
         #endregion
 
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL Statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("INSERT INTO packages DEFAULT VALUES RETURNING packageId;");
+                using IDbCommand dbCommand = _databaseService.CreateCommand("INSERT INTO packages DEFAULT VALUES RETURNING packageId;");
 
                 // Execute query and save packageId of the newly created entry
                 try
@@ -88,13 +88,13 @@ namespace MTCG.Repository
                 foreach (var card in package.Cards)
                 {
                     // Prepare SQL query
-                    using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                    using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                           INSERT INTO cardsPackages (packageId, cardId)
                                                                           VALUES (@packageId, @cardId);
                                                                           """);
 
-                    DataLayer.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, package.Id);
-                    DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
+                    DatabaseService.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, package.Id);
+                    DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
 
                     // Execute query and error handling
                     int rowsAffected;
@@ -135,7 +135,7 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT packageId FROM packages
                                                                       ORDER BY RANDOM()
                                                                       LIMIT 1
@@ -166,13 +166,13 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT cards.cardId, name, damage, cardType, elementType FROM cards
                                                                       JOIN cardsPackages USING (cardId)
                                                                       WHERE cardsPackages.packageId = @packageId
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
+                DatabaseService.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
 
                 // TODO: Add error handling?
                 using IDataReader reader = dbCommand.ExecuteReader();
@@ -225,12 +225,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       DELETE FROM packages
                                                                       WHERE packageId = @packageId;
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
+                DatabaseService.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
 
                 // Execute query and error handling
                 int rowsAffected;

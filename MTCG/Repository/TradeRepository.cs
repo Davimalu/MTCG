@@ -30,24 +30,24 @@ namespace MTCG.Repository
         }
         #endregion
 
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
 
         public int? AddTradeDeal(TradeDeal deal)
         {
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL Query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                         INSERT INTO tradeDeals (userId, cardId, requestedCardType, requestedDamage)
                                                                         VALUES (@userId, @cardId, @requestedCardType, @requestedDamage)
                                                                         RETURNING tradeId;
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, deal.User.Id);
-                DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, deal.Card.Id);
-                DataLayer.AddParameterWithValue(dbCommand, "@requestedCardType", DbType.String,
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, deal.User.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, deal.Card.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@requestedCardType", DbType.String,
                     deal.RequestedMonster ? "Monster" : "Spell");
-                DataLayer.AddParameterWithValue(dbCommand, "@requestedDamage", DbType.Single, deal.RequestedDamage);
+                DatabaseService.AddParameterWithValue(dbCommand, "@requestedDamage", DbType.Single, deal.RequestedDamage);
 
 
                 // Execute query and error handling
@@ -77,12 +77,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       DELETE FROM tradeDeals
                                                                       WHERE tradeId = @tradeId;
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@tradeId", DbType.Int32, deal.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@tradeId", DbType.Int32, deal.Id);
 
                 // Execute query and error handling
                 int rowsAffected;
@@ -116,7 +116,7 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT tradeId, userId, cardId, requestedCardType, requestedDamage FROM tradeDeals
                                                                       WHERE active = true
                                                                       """);
@@ -160,12 +160,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT tradeId, userId, cardId, requestedCardType, requestedElementType, requestedDamage FROM tradeDeals
                                                                       WHERE active = true AND tradeId = @tradeId
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@tradeId", DbType.Int32, tradeId);
+                DatabaseService.AddParameterWithValue(dbCommand, "@tradeId", DbType.Int32, tradeId);
 
                 // TODO: Add error handling?
                 using IDataReader reader = dbCommand.ExecuteReader();
@@ -198,12 +198,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT tradeId, userId, cardId, requestedCardType, requestedDamage FROM tradeDeals
                                                                       WHERE active = true AND cardId = @cardId
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardIdToLookup);
+                DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardIdToLookup);
 
                 // TODO: Add error handling?
                 using IDataReader reader = dbCommand.ExecuteReader();
@@ -236,13 +236,13 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL Query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                 UPDATE tradeDeals
                 SET active = false
                 WHERE tradeId = @id
                 """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.Int32, tradeIdToUpdate);
+                DatabaseService.AddParameterWithValue(dbCommand, "@id", DbType.Int32, tradeIdToUpdate);
 
                 // Execute query and error handling
                 int tradeId;

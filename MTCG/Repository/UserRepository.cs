@@ -28,7 +28,7 @@ namespace MTCG.Repository
         #endregion
 
         private readonly CardRepository _cardRepository = CardRepository.Instance;
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
 
         /// <summary>
@@ -44,23 +44,23 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL Query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                 INSERT INTO users (username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints)
                 VALUES (@username, @chosenName, @biography, @image, @password, @authToken, @coinCount, @wins, @losses, @ties, @eloPoints)
                 RETURNING userId;
                 """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
-                DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.DisplayName);
-                DataLayer.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
-                DataLayer.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
-                DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
-                DataLayer.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
-                DataLayer.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
-                DataLayer.AddParameterWithValue(dbCommand, "@wins", DbType.Int32, user.Stats.Wins);
-                DataLayer.AddParameterWithValue(dbCommand, "@losses", DbType.Int32, user.Stats.Losses);
-                DataLayer.AddParameterWithValue(dbCommand, "@ties", DbType.Int32, user.Stats.Ties);
-                DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.Stats.EloPoints);
+                DatabaseService.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
+                DatabaseService.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.DisplayName);
+                DatabaseService.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
+                DatabaseService.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
+                DatabaseService.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
+                DatabaseService.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
+                DatabaseService.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
+                DatabaseService.AddParameterWithValue(dbCommand, "@wins", DbType.Int32, user.Stats.Wins);
+                DatabaseService.AddParameterWithValue(dbCommand, "@losses", DbType.Int32, user.Stats.Losses);
+                DatabaseService.AddParameterWithValue(dbCommand, "@ties", DbType.Int32, user.Stats.Ties);
+                DatabaseService.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.Stats.EloPoints);
 
                 // Execute query and error handling
                 try
@@ -91,13 +91,13 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT userId, username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints
                                                                       FROM users
                                                                       WHERE username = @username
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, username);
+                DatabaseService.AddParameterWithValue(dbCommand, "@username", DbType.String, username);
 
                 // Execute query and Error Handling
                 try
@@ -152,25 +152,25 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL Query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                 UPDATE users
                 SET username = @username, chosenName = @chosenName, biography = @biography, image = @image, password = @password, authToken = @authToken, coinCount = @coinCount, wins = @wins, losses = @losses, ties = @ties, eloPoints = @eloPoints
                 WHERE userId = @id
                 RETURNING userId
                 """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
-                DataLayer.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.DisplayName);
-                DataLayer.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
-                DataLayer.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
-                DataLayer.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
-                DataLayer.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
-                DataLayer.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
-                DataLayer.AddParameterWithValue(dbCommand, "@wins", DbType.Int32, user.Stats.Wins);
-                DataLayer.AddParameterWithValue(dbCommand, "@losses", DbType.Int32, user.Stats.Losses);
-                DataLayer.AddParameterWithValue(dbCommand, "@ties", DbType.Int32, user.Stats.Ties);
-                DataLayer.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.Stats.EloPoints);
-                DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.Int32, user.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@username", DbType.String, user.Username);
+                DatabaseService.AddParameterWithValue(dbCommand, "@chosenName", DbType.String, user.DisplayName);
+                DatabaseService.AddParameterWithValue(dbCommand, "@biography", DbType.String, user.Biography);
+                DatabaseService.AddParameterWithValue(dbCommand, "@image", DbType.String, user.Image);
+                DatabaseService.AddParameterWithValue(dbCommand, "@password", DbType.String, user.Password);
+                DatabaseService.AddParameterWithValue(dbCommand, "@authToken", DbType.String, user.AuthToken);
+                DatabaseService.AddParameterWithValue(dbCommand, "@coinCount", DbType.Int32, user.CoinCount);
+                DatabaseService.AddParameterWithValue(dbCommand, "@wins", DbType.Int32, user.Stats.Wins);
+                DatabaseService.AddParameterWithValue(dbCommand, "@losses", DbType.Int32, user.Stats.Losses);
+                DatabaseService.AddParameterWithValue(dbCommand, "@ties", DbType.Int32, user.Stats.Ties);
+                DatabaseService.AddParameterWithValue(dbCommand, "@eloPoints", DbType.Int32, user.Stats.EloPoints);
+                DatabaseService.AddParameterWithValue(dbCommand, "@id", DbType.Int32, user.Id);
 
                 // Execute query and error handling
                 int userId;
@@ -201,13 +201,13 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT userId, username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints
                                                                       FROM users
                                                                       WHERE authToken = @token
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@token", DbType.String, token);
+                DatabaseService.AddParameterWithValue(dbCommand, "@token", DbType.String, token);
 
                 // Execute query and error handling
                 try
@@ -262,13 +262,13 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT userId, username, chosenName, biography, image, password, authToken, coinCount, wins, losses, ties, eloPoints
                                                                       FROM users
                                                                       WHERE userId = @userId
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, userId);
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, userId);
 
                 // Execute query and error handling
                 try
@@ -323,7 +323,7 @@ namespace MTCG.Repository
                 List<string> users = new List<string>();
 
                 // Prepare SQL statement
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("SELECT username FROM users");
+                using IDbCommand dbCommand = _databaseService.CreateCommand("SELECT username FROM users");
 
                 // Execute query
                 try

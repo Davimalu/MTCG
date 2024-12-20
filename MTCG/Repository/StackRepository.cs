@@ -28,7 +28,7 @@ namespace MTCG.Repository
         }
         #endregion
 
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
 
         /// <summary>
         /// delete the stack of a user form the database
@@ -43,12 +43,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       DELETE FROM userStacks
                                                                       WHERE userid = @userId;
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
                 // Execute query and error handling
                 int rowsAffected;
@@ -93,13 +93,13 @@ namespace MTCG.Repository
                 foreach (var card in user.Stack.Cards)
                 {
                     // Prepare SQL query
-                    using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                    using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                           INSERT INTO userStacks (userId, cardId)
                                                                           VALUES (@userId, @cardId);
                                                                           """);
 
-                    DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
-                    DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
+                    DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+                    DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
 
                     // Execute query and handle errors
                     int rowsAffected;
@@ -140,12 +140,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT cardId FROM userStacks
                                                                       WHERE userId = @userId
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
                 // Execute query
                 // TODO: Add error handling?

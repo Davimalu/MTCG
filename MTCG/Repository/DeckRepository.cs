@@ -28,7 +28,7 @@ namespace MTCG.Repository
         }
         #endregion
 
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
 
         // TODO: The Deck functions are almost the same as all the stack functions -> Can this be written shorter somehow?
         // TODO: Refactor Deck and Stack functions into Stack- and Deck-Repository?
@@ -49,13 +49,13 @@ namespace MTCG.Repository
                 foreach (var card in user.Deck.Cards)
                 {
                     // Prepare SQL query
-                    using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                    using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                           INSERT INTO userDecks (userId, cardId)
                                                                           VALUES (@userId, @cardId);
                                                                           """);
 
-                    DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
-                    DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
+                    DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+                    DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, card.Id);
 
                     // Execute query and handle errors
                     int rowsAffected;
@@ -96,12 +96,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       SELECT cardId FROM userDecks
                                                                       WHERE userId = @userId
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
                 // Execute query
                 // TODO: Add error handling?
@@ -132,12 +132,12 @@ namespace MTCG.Repository
             lock (ThreadSync.DatabaseLock)
             {
                 // Prepare SQL query
-                using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                       DELETE FROM userDecks
                                                                       WHERE userid = @userId;
                                                                       """);
 
-                DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
                 // Execute query and error handling
                 int rowsAffected;

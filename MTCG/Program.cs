@@ -19,6 +19,14 @@ namespace MTCG
 
         static void Main(string[] args)
         {
+            // Connect to database
+            DatabaseService databaseService = DatabaseService.Instance;
+
+            if (!databaseService.ConnectToDatabase())
+            {
+                Environment.Exit(-1);
+            }
+            
             // Create database tables
             DatabaseInitializer initializer = new DatabaseInitializer();
             initializer.CreateTables();

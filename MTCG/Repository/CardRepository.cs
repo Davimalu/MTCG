@@ -34,7 +34,7 @@ namespace MTCG.Repository
         }
         #endregion
 
-        private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
 
         /// <summary>
@@ -48,16 +48,16 @@ namespace MTCG.Repository
         public bool AddCardToDatabase(Card card)
         {
             // Prepare SQL Statement
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                  INSERT INTO cards (cardId, name, damage, cardType, elementType)
                                                                  VALUES (@id, @name, @damage, @cardType, @elementType);
                                                                  """);
 
-            DataLayer.AddParameterWithValue(dbCommand, "@id", DbType.String, card.Id);
-            DataLayer.AddParameterWithValue(dbCommand, "@name", DbType.String, card.Name);
-            DataLayer.AddParameterWithValue(dbCommand, "@damage", DbType.Int32, card.Damage);
-            DataLayer.AddParameterWithValue(dbCommand, "@cardType", DbType.String, card is MonsterCard ? "Monster" : "Spell");
-            DataLayer.AddParameterWithValue(dbCommand, "@elementType", DbType.String, card.ElementType.ToString());
+            DatabaseService.AddParameterWithValue(dbCommand, "@id", DbType.String, card.Id);
+            DatabaseService.AddParameterWithValue(dbCommand, "@name", DbType.String, card.Name);
+            DatabaseService.AddParameterWithValue(dbCommand, "@damage", DbType.Int32, card.Damage);
+            DatabaseService.AddParameterWithValue(dbCommand, "@cardType", DbType.String, card is MonsterCard ? "Monster" : "Spell");
+            DatabaseService.AddParameterWithValue(dbCommand, "@elementType", DbType.String, card.ElementType.ToString());
 
             // Execute query and catch errors
             try
@@ -90,12 +90,12 @@ namespace MTCG.Repository
         public Card? GetCardById(string cardId)
         {
             // Prepare SQL Statement
-            using IDbCommand dbCommand = _dataLayer.CreateCommand("""
+            using IDbCommand dbCommand = _databaseService.CreateCommand("""
                                                                   SELECT cardId, name, damage, cardType, elementType
                                                                   FROM cards
                                                                   WHERE cardId = @cardId
                                                                   """);
-            DataLayer.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardId);
+            DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardId);
 
             // Execute query
             // TODO: Add error handling?
