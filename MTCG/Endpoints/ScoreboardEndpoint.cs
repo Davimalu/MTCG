@@ -13,6 +13,20 @@ namespace MTCG.Endpoints
         private readonly IScoreboardService _scoreboardService = ScoreboardService.Instance;
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
+        public ScoreboardEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public ScoreboardEndpoint(IUserService userService, IScoreboardService scoreboardService, IHeaderHelper headerHelper)
+        {
+            _userService = userService;
+            _scoreboardService = scoreboardService;
+            _headerHelper = headerHelper;
+        }
+        #endregion
+
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
