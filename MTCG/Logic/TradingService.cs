@@ -32,7 +32,7 @@ namespace MTCG.Logic
         private readonly UserService _userService = UserService.Instance;
         private readonly CardRepository _cardRepository = CardRepository.Instance;
 
-        public TradeDeal? CreateTradeDeal(User user, Card card, bool requestedMonsterCard, float requestedDamage)
+        public TradeDeal? CreateTradeOffer(User user, Card card, bool requestedMonsterCard, float requestedDamage)
         {
             TradeDeal deal = new TradeDeal()
             {
@@ -67,9 +67,9 @@ namespace MTCG.Logic
             return null;
         }
 
-        public bool RemoveTradeDealByCardId(string cardId)
+        public bool RemoveTradeOfferByCardId(string cardId)
         {
-            TradeDeal dealToRemove = GetTradeDealByCardId(cardId);
+            TradeDeal dealToRemove = GetTradeOfferByCardId(cardId);
 
             if (_tradeRepository.RemoveTradeDeal(dealToRemove))
             {
@@ -82,7 +82,7 @@ namespace MTCG.Logic
             return false;
         }
 
-        public TradeDeal? GetTradeDealByCardId(string cardId)
+        public TradeDeal? GetTradeOfferByCardId(string cardId)
         {
             TradeDeal deal = _tradeRepository.GetTradeDealByCardId(cardId);
 
@@ -96,7 +96,7 @@ namespace MTCG.Logic
             return deal;
         }
 
-        public TradeDeal GetTradeDealById(int tradeId)
+        public TradeDeal GetTradeOfferById(int tradeId)
         {
             TradeDeal deal = _tradeRepository.GetTradeDealById(tradeId);
 
@@ -107,7 +107,7 @@ namespace MTCG.Logic
             return deal;
         }
 
-        public List<TradeDeal> GetTradeDeals()
+        public List<TradeDeal> GetTradeOffers()
         {
             List<TradeDeal> deals = _tradeRepository.GetAllTradeDeals();
 
@@ -126,7 +126,7 @@ namespace MTCG.Logic
             // Ensure that no user information is changed while this function is executed - otherwise the User objects might contain outdated information by the time SaveUserToDatabase() is called
             lock (ThreadSync.UserLock)
             {
-                List<TradeDeal> allOffers = GetTradeDeals();
+                List<TradeDeal> allOffers = GetTradeOffers();
 
                 // No other offers exist -> cannot trade
                 if (allOffers.Count < 2)

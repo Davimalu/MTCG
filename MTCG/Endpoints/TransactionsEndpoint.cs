@@ -2,9 +2,9 @@
 using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
-using MTCG.Models.Enums;
 
 namespace MTCG.Endpoints
 {
@@ -66,7 +66,6 @@ namespace MTCG.Endpoints
                 }
 
                 Package? package = _packageService.GetRandomPackage();
-
                 if (package == null)
                 {
                     return (410, JsonSerializer.Serialize("No packages available"));
