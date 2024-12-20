@@ -1,13 +1,9 @@
 ﻿using MTCG.DAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using MTCG.Models;
-using System.Data;
 using MTCG.Interfaces;
+using MTCG.Logic;
+using MTCG.Models;
+using MTCG.Models.Enums;
+using System.Data;
 
 namespace MTCG.Repository
 {
@@ -32,6 +28,7 @@ namespace MTCG.Repository
 
         private readonly CardRepository _cardRepository = CardRepository.Instance;
         private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly IEventService _eventService = new EventService();
 
         /// <summary>
         /// saves a new user to the database
@@ -71,15 +68,11 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] User {user.Username} couldn't be added to the database!");
-                    Console.WriteLine($"[ERROR] {ex.Message}");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Error, $"User {user.Username} couldn't be added to the database!", ex);
                     return -1;
                 }
 
-                Console.WriteLine($"[INFO] User {user.Username} added to database!");
+                _eventService.LogEvent(EventType.Highlight, $"User {user.Username} added to database!", null);
                 return user.Id;
             }
         }
@@ -102,34 +95,42 @@ namespace MTCG.Repository
                                                                       FROM users
                                                                       WHERE username = @username
                                                                       """);
+
                 DataLayer.AddParameterWithValue(dbCommand, "@username", DbType.String, username);
 
-                // Execute query
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
-
-                if (reader.Read())
+                // Execute query and Error Handling
+                try
                 {
-                    UserStatistics stats = new UserStatistics()
-                    {
-                        Wins = reader.GetInt32(8),
-                        Losses = reader.GetInt32(9),
-                        Ties = reader.GetInt32(10),
-                        EloPoints = reader.GetInt32(11)
-                    };
+                    using IDataReader reader = dbCommand.ExecuteReader();
 
-                    return new User()
+                    if (reader.Read())
                     {
-                        Id = reader.GetInt32(0),
-                        Username = reader.GetString(1),
-                        DisplayName = reader.GetString(2),
-                        Biography = reader.GetString(3),
-                        Image = reader.GetString(4),
-                        Password = reader.GetString(5),
-                        AuthToken = reader.GetString(6),
-                        CoinCount = reader.GetInt32(7),
-                        Stats = stats
-                    };
+                        UserStatistics stats = new UserStatistics()
+                        {
+                            Wins = reader.GetInt32(8),
+                            Losses = reader.GetInt32(9),
+                            Ties = reader.GetInt32(10),
+                            EloPoints = reader.GetInt32(11)
+                        };
+
+                        return new User()
+                        {
+                            Id = reader.GetInt32(0),
+                            Username = reader.GetString(1),
+                            DisplayName = reader.GetString(2),
+                            Biography = reader.GetString(3),
+                            Image = reader.GetString(4),
+                            Password = reader.GetString(5),
+                            AuthToken = reader.GetString(6),
+                            CoinCount = reader.GetInt32(7),
+                            Stats = stats
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Error retrieving {username} from the database!", ex);
+                    return null;
                 }
 
                 // If no entries were returned...
@@ -178,11 +179,7 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Changes for user {user.Username} couldn't be written to the database!");
-                    Console.WriteLine($"[ERROR] {ex.Message}");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Error, $"Changes for user {user.Username} couldn't be written to the database!", ex);
                     return -1;
                 }
 
@@ -208,34 +205,42 @@ namespace MTCG.Repository
                                                                       FROM users
                                                                       WHERE authToken = @token
                                                                       """);
+
                 DataLayer.AddParameterWithValue(dbCommand, "@token", DbType.String, token);
 
-                // Execute query
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
-
-                if (reader.Read())
+                // Execute query and error handling
+                try
                 {
-                    UserStatistics stats = new UserStatistics()
-                    {
-                        Wins = reader.GetInt32(8),
-                        Losses = reader.GetInt32(9),
-                        Ties = reader.GetInt32(10),
-                        EloPoints = reader.GetInt32(11)
-                    };
+                    using IDataReader reader = dbCommand.ExecuteReader();
 
-                    return new User()
+                    if (reader.Read())
                     {
-                        Id = reader.GetInt32(0),
-                        Username = reader.GetString(1),
-                        DisplayName = reader.GetString(2),
-                        Biography = reader.GetString(3),
-                        Image = reader.GetString(4),
-                        Password = reader.GetString(5),
-                        AuthToken = reader.GetString(6),
-                        CoinCount = reader.GetInt32(7),
-                        Stats = stats
-                    };
+                        UserStatistics stats = new UserStatistics()
+                        {
+                            Wins = reader.GetInt32(8),
+                            Losses = reader.GetInt32(9),
+                            Ties = reader.GetInt32(10),
+                            EloPoints = reader.GetInt32(11)
+                        };
+
+                        return new User()
+                        {
+                            Id = reader.GetInt32(0),
+                            Username = reader.GetString(1),
+                            DisplayName = reader.GetString(2),
+                            Biography = reader.GetString(3),
+                            Image = reader.GetString(4),
+                            Password = reader.GetString(5),
+                            AuthToken = reader.GetString(6),
+                            CoinCount = reader.GetInt32(7),
+                            Stats = stats
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Error retrieving user with token {token} from the database!", ex);
+                    return null;
                 }
 
                 // If no entries were returned...
@@ -261,34 +266,42 @@ namespace MTCG.Repository
                                                                       FROM users
                                                                       WHERE userId = @userId
                                                                       """);
+
                 DataLayer.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, userId);
 
-                // Execute query
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
-
-                if (reader.Read())
+                // Execute query and error handling
+                try
                 {
-                    UserStatistics stats = new UserStatistics()
-                    {
-                        Wins = reader.GetInt32(8),
-                        Losses = reader.GetInt32(9),
-                        Ties = reader.GetInt32(10),
-                        EloPoints = reader.GetInt32(11)
-                    };
+                    using IDataReader reader = dbCommand.ExecuteReader();
 
-                    return new User()
+                    if (reader.Read())
                     {
-                        Id = reader.GetInt32(0),
-                        Username = reader.GetString(1),
-                        DisplayName = reader.GetString(2),
-                        Biography = reader.GetString(3),
-                        Image = reader.GetString(4),
-                        Password = reader.GetString(5),
-                        AuthToken = reader.GetString(6),
-                        CoinCount = reader.GetInt32(7),
-                        Stats = stats
-                    };
+                        UserStatistics stats = new UserStatistics()
+                        {
+                            Wins = reader.GetInt32(8),
+                            Losses = reader.GetInt32(9),
+                            Ties = reader.GetInt32(10),
+                            EloPoints = reader.GetInt32(11)
+                        };
+
+                        return new User()
+                        {
+                            Id = reader.GetInt32(0),
+                            Username = reader.GetString(1),
+                            DisplayName = reader.GetString(2),
+                            Biography = reader.GetString(3),
+                            Image = reader.GetString(4),
+                            Password = reader.GetString(5),
+                            AuthToken = reader.GetString(6),
+                            CoinCount = reader.GetInt32(7),
+                            Stats = stats
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Error retrieving user with ID {userId} from the database!", ex);
+                    return null;
                 }
 
                 // If no entries were returned...
@@ -312,15 +325,21 @@ namespace MTCG.Repository
                 using IDbCommand dbCommand = _dataLayer.CreateCommand("SELECT username FROM users");
 
                 // Execute query
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
-
-                while (reader.Read())
+                try
                 {
-                    users.Add(reader.GetString(0));
+                    using IDataReader reader = dbCommand.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        users.Add(reader.GetString(0));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Error retrieving list of all users from the database!", ex);
+                    return users;
                 }
 
-                // If no entries were returned...
                 return users;
             }
         }

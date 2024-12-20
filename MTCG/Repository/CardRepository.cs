@@ -9,6 +9,7 @@ using System.Data;
 using MTCG.Logic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Xml.Linq;
+using MTCG.Interfaces;
 
 namespace MTCG.Repository
 {
