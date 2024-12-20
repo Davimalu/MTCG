@@ -18,6 +18,23 @@ namespace MTCG.Endpoints
 
         private readonly IEventService _eventService = new EventService();
 
+        public DeckEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public DeckEndpoint(ICardService cardService, IUserService userService, IDeckService deckService,
+            IHeaderHelper headerHelper, IEventService eventService)
+        {
+            _cardService = cardService;
+            _userService = userService;
+            _deckService = deckService;
+            _headerHelper = headerHelper;
+            _eventService = eventService;
+        }
+        #endregion
+
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
