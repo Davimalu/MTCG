@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using MTCG.HTTP;
+﻿using MTCG.HTTP;
 using MTCG.Interfaces;
 using MTCG.Logic;
 using MTCG.Models;
 using MTCG.Models.Enums;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace MTCG.Endpoints
 {
@@ -75,7 +68,7 @@ namespace MTCG.Endpoints
             {
                 _eventService.LogEvent(EventType.Warning, "Account creation failed: Error parsing request body", ex);
             }
-            
+
             if (tmpUser == null) // Check if Username and Password were provided
             {
                 return (400, JsonSerializer.Serialize("Invalid request body"));
@@ -96,8 +89,6 @@ namespace MTCG.Endpoints
                         Biography = tmpUser.Biography,
                         Image = tmpUser.Image,
                         Stats = tmpUser.Stats,
-                        Stack = tmpUser.Stack,
-                        Deck = tmpUser.Deck,
                         CoinCount = tmpUser.CoinCount
                     }
                 };
@@ -173,7 +164,7 @@ namespace MTCG.Endpoints
             {
                 _eventService.LogEvent(EventType.Warning, $"Couldn't update user information of User {userToBeUpdated.Username}: Invalid request body", ex);
                 return (400, JsonSerializer.Serialize("Invalid Request Body"));
-            } 
+            }
 
             if (updatedInformation == null)
             {
@@ -189,7 +180,21 @@ namespace MTCG.Endpoints
             // Update user
             _userService.SaveUserToDatabase(userToBeUpdated);
 
-            return (200, JsonSerializer.Serialize("User information updated"));
+            var response = new
+            {
+                message = "User information updated",
+                User = new
+                {
+                    Username = userToBeUpdated.Username,
+                    DisplayName = userToBeUpdated.DisplayName,
+                    Biography = userToBeUpdated.Biography,
+                    Image = userToBeUpdated.Image,
+                    Stats = userToBeUpdated.Stats,
+                    CoinCount = userToBeUpdated.CoinCount
+                }
+            };
+
+            return (200, JsonSerializer.Serialize(response));
         }
 
         /// <summary>

@@ -237,7 +237,22 @@ namespace MTCGTests.Endpoints
 
             // Assert
             Assert.That(result.Item1, Is.EqualTo(200));
-            Assert.That(result.Item2, Is.EqualTo(JsonSerializer.Serialize("User information updated")));
+
+            var expectedResponse = new
+            {
+                message = "User information updated",
+                User = new
+                {
+                    Username = "testuser",
+                    DisplayName = "Updated Name",
+                    Biography = "Updated Bio",
+                    Image = "Updated Image",
+                    Stats = user.Stats,
+                    CoinCount = user.CoinCount
+                }
+            };
+            Assert.That(result.Item2, Is.EqualTo(JsonSerializer.Serialize(expectedResponse)));
+
             _userService.Received().SaveUserToDatabase(Arg.Is<User>(u =>
                 u.DisplayName == "Updated Name" &&
                 u.Biography == "Updated Bio" &&
