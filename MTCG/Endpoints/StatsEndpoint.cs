@@ -12,6 +12,19 @@ namespace MTCG.Endpoints
         private readonly IUserService _userService = UserService.Instance;
         private readonly IHeaderHelper _headerHelper = new HeaderHelper();
 
+        public StatsEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public StatsEndpoint(IUserService userService, IHeaderHelper headerHelper)
+        {
+            _userService = userService;
+            _headerHelper = headerHelper;
+        }
+        #endregion
+
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
