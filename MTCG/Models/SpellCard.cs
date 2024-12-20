@@ -13,6 +13,11 @@ namespace MTCG.Models
 
         }
 
+        public SpellCard()
+        {
+
+        }
+
         // Copy Constructor
         public SpellCard(Card card)
         {
