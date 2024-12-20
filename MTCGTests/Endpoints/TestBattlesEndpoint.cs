@@ -1,16 +1,10 @@
 ﻿using MTCG.Endpoints;
 using MTCG.HTTP;
-using MTCG.Interfaces.Logic;
 using MTCG.Interfaces;
-using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
-using System.Collections.Concurrent;
+using NSubstitute;
+using System.Net.Sockets;
 
 namespace MTCGTests.Endpoints
 {

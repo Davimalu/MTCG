@@ -1,16 +1,14 @@
-﻿using MTCG.Models;
-using System;
-using System.Collections.Generic;
+﻿using MTCG.Interfaces.Logic;
+using MTCG.Logic;
+using MTCG.Models.Enums;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MTCG.DAL
 {
     public class DatabaseInitializer
     {
         private readonly DataLayer _dataLayer = DataLayer.Instance;
+        private readonly IEventService _eventService = new EventService();
 
         public void CreateTables()
         {
@@ -24,7 +22,10 @@ namespace MTCG.DAL
             CreateCardsPackagesTable();
         }
 
-        // Saves all users that registered
+
+        /// <summary>
+        /// creates the PostgresSQL table that stores information about all registered users
+        /// </summary>
         public void CreateUserTable()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -43,30 +44,51 @@ namespace MTCG.DAL
                     eloPoints INT DEFAULT 100 );
                 """);
 
-            dbCommand.ExecuteNonQuery();
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `users`", ex);
+                Environment.Exit(-1);
+            }
 
-            Console.WriteLine("[INFO] Users Table created!");
+            _eventService.LogEvent(EventType.Info, $"Table `users` created", null);
         }
 
-        // Saves all cards that are available
+
+        /// <summary>
+        /// creates the PostgresSQL table that stores all cards that were added to the game
+        /// </summary>
         public void CreateCardsTable()
         {
-            // TODO: Replace type with enum
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
                 CREATE TABLE IF NOT EXISTS cards (
                     cardId VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     damage REAL NOT NULL,
-                    cardType VARCHAR(255) NOT NULL,
-                    elementType VARCHAR(255) NOT NULL
+                    cardType VARCHAR(255) NOT NULL CHECK (cardType IN ('Monster', 'Spell')),
+                    elementType VARCHAR(255) NOT NULL CHECK (elementType IN ('Normal', 'Water', 'Fire'))
                 );
                 """);
 
-            dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] Cards Table created!");
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `cards`", ex);
+                Environment.Exit(-1);
+            }
+
+            _eventService.LogEvent(EventType.Info, $"Table `cards` created", null);
         }
 
-        // Saves all packages that were created
+        /// <summary>
+        /// creates the PostgresSQL table that stores all packages that were added to the game
+        /// </summary>
         public void CreatePackagesTable()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -75,11 +97,23 @@ namespace MTCG.DAL
                                                                  );
                                                                  """);
 
-            dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] Packages Table created!");
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `packages`", ex);
+                Environment.Exit(-1);
+            }
+
+            _eventService.LogEvent(EventType.Info, $"Table `packages` created", null);
         }
 
-        // Saves which cards are contained by a package
+
+        /// <summary>
+        /// creates the PostgresSQL table that saves which cards are contained in a certain package
+        /// </summary>
         public void CreateCardsPackagesTable()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -92,11 +126,23 @@ namespace MTCG.DAL
                                                                  );
                                                                  """);
 
-            dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] CardsPackages Table created!");
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `cardsPackages`", ex);
+                Environment.Exit(-1);
+            }
+
+            _eventService.LogEvent(EventType.Info, $"Table `cardsPackages` created", null);
         }
 
-        // Saves which cards a user has in his stack
+
+        /// <summary>
+        /// creates the PostgresSQL table that saves which cards a user has in his stack
+        /// </summary>
         public void CreateUserStacksTable()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -109,11 +155,23 @@ namespace MTCG.DAL
                                                                  );
                                                                  """);
 
-            dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] UserStacks Table created!");
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `userStacks`", ex);
+                Environment.Exit(-1);
+            }
+
+            _eventService.LogEvent(EventType.Info, $"Table `userStacks` created", null);
         }
 
-        // Saves which cards a user has in his deck
+
+        /// <summary>
+        /// creates the PostgresSQL table that saves which cards a user has in his deck
+        /// </summary>
         public void CreateUserDecksTable()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -126,11 +184,23 @@ namespace MTCG.DAL
                                                                  );
                                                                  """);
 
-            dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] UserDecks Table created!");
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `userDecks`", ex);
+                Environment.Exit(-1);
+            }
+
+            _eventService.LogEvent(EventType.Info, $"Table `userDecks` created", null);
         }
 
-        // Saves all open trade deals
+
+        /// <summary>
+        /// creates the PostgresSQL table that stores all open (and closed) trade offers
+        /// </summary>
         public void CreateTradeDealsTable()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -146,10 +216,22 @@ namespace MTCG.DAL
                                                                   );
                                                                   """);
 
-            dbCommand.ExecuteNonQuery();
-            Console.WriteLine("[INFO] TradeDeals Table created!");
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error creating Table `tradeDeals`", ex);
+                Environment.Exit(-1);
+            }
+
+            _eventService.LogEvent(EventType.Info, $"Table `tradeDeals` created", null);
         }
 
+        /// <summary>
+        /// drops all PostgresSQL database tables
+        /// </summary>
         public void DropAllTables()
         {
             using IDbCommand dbCommand = _dataLayer.CreateCommand("""
@@ -162,9 +244,17 @@ namespace MTCG.DAL
                 DROP TABLE IF EXISTS packages;
              """);
 
-            dbCommand.ExecuteNonQuery();
+            try
+            {
+                dbCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Error dropping tables", ex);
+                Environment.Exit(-1);
+            }
 
-            Console.WriteLine("[INFO] All tables dropped!");
+            _eventService.LogEvent(EventType.Warning, $"All database tables have been dropped", null);
         }
     }
 }
