@@ -12,6 +12,19 @@ namespace MTCG.Endpoints
         private readonly IAuthService _authService = AuthService.Instance;
         private readonly IEventService _eventService = new EventService();
 
+        public SessionsEndpoint()
+        {
+
+        }
+
+        #region DependencyInjection
+        public SessionsEndpoint(IAuthService authService, IEventService eventService)
+        {
+            _authService = authService;
+            _eventService = eventService;
+        }
+        #endregion
+
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             switch (headers.Method)
