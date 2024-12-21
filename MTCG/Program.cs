@@ -1,21 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-
-using MTCG.Models;
-using MTCG.Logic;
+﻿using MTCG.DAL;
 using MTCG.HTTP;
-using MTCG.DAL;
-
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace MTCG
 {
     internal class Program
     {
-        private static ServerService ServerService = new ServerService();
+        private static readonly ServerService ServerService = new ServerService();
 
         static void Main(string[] args)
         {
@@ -26,11 +16,18 @@ namespace MTCG
             {
                 Environment.Exit(-1);
             }
-            
+
             // Create database tables
             DatabaseInitializer initializer = new DatabaseInitializer();
             initializer.CreateTables();
 
+            // Start Server
+            if (!ServerService.StartServer())
+            {
+                Environment.Exit(-2);
+            }
+
+            // Listen for incoming Connections
             while (true)
             {
                 ServerService.AcceptConnections();

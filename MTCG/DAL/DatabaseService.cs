@@ -53,7 +53,7 @@ namespace MTCG.DAL
             }
             catch (Exception ex)
             {
-                _eventService.LogEvent(EventType.Error, $"Error establishing connection to Postgres Database", ex);
+                _eventService.LogEvent(EventType.Error, $"Error establishing connection to the Postgres Database", ex);
                 return false;
             }
 

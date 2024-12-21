@@ -1,51 +1,69 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using MTCG.Interfaces.Logic;
+using MTCG.Logic;
+using MTCG.Models.Enums;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using MTCG.Endpoints;
-using MTCG.Interfaces;
-using MTCG.Logic;
-using MTCG.Models;
 
 namespace MTCG.HTTP
 {
     public class ServerService
     {
-        private HandlerService HandlerService = new HandlerService();
+        private const int PORT_NO = 10001;
 
-        private TcpListener server;
-        private int PortNo = 10001;
-        
-        // Constructor
-        public ServerService()
+        private readonly HandlerService _handlerService = new HandlerService();
+        private readonly IEventService _eventService = new EventService();
+
+        private TcpListener? _server;
+
+        public bool StartServer()
         {
-            // Start server
-            server = new TcpListener(IPAddress.Any, PortNo);
-            server.Start();
+            try
+            {
+                // Start server
+                _server = new TcpListener(IPAddress.Any, PORT_NO);
+                _server.Start();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, $"Couldn't start server", ex);
+                return false;
+            }
 
-            Console.WriteLine("[INFO] Server started!");
+            _eventService.LogEvent(EventType.Highlight, $"Server started on Port {PORT_NO}", null);
+            return true;
         }
 
         public void AcceptConnections()
         {
-            // Accept client
-            Console.WriteLine($"[INFO] Listening on http://localhost:{PortNo}...");
-            var client = server.AcceptTcpClient();
+            // Check if server is running
+            if (_server == null)
+            {
+                _eventService.LogEvent(EventType.Warning, $"Cannot listen for incoming connections: Server has not yet been started", null);
+                return;
+            }
+
+            // https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener.localendpoint?view=net-9.0
+            _eventService.LogEvent(EventType.Info, $"Listening for connections on {IPAddress.Parse(((IPEndPoint)_server.LocalEndpoint).Address.ToString())}:{((IPEndPoint)_server.LocalEndpoint).Port.ToString()}...", null);
+
+            // Try to accept a connection
+            TcpClient? client = null;
+            try
+            {
+                client = _server.AcceptTcpClient();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, $"Error accepting connection", ex);
+                return;
+            }
 
             // Get client IP Address
-            IPEndPoint remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
-            Console.WriteLine($"[INFO] Received a request from {remoteIpEndPoint.Address}");
+            IPEndPoint? remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
+            _eventService.LogEvent(EventType.Info, $"Received a request from {remoteIpEndPoint?.Address}", null);
 
             // Start new thread for client
-            Console.WriteLine($"[INFO] Starting new thread for request...");
-            Task.Run(() => HandlerService.HandleClient(client));
-
-            // TODO: Go through the whole code again and guard critical sections
+            _eventService.LogEvent(EventType.Info, $"Starting new thread for request...", null);
+            Task.Run(() => _handlerService.HandleClient(client));
         }
     }
 }
