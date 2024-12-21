@@ -13,7 +13,7 @@ namespace MTCG.Endpoints
     {
         // Thread communication
         private static ConcurrentQueue<(User, int)> _battleQueue = new ConcurrentQueue<(User, int)>();
-        private static ConcurrentDictionary<int, string> _battleResults = new ConcurrentDictionary<int, string>();
+        private static ConcurrentDictionary<int, string?> _battleResults = new ConcurrentDictionary<int, string?>();
         private static object _localLock = new();
 
         private readonly IUserService _userService = UserService.Instance;
@@ -26,11 +26,11 @@ namespace MTCG.Endpoints
         }
 
         #region DependencyInjection
-        public BattlesEndpoint(IUserService userService, IBattleService battleService, IHttpHeaderService ihttpHeaderService)
+        public BattlesEndpoint(IUserService userService, IBattleService battleService, IHttpHeaderService httpHeaderService)
         {
             _userService = userService;
             _battleService = battleService;
-            _httpHeaderService = ihttpHeaderService;
+            _httpHeaderService = httpHeaderService;
         }
         #endregion
 
@@ -62,7 +62,7 @@ namespace MTCG.Endpoints
                 // TODO: Is there a better way to dequeue a tuple?
                 (User otherUser, int otherThread) = otherOne;
 
-                string battleLog = _battleService.StartBattle(user, otherUser);
+                string? battleLog = _battleService.StartBattle(user, otherUser);
 
                 // Inform other thread about the result of the battle
                 lock (_localLock)
@@ -85,9 +85,9 @@ namespace MTCG.Endpoints
                         Monitor.Wait(_localLock);
                     }
 
-                    // Remove key from dictionary (so that it's clean again if this thread immediately serves another client)
-                    string battleLog = _battleResults[Thread.CurrentThread.ManagedThreadId];
+                    string? battleLog = _battleResults[Thread.CurrentThread.ManagedThreadId];
 
+                    // Remove key from dictionary (so that it's clean again if this thread immediately serves another client)
                     // https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2.remove?view=net-9.0
                     _battleResults.Remove(Thread.CurrentThread.ManagedThreadId, out _); // For some reason, the function doesn't work without the second parameter
 

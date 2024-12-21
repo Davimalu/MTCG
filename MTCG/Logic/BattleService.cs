@@ -1,25 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using MTCG.Interfaces;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
-using MTCG.Repository;
+using System.Text.Json;
+using MTCG.Models.Enums;
 
 namespace MTCG.Logic
 {
     public class BattleService : IBattleService
     {
-        private UserService _userService = UserService.Instance;
+        private static readonly Random Rnd = new Random();
+        private readonly List<string> _battleLog = [];
 
-        private static Random _rnd = new Random();
-        private List<string>? _battleLog = null;
+        private readonly IUserService _userService = UserService.Instance;
+        private readonly IEventService _eventService = new EventService();
 
-        public string StartBattle(User playerA, User playerB)
+
+        public string? StartBattle(User playerA, User playerB)
         {
-            _battleLog = new List<string>();
             int counter = 1;
 
             // The fight continues as long as both players still have cards in their deck and less than 100 rounds have been played
@@ -33,70 +30,85 @@ namespace MTCG.Logic
                 if (playerACard == null || playerBCard == null)
                 {
                     // This should never happen
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Fatal error during battle. Couldn't retrieve card from Player's deck");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Error, $"Fatal error during battle: Couldn't retrieve card from Player's deck", null);
                     return null;
                 }
 
-                _battleLog.Add($"{playerA.Username} plays Card {playerACard.Name}!");
-                _battleLog.Add($"Card Type: {(playerACard is MonsterCard ? "Monster" : "Spell")} | Damage: {playerACard.Damage} | Element Type: {playerACard.ElementType.ToString()}");
-
-                _battleLog.Add($"{playerB.Username} plays Card {playerBCard.Name}!");
-                _battleLog.Add($"Card Type: {(playerBCard is MonsterCard ? "Monster" : "Spell")} | Damage: {playerBCard.Damage} | Element Type: {playerBCard.ElementType.ToString()}");
+                LogPlayedCards(playerA, playerB, playerACard, playerBCard);
 
                 Card? winnerCard = FightOneRound(playerACard, playerBCard);
 
                 // Continue on draw
                 if (winnerCard == null)
                 {
+                    _battleLog.Add($"No one has won Round {counter} - it's a tie!");
                     counter++;
                     continue;
                 }
 
-                // If A wins, transfer B's card to him
-                if (playerA.Deck.Cards.Contains(winnerCard))
-                {
-                    _battleLog.Add($"{playerA.Username} has won Round {counter}!");
-                    playerA.Deck.Cards.Add(playerBCard);
-                    playerB.Deck.Cards.Remove(playerBCard);
-                }
-
-                // If B wins, transfer A's card to him
-                if (playerB.Deck.Cards.Contains(winnerCard))
-                {
-                    _battleLog.Add($"{playerB.Username} has won Round {counter}!");
-                    playerB.Deck.Cards.Add(playerACard);
-                    playerA.Deck.Cards.Remove(playerACard);
-                }
+                TransferCardFromLoserToWinner(playerA, playerB, winnerCard, counter, playerACard, playerBCard);
 
                 counter++;
             }
 
+            ProcessBattleOutcome(playerA, playerB, counter);
+            return JsonSerializer.Serialize(_battleLog);
+        }
+
+
+        private void LogPlayedCards(User playerA, User playerB, Card playerACard, Card playerBCard)
+        {
+            _battleLog.Add($"{playerA.Username} plays Card {playerACard.Name}!");
+            _battleLog.Add($"Card Type: {(playerACard is MonsterCard ? "Monster" : "Spell")} | Damage: {playerACard.Damage} | Element Type: {playerACard.ElementType.ToString()}");
+
+            _battleLog.Add($"{playerB.Username} plays Card {playerBCard.Name}!");
+            _battleLog.Add($"Card Type: {(playerBCard is MonsterCard ? "Monster" : "Spell")} | Damage: {playerBCard.Damage} | Element Type: {playerBCard.ElementType.ToString()}");
+        }
+
+
+        private void TransferCardFromLoserToWinner(User playerA, User playerB, Card winnerCard, int counter, Card playerACard, Card playerBCard)
+        {
+            // If A wins, transfer B's card to him
+            if (playerA.Deck.Cards.Contains(winnerCard))
+            {
+                _battleLog.Add($"{playerA.Username} has won Round {counter}!");
+                playerA.Deck.Cards.Add(playerBCard);
+                playerB.Deck.Cards.Remove(playerBCard);
+            }
+
+            // If B wins, transfer A's card to him
+            if (playerB.Deck.Cards.Contains(winnerCard))
+            {
+                _battleLog.Add($"{playerB.Username} has won Round {counter}!");
+                playerB.Deck.Cards.Add(playerACard);
+                playerA.Deck.Cards.Remove(playerACard);
+            }
+        }
+
+
+        private void ProcessBattleOutcome(User playerA, User playerB, int counter)
+        {
             _battleLog.Add($">>> Result <<<");
             if (playerA.Deck.Cards.Count > playerB.Deck.Cards.Count) // A wins
             {
-                _battleLog.Add($"{playerA.Username} defeated {playerB.Username} in {counter-1} rounds. Well done!");
+                _battleLog.Add($"{playerA.Username} defeated {playerB.Username} in {counter - 1} rounds. Well done!");
                 _userService.UpdateUserStats(playerA, playerB, false);
-                return JsonSerializer.Serialize(_battleLog);
-            } 
+            }
             else if (playerB.Deck.Cards.Count > playerA.Deck.Cards.Count) // B wins
             {
-                _battleLog.Add($"{playerB.Username} defeated {playerA.Username} in {counter-1} rounds. Well done!");
+                _battleLog.Add($"{playerB.Username} defeated {playerA.Username} in {counter - 1} rounds. Well done!");
                 _userService.UpdateUserStats(playerB, playerA, false);
-                return JsonSerializer.Serialize(_battleLog);
             }
             else // Draw
             {
                 _battleLog.Add($"None of the players managed to win within 100 rounds. It's a tie!");
                 _userService.UpdateUserStats(playerA, playerB, true);
-                return JsonSerializer.Serialize(_battleLog);
             }
         }
 
+
         /// <summary>
-        /// performs a round of combat between two playing cards
+        /// performs one round of combat between two playing cards
         /// </summary>
         /// <param name="cardA"></param>
         /// <param name="cardB"></param>
@@ -104,7 +116,7 @@ namespace MTCG.Logic
         /// <para>returns the card that won the round</para>
         /// <para>returns null on draw</para>
         /// </returns>
-        public Card? FightOneRound(Card cardA, Card cardB)
+        private Card? FightOneRound(Card cardA, Card cardB)
         {
             // Check if specialties apply to battle
             Card? winner = BattleWithSpecialties(cardA, cardB);
@@ -115,86 +127,103 @@ namespace MTCG.Logic
             }
 
             // Regular battle
-            if (cardA is MonsterCard && cardB is MonsterCard)
-            {
-                _battleLog.Add($"Both players have played monster cards -> Element types have no effect in this round!");
+            cardA.TemporaryDamage = cardA.Damage;
+            cardB.TemporaryDamage = cardB.Damage;
 
-                // Pure Monster Fight (both cards are monsters) -> fights are not affected by the element type
-                cardA.TemporaryDamage = cardA.Damage;
-                cardB.TemporaryDamage = cardB.Damage;
-                return CardFight(cardA, cardB);
+            if (cardA is SpellCard || cardB is SpellCard)
+            {
+                // at least one of the cards is a spell card -> element type has an effect on the damage calculation of this single round
+                ApplyElementTypes(cardA, cardB);
             }
             else
             {
-                // at least one of the cards is a spell card -> element type has an effect on the damage calculation of this single round
-                cardA.TemporaryDamage = cardA.Damage;
-                cardB.TemporaryDamage = cardB.Damage;
+                // Pure Monster Fight (both cards are monsters) -> fights are not affected by the element type
+                _battleLog.Add($"Both players have played monster cards -> Element types have no effect in this round!");
+            }
 
-                // water is effective against fire, so damage is doubled
-                // fire is not effective against water, so damage is halved
-                if (cardA.ElementType == ElementType.Water && cardB.ElementType == ElementType.Fire)
-                {
-                    cardA.TemporaryDamage *= 2;
-                    cardB.TemporaryDamage /= 2;
+            return CardFight(cardA, cardB);
+        }
 
-                    _battleLog.Add($"Water is very effective against fire, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
-                    _battleLog.Add($"Fire is not effective against water, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
-                }
 
-                if (cardB.ElementType == ElementType.Water && cardA.ElementType == ElementType.Fire)
-                {
-                    cardB.TemporaryDamage *= 2;
-                    cardA.TemporaryDamage /= 2;
+        /// <summary>
+        /// modifies the cards' TemporaryDamage property depending on the Element Type Interactions
+        /// </summary>
+        /// <param name="cardA"></param>
+        /// <param name="cardB"></param>
+        private void ApplyElementTypes(Card cardA, Card cardB)
+        {
+            // water is effective against fire, so damage is doubled
+            // fire is not effective against water, so damage is halved
+            if (cardA.ElementType == ElementType.Water && cardB.ElementType == ElementType.Fire)
+            {
+                cardA.TemporaryDamage *= 2;
+                cardB.TemporaryDamage /= 2;
 
-                    _battleLog.Add($"Water is very effective against fire, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
-                    _battleLog.Add($"Fire is not effective against water, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
-                }
+                _battleLog.Add($"Water is very effective against fire, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
+                _battleLog.Add($"Fire is not effective against water, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
+            }
 
-                // fire is effective against normal, so damage is doubled
-                // normal is not effective against fire, so damage is halved
-                if (cardA.ElementType == ElementType.Fire && cardB.ElementType == ElementType.Normal)
-                {
-                    cardA.TemporaryDamage *= 2;
-                    cardB.TemporaryDamage /= 2;
+            if (cardB.ElementType == ElementType.Water && cardA.ElementType == ElementType.Fire)
+            {
+                cardB.TemporaryDamage *= 2;
+                cardA.TemporaryDamage /= 2;
 
-                    _battleLog.Add($"Fire is very effective against normal, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
-                    _battleLog.Add($"Normal is not effective against fire, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
-                }
+                _battleLog.Add($"Water is very effective against fire, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
+                _battleLog.Add($"Fire is not effective against water, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
+            }
 
-                if (cardB.ElementType == ElementType.Fire && cardA.ElementType == ElementType.Normal)
-                {
-                    cardB.TemporaryDamage *= 2;
-                    cardA.TemporaryDamage /= 2;
+            // fire is effective against normal, so damage is doubled
+            // normal is not effective against fire, so damage is halved
+            if (cardA.ElementType == ElementType.Fire && cardB.ElementType == ElementType.Normal)
+            {
+                cardA.TemporaryDamage *= 2;
+                cardB.TemporaryDamage /= 2;
 
-                    _battleLog.Add($"Fire is very effective against normal, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
-                    _battleLog.Add($"Normal is not effective against fire, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
-                }
+                _battleLog.Add($"Fire is very effective against normal, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
+                _battleLog.Add($"Normal is not effective against fire, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
+            }
 
-                // normal is effective against water, so damage is doubled
-                // water is not effective against normal, so damage is halved
-                if (cardA.ElementType == ElementType.Normal && cardB.ElementType == ElementType.Water)
-                {
-                    cardA.TemporaryDamage *= 2;
-                    cardB.TemporaryDamage /= 2;
+            if (cardB.ElementType == ElementType.Fire && cardA.ElementType == ElementType.Normal)
+            {
+                cardB.TemporaryDamage *= 2;
+                cardA.TemporaryDamage /= 2;
 
-                    _battleLog.Add($"Normal is very effective against water, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
-                    _battleLog.Add($"Water is not effective against normal, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
-                }
+                _battleLog.Add($"Fire is very effective against normal, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
+                _battleLog.Add($"Normal is not effective against fire, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
+            }
 
-                if (cardB.ElementType == ElementType.Normal && cardA.ElementType == ElementType.Water)
-                {
-                    cardB.TemporaryDamage *= 2;
-                    cardA.TemporaryDamage /= 2;
+            // normal is effective against water, so damage is doubled
+            // water is not effective against normal, so damage is halved
+            if (cardA.ElementType == ElementType.Normal && cardB.ElementType == ElementType.Water)
+            {
+                cardA.TemporaryDamage *= 2;
+                cardB.TemporaryDamage /= 2;
 
-                    _battleLog.Add($"Normal is very effective against water, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
-                    _battleLog.Add($"Water is not effective against normal, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
-                }
+                _battleLog.Add($"Normal is very effective against water, thus the damage of card {cardA.Name} is doubled to {cardA.TemporaryDamage}!");
+                _battleLog.Add($"Water is not effective against normal, thus the damage of card {cardB.Name} is halved to {cardB.TemporaryDamage}!");
+            }
 
-                return CardFight(cardA, cardB);
+            if (cardB.ElementType == ElementType.Normal && cardA.ElementType == ElementType.Water)
+            {
+                cardB.TemporaryDamage *= 2;
+                cardA.TemporaryDamage /= 2;
+
+                _battleLog.Add($"Normal is very effective against water, thus the damage of card {cardB.Name} is doubled to {cardB.TemporaryDamage}!");
+                _battleLog.Add($"Water is not effective against normal, thus the damage of card {cardA.Name} is halved to {cardA.TemporaryDamage}!");
             }
         }
 
-        public Card? CardFight(Card cardA, Card cardB)
+
+        /// <summary>
+        /// compares the damage values of both cards and returns the winner
+        /// </summary>
+        /// <param name="cardA"></param>
+        /// <param name="cardB"></param>
+        /// <returns>
+        /// <para>the winning card (card that has higher damage)</para>
+        /// <para>null if it's a tie (both cards have the same damage)</para>
+        /// </returns>
+        private Card? CardFight(Card cardA, Card cardB)
         {
             if (cardA.TemporaryDamage > cardB.TemporaryDamage)
             {
@@ -204,11 +233,10 @@ namespace MTCG.Logic
             {
                 return cardB;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
+
 
         /// <summary>
         /// retrieve a random card from a user's deck
@@ -218,13 +246,23 @@ namespace MTCG.Logic
         /// <para>a card object on success</para>
         /// <para>null if deck is empty or on error</para>
         /// </returns>
-        public Card? GetRandomCardFromDeck(Deck deck)
+        private Card? GetRandomCardFromDeck(Deck deck)
         {
-            int r = _rnd.Next(deck.Cards.Count);
+            int r = Rnd.Next(deck.Cards.Count);
             return deck.Cards[r];
         }
 
-        public Card? BattleWithSpecialties(Card cardA, Card cardB)
+
+        /// <summary>
+        /// implements the Battle Logic for Special Cases
+        /// </summary>
+        /// <param name="cardA"></param>
+        /// <param name="cardB"></param>
+        /// <returns>
+        ///<para>the winner's card if a special case applied to this fight</para>
+        ///<para>null if no special case applied to this fight</para>
+        /// </returns>
+        private Card? BattleWithSpecialties(Card cardA, Card cardB)
         {
             // Goblins are too afraid of Dragons to attack
             if (cardA.Name.Contains("Goblin") && cardB.Name.Contains("Dragon"))
