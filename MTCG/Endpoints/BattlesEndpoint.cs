@@ -18,7 +18,7 @@ namespace MTCG.Endpoints
 
         private readonly IUserService _userService = UserService.Instance;
         private readonly IBattleService _battleService = new BattleService();
-        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
+        private readonly IHttpHeaderService _httpHeaderService = new HttpHeaderService();
 
         public BattlesEndpoint()
         {
@@ -30,14 +30,14 @@ namespace MTCG.Endpoints
         {
             _userService = userService;
             _battleService = battleService;
-            _ihttpHeaderService = ihttpHeaderService;
+            _httpHeaderService = ihttpHeaderService;
         }
         #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+            string token = _httpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)
