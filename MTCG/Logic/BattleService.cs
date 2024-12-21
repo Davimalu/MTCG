@@ -14,6 +14,15 @@ namespace MTCG.Logic
         private readonly IUserService _userService = UserService.Instance;
         private readonly IEventService _eventService = new EventService();
 
+        public BattleService() { }
+
+        #region DependencyInjection
+        public BattleService(IUserService userService, IEventService eventService)
+        {
+            _userService = userService;
+            _eventService = eventService;
+        }
+        #endregion
 
         public string? StartBattle(User playerA, User playerB)
         {
