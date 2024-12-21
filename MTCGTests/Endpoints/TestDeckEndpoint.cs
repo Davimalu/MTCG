@@ -1,6 +1,6 @@
 ﻿using MTCG.Endpoints;
-using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using NSubstitute;
@@ -13,7 +13,7 @@ namespace MTCGTests.Endpoints
         private ICardService _cardService;
         private IUserService _userService;
         private IDeckService _deckService;
-        private IHeaderHelper _headerHelper;
+        private IHttpHeaderService _ihttpHeaderService;
         private IEventService _eventService;
         private DeckEndpoint _endpoint;
 
@@ -23,14 +23,14 @@ namespace MTCGTests.Endpoints
             _cardService = Substitute.For<ICardService>();
             _userService = Substitute.For<IUserService>();
             _deckService = Substitute.For<IDeckService>();
-            _headerHelper = Substitute.For<IHeaderHelper>();
+            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
             _eventService = Substitute.For<IEventService>();
 
             _endpoint = new DeckEndpoint(
                 _cardService,
                 _userService,
                 _deckService,
-                _headerHelper,
+                _ihttpHeaderService,
                 _eventService
             );
         }
@@ -40,7 +40,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/deck", Method = "GET", Version = "1.1" };
-            _headerHelper.GetTokenFromHeader(headers).Returns("invalid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
             // Act
@@ -57,9 +57,9 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HTTPHeader { Path = "/deck", Method = "GET", Version = "1.1" };
             var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
-            _headerHelper.GetQueryParameters(headers).Returns(new Dictionary<string, string>());
+            _ihttpHeaderService.GetQueryParameters(headers).Returns(new Dictionary<string, string>());
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
@@ -75,9 +75,9 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HTTPHeader { Path = "/deck", Method = "GET", Version = "1.1" };
             var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
-            _headerHelper.GetQueryParameters(headers).Returns(new Dictionary<string, string> { { "format", "plain" } });
+            _ihttpHeaderService.GetQueryParameters(headers).Returns(new Dictionary<string, string> { { "format", "plain" } });
             _deckService.SerializeDeckToPlaintext(user.Deck).Returns("Card 1\nCard 2\nCard 3\nCard 4");
 
             // Act
@@ -96,7 +96,7 @@ namespace MTCGTests.Endpoints
             var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
             var body = JsonSerializer.Serialize(new List<string> { "1", "2", "3", "4" });
 
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             // Lambda expression that dynamically creates a new Card object. The Id property of the Card is set to the value of the argument passed to the GetCardById method.
@@ -116,7 +116,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HTTPHeader { Path = "/deck", Method = "POST", Version = "1.1" };
             var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             // Act

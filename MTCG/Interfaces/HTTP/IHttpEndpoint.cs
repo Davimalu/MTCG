@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MTCG.Models;
 
-namespace MTCG.Interfaces
+namespace MTCG.Interfaces.HTTP
 {
     public interface IHttpEndpoint
     {

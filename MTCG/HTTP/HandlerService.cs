@@ -1,5 +1,5 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Logic;
 using MTCG.Models;
 using System;
@@ -19,8 +19,9 @@ namespace MTCG.HTTP
         private static AuthService _authService = new AuthService();
         private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
         private HTTPService _httpService = new HTTPService();
+        private readonly HttpHeaderService _headerService = new HttpHeaderService();
 
-        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         public HandlerService()
         {
@@ -46,7 +47,7 @@ namespace MTCG.HTTP
                 AutoFlush = true
             };
 
-            HTTPHeader headers = _httpService.ParseHTTPHeader(reader);
+            HTTPHeader headers = _headerService.ParseHttpHeader(reader);
             string? body = _httpService.ParseHTTPBody(reader, headers);
 
             Console.WriteLine($"[INFO] Client connected: {headers.Version} {headers.Path} {headers.Method}");
@@ -56,7 +57,7 @@ namespace MTCG.HTTP
             string? responseBody = JsonSerializer.Serialize("Not found");
 
             // Get request path without query parameters | e.g. /deck?format=plain -> /deck
-            string path = _headerHelper.GetPathWithoutQueryParameters(headers);
+            string path = _ihttpHeaderService.GetPathWithoutQueryParameters(headers);
 
             // Only look up the first "directory" of the path in the dictionary | e.g. /users/kienboec -> /users
             var matchingKey = _endpoints.Keys.FirstOrDefault(key =>

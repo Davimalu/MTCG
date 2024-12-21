@@ -1,5 +1,6 @@
 ﻿using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
@@ -16,7 +17,7 @@ namespace MTCG.Endpoints
         private readonly IStackService _stackService = StackService.Instance;
 
         private readonly IEventService _eventService = new EventService();
-        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         public TransactionsEndpoint()
         {
@@ -24,20 +25,20 @@ namespace MTCG.Endpoints
         }
 
         #region DependencyInjection
-        public TransactionsEndpoint(IUserService userService, IPackageService packageService, IStackService stackService, IEventService eventService, IHeaderHelper headerHelper)
+        public TransactionsEndpoint(IUserService userService, IPackageService packageService, IStackService stackService, IEventService eventService, IHttpHeaderService ihttpHeaderService)
         {
             _userService = userService;
             _packageService = packageService;
             _stackService = stackService;
             _eventService = eventService;
-            _headerHelper = headerHelper;
+            _ihttpHeaderService = ihttpHeaderService;
         }
         #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = _headerHelper.GetTokenFromHeader(headers)!;
+            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)

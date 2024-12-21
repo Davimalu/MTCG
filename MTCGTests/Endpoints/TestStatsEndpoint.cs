@@ -1,6 +1,6 @@
 ﻿using MTCG.Endpoints;
-using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
@@ -10,15 +10,15 @@ namespace MTCGTests.Endpoints
     public class TestStatsEndpoint
     {
         private IUserService _userService;
-        private IHeaderHelper _headerHelper;
+        private IHttpHeaderService _ihttpHeaderService;
         private StatsEndpoint _endpoint;
 
         [SetUp]
         public void SetUp()
         {
             _userService = Substitute.For<IUserService>();
-            _headerHelper = Substitute.For<IHeaderHelper>();
-            _endpoint = new StatsEndpoint(_userService, _headerHelper);
+            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
+            _endpoint = new StatsEndpoint(_userService, _ihttpHeaderService);
         }
 
         [Test]
@@ -26,7 +26,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/stats", Method = "POST", Version = "1.1" };
-            _headerHelper.GetTokenFromHeader(headers).Returns((string?)null);
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns((string?)null);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
@@ -43,7 +43,7 @@ namespace MTCGTests.Endpoints
             var headers = new HTTPHeader { Path = "/stats", Method = "GET", Version = "1.1" };
             var user = new User { Stats = new UserStatistics { Wins = 10, Losses = 5 } };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid_token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
             _userService.GetUserByToken("valid_token").Returns(user);
 
             // Act
@@ -61,7 +61,7 @@ namespace MTCGTests.Endpoints
             var headers = new HTTPHeader { Path = "/stats", Method = "POST", Version = "1.1" };
             var user = new User { Stats = new UserStatistics { Wins = 10, Losses = 5 } };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid_token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
             _userService.GetUserByToken("valid_token").Returns(user);
 
             // Act

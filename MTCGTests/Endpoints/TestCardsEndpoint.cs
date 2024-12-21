@@ -1,6 +1,6 @@
 ﻿using MTCG.Endpoints;
-using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
@@ -11,15 +11,15 @@ namespace MTCGTests.Endpoints
     {
         private CardsEndpoint _cardsEndpoint;
         private IUserService _userService;
-        private IHeaderHelper _headerHelper;
+        private IHttpHeaderService _ihttpHeaderService;
 
         [SetUp]
         public void Setup()
         {
             _userService = Substitute.For<IUserService>();
-            _headerHelper = Substitute.For<IHeaderHelper>();
+            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
 
-            _cardsEndpoint = new CardsEndpoint(_userService, _headerHelper);
+            _cardsEndpoint = new CardsEndpoint(_userService, _ihttpHeaderService);
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/cards", Method = "GET", Version = "1.1" };
-            _headerHelper.GetTokenFromHeader(headers).Returns(("invalid-token"));
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(("invalid-token"));
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
             // Act
@@ -46,7 +46,7 @@ namespace MTCGTests.Endpoints
             var stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1", Name = "TestCard" }, new SpellCard { Id = "2", Name = "AnotherTestCard" } } };
             var user = new User { Stack = stack };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             // Act
@@ -63,7 +63,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HTTPHeader { Path = "/cards", Method = "POST", Version = "1.1" };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User());
 
             // Act

@@ -1,5 +1,6 @@
 ﻿using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
@@ -12,7 +13,7 @@ namespace MTCG.Endpoints
     {
         private readonly IUserService _userService = UserService.Instance;
         private readonly IScoreboardService _scoreboardService = ScoreboardService.Instance;
-        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         public ScoreboardEndpoint()
         {
@@ -20,18 +21,18 @@ namespace MTCG.Endpoints
         }
 
         #region DependencyInjection
-        public ScoreboardEndpoint(IUserService userService, IScoreboardService scoreboardService, IHeaderHelper headerHelper)
+        public ScoreboardEndpoint(IUserService userService, IScoreboardService scoreboardService, IHttpHeaderService ihttpHeaderService)
         {
             _userService = userService;
             _scoreboardService = scoreboardService;
-            _headerHelper = headerHelper;
+            _ihttpHeaderService = ihttpHeaderService;
         }
         #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = _headerHelper.GetTokenFromHeader(headers)!;
+            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)

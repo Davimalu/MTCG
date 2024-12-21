@@ -1,5 +1,6 @@
 ﻿using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
@@ -14,7 +15,7 @@ namespace MTCG.Endpoints
         private readonly ICardService _cardService = CardService.Instance;
         private readonly IUserService _userService = UserService.Instance;
         private readonly IPackageService _packageService = PackageService.Instance;
-        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         private readonly IEventService _eventService = new EventService();
 
@@ -25,12 +26,12 @@ namespace MTCG.Endpoints
 
         #region DependencyInjection
         public PackagesEndpoint(ICardService cardService, IUserService userService, IPackageService packageService,
-            IHeaderHelper headerHelper, IEventService eventService)
+            IHttpHeaderService ihttpHeaderService, IEventService eventService)
         {
             _cardService = cardService;
             _userService = userService;
             _packageService = packageService;
-            _headerHelper = headerHelper;
+            _ihttpHeaderService = ihttpHeaderService;
             _eventService = eventService;
         }
         #endregion
@@ -38,7 +39,7 @@ namespace MTCG.Endpoints
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = _headerHelper.GetTokenFromHeader(headers)!;
+            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null || user.Username != "admin")

@@ -74,50 +74,6 @@ namespace MTCG.HTTP
 
         }
 
-        public HTTPHeader ParseHTTPHeader(StreamReader reader)
-        {
-            string? line;
-            line = reader.ReadLine();
-
-            // Check if HTTP header is present
-            if (line == null)
-            {
-                throw new Exception("No HTTP header found");
-            }
-
-            var httpParts = line.Split(' ');
-
-            var method = httpParts[0];
-            var path = httpParts[1];
-            var version = httpParts[2];
-
-            HTTPHeader headers = new HTTPHeader()
-            {
-                Method = method,
-                Path = path,
-                Version = version
-            };
-
-            while ((line = reader.ReadLine()) != null)
-            {
-                // Empty line indicates end of HTTP headers
-                if (line.Length == 0)
-                {
-                    break;
-                }
-
-                // Parse header fields
-                var headerParts = line.Split(":");
-
-                var headerName = headerParts[0].Trim();
-                var headerValue = headerParts[1].Trim();
-
-                headers.Headers.Add(headerName, headerValue);
-            }
-
-            return headers;
-        }
-
         public string? ParseHTTPBody(StreamReader reader, HTTPHeader headers)
         {
             if (headers.Headers.ContainsKey("Content-Length"))

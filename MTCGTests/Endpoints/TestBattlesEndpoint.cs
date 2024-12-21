@@ -1,6 +1,6 @@
 ﻿using MTCG.Endpoints;
-using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using NSubstitute;
@@ -13,7 +13,7 @@ namespace MTCGTests.Endpoints
         private BattlesEndpoint _battlesEndpoint;
         private IUserService _userService;
         private IBattleService _battleService;
-        private IHeaderHelper _headerHelper;
+        private IHttpHeaderService _ihttpHeaderService;
         private TcpClient _tcpClient;
 
         [SetUp]
@@ -21,10 +21,10 @@ namespace MTCGTests.Endpoints
         {
             _userService = Substitute.For<IUserService>();
             _battleService = Substitute.For<IBattleService>();
-            _headerHelper = Substitute.For<IHeaderHelper>();
+            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
             _tcpClient = Substitute.For<TcpClient>();
 
-            _battlesEndpoint = new BattlesEndpoint(_userService, _battleService, _headerHelper);
+            _battlesEndpoint = new BattlesEndpoint(_userService, _battleService, _ihttpHeaderService);
         }
 
         [TearDown]
@@ -38,7 +38,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/battles", Method = "POST", Version = "1.1" };
-            _headerHelper.GetTokenFromHeader(headers).Returns("invalid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("valid-token").Returns((User?)null);
 
             // Act
@@ -54,7 +54,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/battles", Method = "GET", Version = "1.1" };
-            _headerHelper.GetTokenFromHeader(headers).Returns("valid-token");
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "testUser" });
 
             // Act

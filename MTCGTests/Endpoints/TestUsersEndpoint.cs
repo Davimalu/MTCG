@@ -1,6 +1,6 @@
 ﻿using MTCG.Endpoints;
-using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Models.Enums;
@@ -14,7 +14,7 @@ namespace MTCGTests.Endpoints
         private IAuthService _authService;
         private IEventService _eventService;
         private IUserService _userService;
-        private IHeaderHelper _headerHelper;
+        private IHttpHeaderService _ihttpHeaderService;
         private UsersEndpoint _usersEndpoint;
 
         [SetUp]
@@ -23,9 +23,9 @@ namespace MTCGTests.Endpoints
             _authService = Substitute.For<IAuthService>();
             _eventService = Substitute.For<IEventService>();
             _userService = Substitute.For<IUserService>();
-            _headerHelper = Substitute.For<IHeaderHelper>();
+            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
 
-            _usersEndpoint = new UsersEndpoint(_authService, _eventService, _userService, _headerHelper);
+            _usersEndpoint = new UsersEndpoint(_authService, _eventService, _userService, _ihttpHeaderService);
 
         }
 
@@ -131,7 +131,7 @@ namespace MTCGTests.Endpoints
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns(token);
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(token);
             _userService.GetUserByName("testuser").Returns(user);
             _userService.GetUserByToken(token).Returns(user);
             _userService.UserToJson(user).Returns(JsonSerializer.Serialize(user));
@@ -152,7 +152,7 @@ namespace MTCGTests.Endpoints
             var token = "invalid-mtcgToken";
             var user = new User { Username = "testuser" };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns(token);
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(token);
             _userService.GetUserByName("testuser").Returns(user);
             _userService.GetUserByToken(token).Returns((User?)null);
 
@@ -172,7 +172,7 @@ namespace MTCGTests.Endpoints
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns(token);
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(token);
             _userService.GetUserByName("testuser").Returns(user);
             _userService.GetUserByToken(token).Returns(user);
 
@@ -193,7 +193,7 @@ namespace MTCGTests.Endpoints
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns(token);
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(token);
             _userService.GetUserByName("testuser").Returns(user);
             _userService.GetUserByToken(token).Returns(user);
 
@@ -216,7 +216,7 @@ namespace MTCGTests.Endpoints
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
-            _headerHelper.GetTokenFromHeader(headers).Returns(token);
+            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(token);
             _userService.GetUserByName("testuser").Returns(user);
             _userService.GetUserByToken(token).Returns(user);
 

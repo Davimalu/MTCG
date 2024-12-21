@@ -1,5 +1,6 @@
 ﻿using MTCG.HTTP;
 using MTCG.Interfaces;
+using MTCG.Interfaces.HTTP;
 using MTCG.Logic;
 using MTCG.Models;
 using System.Net.Sockets;
@@ -10,7 +11,7 @@ namespace MTCG.Endpoints
     public class CardsEndpoint : IHttpEndpoint
     {
         private readonly IUserService _userService = UserService.Instance;
-        private readonly IHeaderHelper _headerHelper = new HeaderHelper();
+        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         public CardsEndpoint()
         {
@@ -18,17 +19,17 @@ namespace MTCG.Endpoints
         }
 
         #region DependencyInjection
-        public CardsEndpoint(IUserService userService, IHeaderHelper headerHelper)
+        public CardsEndpoint(IUserService userService, IHttpHeaderService ihttpHeaderService)
         {
             _userService = userService;
-            _headerHelper = headerHelper;
+            _ihttpHeaderService = ihttpHeaderService;
         }
         #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
         {
             // Check if user is authorized
-            string? token = _headerHelper.GetTokenFromHeader(headers)!;
+            string? token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)
