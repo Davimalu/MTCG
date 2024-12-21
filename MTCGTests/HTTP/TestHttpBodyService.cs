@@ -9,13 +9,13 @@ namespace MTCGTests.HTTP
     public class TestHttpBodyService
     {
         private HttpBodyService _httpBodyService;
-        private IEventService _mockEventService;
+        private IEventService _eventService;
 
         [SetUp]
         public void Setup()
         {
-            _mockEventService = Substitute.For<IEventService>();
-            _httpBodyService = new HttpBodyService(_mockEventService);
+            _eventService = Substitute.For<IEventService>();
+            _httpBodyService = new HttpBodyService(_eventService);
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace MTCGTests.HTTP
 
             // Assert
             Assert.That(result, Is.Null);
-            _mockEventService.Received(1).LogEvent(EventType.Warning,
+            _eventService.Received(1).LogEvent(EventType.Warning,
                 "Couldn't parse HTTP Request Body: Invalid Content Length",
                 Arg.Any<Exception>());
         }
@@ -106,7 +106,7 @@ namespace MTCGTests.HTTP
 
             // Assert
             Assert.That(result, Is.Null);
-            _mockEventService.Received(1).LogEvent(EventType.Warning,
+            _eventService.Received(1).LogEvent(EventType.Warning,
                 "Couldn't parse HTTP Request Body: Invalid Content Length",
                 Arg.Any<Exception>());
         }
