@@ -74,25 +74,6 @@ namespace MTCG.HTTP
 
         }
 
-        public string? ParseHTTPBody(StreamReader reader, HTTPHeader headers)
-        {
-            if (headers.Headers.ContainsKey("Content-Length"))
-            {
-                int contentLength = int.Parse(headers.Headers["Content-Length"]);
-
-                char[] buffer = new char[contentLength];
-                reader.Read(buffer, 0, contentLength);
-
-                string body = new string(buffer);
-
-                return body;
-            }
-            else
-            {
-                // No body to parse
-                return null;
-            }
-        }
 
         private bool IsJson(string? source)
         {

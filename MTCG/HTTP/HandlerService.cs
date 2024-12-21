@@ -20,6 +20,7 @@ namespace MTCG.HTTP
         private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
         private HTTPService _httpService = new HTTPService();
         private readonly HttpHeaderService _headerService = new HttpHeaderService();
+        private readonly HttpBodyService _bodyService = new HttpBodyService();
 
         private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
@@ -47,8 +48,8 @@ namespace MTCG.HTTP
                 AutoFlush = true
             };
 
-            HTTPHeader headers = _headerService.ParseHttpHeader(reader);
-            string? body = _httpService.ParseHTTPBody(reader, headers);
+            HTTPHeader? headers = _headerService.ParseHttpHeader(reader);
+            string? body = _bodyService.ParseHttpBody(reader, headers);
 
             Console.WriteLine($"[INFO] Client connected: {headers.Version} {headers.Path} {headers.Method}");
 
