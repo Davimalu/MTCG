@@ -1,15 +1,15 @@
-﻿using MTCG.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace MTCG.HTTP
 {
-    public class HTTPService
+    public class HttpResponseService
     {
+        /// <summary>
+        /// sends a well-formatted HTTP Response to the client
+        /// </summary>
+        /// <param name="writer">StreamWriter object associated with the TcpClient to which the response is to be sent</param>
+        /// <param name="statusCode">Http Status Code</param>
+        /// <param name="response">Http Response body</param>
         public void SendResponseToClient(StreamWriter writer, int statusCode, string? response)
         {
             string reasonPhrase;
@@ -65,13 +65,12 @@ namespace MTCG.HTTP
             {
                 writer.WriteLine("Content-Type: text/plain");
             }
-            
+
             writer.WriteLine($"Content-Length: {(response?.Length ?? 0)}");
             writer.WriteLine();
 
             // HTTP Response Body
             writer.WriteLine(response);
-
         }
 
 

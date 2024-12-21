@@ -1,13 +1,8 @@
 ﻿using MTCG.HTTP;
 using MTCG.Interfaces.Logic;
-using MTCG.Models.Enums;
 using MTCG.Models;
+using MTCG.Models.Enums;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MTCGTests.HTTP
 {

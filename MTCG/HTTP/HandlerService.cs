@@ -18,7 +18,7 @@ namespace MTCG.HTTP
     {
         private static AuthService _authService = new AuthService();
         private Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
-        private HTTPService _httpService = new HTTPService();
+        private HttpResponseService _httpResponseService = new HttpResponseService();
         private readonly HttpHeaderService _headerService = new HttpHeaderService();
         private readonly HttpBodyService _bodyService = new HttpBodyService();
 
@@ -107,7 +107,7 @@ namespace MTCG.HTTP
                 }
             }
 
-            _httpService.SendResponseToClient(writer, responseCode, responseBody);
+            _httpResponseService.SendResponseToClient(writer, responseCode, responseBody);
         }
     }
 }
