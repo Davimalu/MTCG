@@ -2,7 +2,7 @@
 
 namespace MTCG.HTTP
 {
-    public class HttpResponseService
+    public class HttpResponseService : IHttpResponseService
     {
         /// <summary>
         /// sends a well-formatted HTTP Response to the client
@@ -74,7 +74,7 @@ namespace MTCG.HTTP
         }
 
 
-        private bool IsJson(string? source)
+        public bool IsJson(string? source)
         {
             // https://stackoverflow.com/questions/58629279/validate-if-string-is-valid-json-fastest-way-possible-in-net-core-3-0
             if (source == null)

@@ -13,11 +13,22 @@ namespace MTCG.HTTP
     {
         private readonly Dictionary<string, IHttpEndpoint> _endpoints = new Dictionary<string, IHttpEndpoint>();
 
-        private readonly HttpHeaderService _headerService = new HttpHeaderService();
-        private readonly HttpBodyService _bodyService = new HttpBodyService();
-        private readonly HttpResponseService _responseService = new HttpResponseService();
+        private readonly IHttpHeaderService _headerService = new HttpHeaderService();
+        private readonly IHttpBodyService _bodyService = new HttpBodyService();
+        private readonly IHttpResponseService _responseService = new HttpResponseService();
 
         private readonly IEventService _eventService = new EventService();
+
+        #region DependencyInjection
+        public HandlerService(IHttpHeaderService headerService, IHttpBodyService bodyService, IHttpResponseService responseService, IEventService eventService, Dictionary<string, IHttpEndpoint> endpoints)
+        {
+            _headerService = headerService;
+            _bodyService = bodyService;
+            _responseService = responseService;
+            _eventService = eventService;
+            _endpoints = endpoints;
+        }
+        #endregion
 
         public HandlerService()
         {

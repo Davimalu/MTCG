@@ -5,7 +5,7 @@ using MTCG.Models.Enums;
 
 namespace MTCG.HTTP
 {
-    public class HttpBodyService
+    public class HttpBodyService : IHttpBodyService
     {
         private readonly IEventService _eventService = new EventService();
 
