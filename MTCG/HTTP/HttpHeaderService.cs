@@ -11,6 +11,14 @@ namespace MTCG.HTTP
     {
         private readonly IEventService _eventService = new EventService();
 
+        public HttpHeaderService() { }
+
+        #region DependencyInjection
+        public HttpHeaderService(IEventService eventService)
+        {
+            _eventService = eventService;
+        }
+        #endregion
 
         public HTTPHeader? ParseHttpHeader(StreamReader reader)
         {
