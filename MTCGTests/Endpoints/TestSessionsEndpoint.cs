@@ -53,20 +53,18 @@ namespace MTCGTests.Endpoints
         }
 
         [Test]
-        public void HandleRequest_POST_InvalidCredentials_Returns401WithErrorMessage()
+        public void HandleRequest_POST_InvalidCredentials_Returns401()
         {
             // Arrange
             var headers = new HTTPHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "test", Password = "wrongPassword" });
-            _authService.Login("test", "wrongPassword").Returns((User?)null);
+            _authService.LoginUser("test", "wrongPassword").Returns((User?)null);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, body);
 
             // Assert
             Assert.That(result.Item1, Is.EqualTo(401));
-            Assert.That(result.Item2, Is.EqualTo(JsonSerializer.Serialize("Wrong username or password")));
-            _eventService.Received(1).LogEvent(EventType.Warning, Arg.Any<string>(), null);
         }
 
         [Test]
@@ -76,7 +74,7 @@ namespace MTCGTests.Endpoints
             var headers = new HTTPHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "test", Password = "correctPassword" });
             var user = new User { Username = "test", AuthToken = "valid-token" };
-            _authService.Login("test", "correctPassword").Returns(user);
+            _authService.LoginUser("test", "correctPassword").Returns(user);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, body);

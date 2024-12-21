@@ -66,7 +66,7 @@ namespace MTCGTests.Endpoints
             var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "testuser", Password = "password" });
 
-            _authService.Register("testuser", "password").Returns(true);
+            _authService.RegisterUser("testuser", "password").Returns(true);
 
             // Act
             var result = _usersEndpoint.HandleRequest(null, headers, body);
@@ -84,7 +84,7 @@ namespace MTCGTests.Endpoints
             var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "testuser", Password = "password" });
 
-            _authService.Register("testuser", "password").Returns(false);
+            _authService.RegisterUser("testuser", "password").Returns(false);
 
             // Act
             var result = _usersEndpoint.HandleRequest(null, headers, body);

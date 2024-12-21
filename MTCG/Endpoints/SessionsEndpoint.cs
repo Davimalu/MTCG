@@ -62,11 +62,10 @@ namespace MTCG.Endpoints
             }
 
             // If none of these checks failed, try to log the user in
-            User? user = _authService.Login(tmpUser.Username, tmpUser.Password);
+            User? user = _authService.LoginUser(tmpUser.Username, tmpUser.Password);
 
             if (user == null)
             {
-                _eventService.LogEvent(EventType.Warning, $"Someone tried to access User {tmpUser.Username} with an invalid password", null);
                 return (401, JsonSerializer.Serialize("Wrong username or password"));
             }
             else

@@ -77,7 +77,7 @@ namespace MTCG.Endpoints
             }
 
             // Try registering the user
-            if (_authService.Register(tmpUser.Username, tmpUser.Password))
+            if (_authService.RegisterUser(tmpUser.Username, tmpUser.Password))
             {
                 _eventService.LogEvent(EventType.Highlight, $"New user account created: {tmpUser.Username}", null);
 

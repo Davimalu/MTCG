@@ -1,48 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-
+﻿using MTCG.Interfaces;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
-using MTCG.Repository;
+using MTCG.Models.Enums;
 
 namespace MTCG.Logic
 {
     // Has to be moved inside the namespace for some reason
     using BCrypt.Net;
-    using MTCG.DAL;
-    using MTCG.Interfaces.Logic;
 
     public class AuthService : IAuthService
     {
         #region Singleton
-        private static AuthService? instance;
+        private static AuthService? _instance;
 
         public static AuthService Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = new AuthService();
+                    _instance = new AuthService();
                 }
 
-                return instance;
+                return _instance;
             }
         }
         #endregion
+        #region DependecyInjection
+        public AuthService(IUserService userService, IEventService eventService)
+        {
+            _userService = userService;
+            _eventService = eventService;
+        }
+        #endregion
 
-        private readonly UserService _userService = UserService.Instance;
+        public AuthService() { }
 
-        public bool Register(string username, string password) {
+        private readonly IUserService _userService = UserService.Instance;
+        private readonly IEventService _eventService = new EventService();
+
+        public bool RegisterUser(string username, string password)
+        {
             // Check if user already exists
             if (_userService.GetUserByName(username) != null)
             {
                 // User already exists
+                _eventService.LogEvent(EventType.Warning, $"Couldn't register user: User already exists", null);
                 return false;
             }
-            
+
             // Create user
 
             // Hash password
@@ -54,41 +60,43 @@ namespace MTCG.Logic
             return true;
         }
 
-        public User? Login(string username, string password)
+        public User? LoginUser(string username, string password)
         {
             // Check if user exists
-            User? tempUser = _userService.GetUserByName(username);
+            User? tmpUser = _userService.GetUserByName(username);
 
-            if (tempUser != null)
+            if (tmpUser != null)
             {
-                if (VerifyPassword(password, tempUser.Password))
+                if (VerifyPassword(password, tmpUser.Password))
                 {
                     // Generate token for user
-                    string token = $"{tempUser.Username}-mtcgToken";
-                    tempUser.AuthToken = token;
+                    string token = $"{tmpUser.Username}-mtcgToken";
+                    tmpUser.AuthToken = token;
 
                     // Update authToken in Database
-                    _userService.SaveUserToDatabase(tempUser);
+                    _userService.SaveUserToDatabase(tmpUser);
 
-                    return tempUser;
+                    return tmpUser;
                 }
                 else
                 {
                     // Wrong credentials
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't log in User {tmpUser.Username}: Invalid password", null);
                     return null;
                 }
             }
 
             // User doesn't exist
+            _eventService.LogEvent(EventType.Warning, $"Couldn't log in User {username}: User doesn't exist", null);
             return null;
         }
 
-        public string HashPassword(string password)
+        private string HashPassword(string password)
         {
             return BCrypt.HashPassword(password);
         }
 
-        public bool VerifyPassword(string password, string hash)
+        private bool VerifyPassword(string password, string hash)
         {
             return BCrypt.Verify(password, hash);
         }
