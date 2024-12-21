@@ -9,6 +9,15 @@ namespace MTCG.HTTP
     {
         private readonly IEventService _eventService = new EventService();
 
+        public HttpBodyService() { }
+
+        #region DependencyInjection
+        public HttpBodyService(IEventService eventService)
+        {
+            _eventService = eventService;
+        }
+        #endregion
+
         public string? ParseHttpBody(StreamReader reader, HTTPHeader headers)
         {
             if (headers.Headers.TryGetValue("Content-Length", out var contentLengthValue))
@@ -21,6 +30,12 @@ namespace MTCG.HTTP
                 catch (Exception ex)
                 {
                     _eventService.LogEvent(EventType.Warning, $"Couldn't parse HTTP Request Body: Invalid Content Length", ex);
+                    return null;
+                }
+
+                if (contentLength < 0)
+                {
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't parse HTTP Request Body: Invalid Content Length", null);
                     return null;
                 }
 
