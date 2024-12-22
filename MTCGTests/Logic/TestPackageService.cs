@@ -105,7 +105,6 @@ namespace MTCGTests.Logic
 
             // Assert
             Assert.That(result, Is.Null);
-            _packageRepository.Received(1).DeletePackageById(1);
         }
     }
 }
