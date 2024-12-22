@@ -37,9 +37,9 @@ namespace MTCG.Repository
         /// <param name="user">user object containing all user data, Stack and Deck are optional/ignored</param>
         /// <returns>
         /// <para>ID of the newly created database entry on success</para>
-        /// <para>-1 on error</para>
+        /// <para>null on error</para>
         /// </returns>
-        public int SaveUserToDatabase(User user)
+        public int? SaveUserToDatabase(User user)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -70,7 +70,7 @@ namespace MTCG.Repository
                 catch (Exception ex)
                 {
                     _eventService.LogEvent(EventType.Error, $"User {user.Username} couldn't be added to the database!", ex);
-                    return -1;
+                    return null;
                 }
 
                 _eventService.LogEvent(EventType.Highlight, $"User {user.Username} added to database!", null);
@@ -145,9 +145,9 @@ namespace MTCG.Repository
         /// <param name="user">user object containing the updated user data, Stack and Deck are optional/ignored</param>
         /// <returns>
         /// <para>ID of the updated database entry on success</para>
-        /// <para>-1 if the user has not yet been added to the database or on error</para>
+        /// <para>null if the user has not yet been added to the database or on error</para>
         /// </returns>
-        public int UpdateUser(User user)
+        public int? UpdateUser(User user)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -181,7 +181,7 @@ namespace MTCG.Repository
                 catch (Exception ex)
                 {
                     _eventService.LogEvent(EventType.Error, $"Changes for user {user.Username} couldn't be written to the database!", ex);
-                    return -1;
+                    return null;
                 }
 
                 return userId;

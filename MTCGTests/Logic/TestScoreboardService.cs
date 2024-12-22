@@ -1,4 +1,5 @@
 ﻿using MTCG.Interfaces;
+using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
 using NSubstitute;

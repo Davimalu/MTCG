@@ -189,9 +189,13 @@ namespace MTCG.Logic
         /// </returns>
         private bool PopulateTradeOfferFields(TradeOffer offer)
         {
-            // 
+            if (offer.User.Id == null)
+            {
+                return false;
+            }
+
             // The errors in these error checks should be near impossible, but I guess it's good practice to check for them anyway
-            User? offeringUser = _userService.GetUserById(offer.User.Id);
+            User? offeringUser = _userService.GetUserById((int)offer.User.Id);
             Card? offeredCard = _cardService.GetCardById(offer.Card.Id);
 
             if (offeringUser == null)

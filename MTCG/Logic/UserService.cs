@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using MTCG.Interfaces;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using MTCG.Models.Enums;
 using MTCG.Repository;
+using System.Text.Json;
 
 namespace MTCG.Logic
 {
@@ -32,17 +28,14 @@ namespace MTCG.Logic
         private readonly UserRepository _userRepository = UserRepository.Instance;
         private readonly StackRepository _stackRepository = StackRepository.Instance;
         private readonly DeckRepository _deckRepository = DeckRepository.Instance;
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
+        private readonly ICardService _cardService = CardService.Instance;
 
-        /// <summary>
-        /// saves a new user to the database or - if the user already exists - updates his information
-        /// </summary>
-        /// <param name="user">user object | Stack and Deck are optional</param>
-        /// <returns>ID of the newly created or updated database entry</returns>
-        public int SaveUserToDatabase(User user)
+        private readonly IEventService _eventService = new EventService();
+
+        public int? SaveUserToDatabase(User user)
         {
             // If the user object already has a userId associated with it, there's already an entry in the database for it
-            if (user.Id != 0)
+            if (user.Id != null)
             {
                 user.Id = _userRepository.UpdateUser(user);
             }
@@ -64,18 +57,11 @@ namespace MTCG.Logic
                 _deckRepository.ClearUserDeck(user);
                 _deckRepository.SaveDeckOfUser(user);
             }
-            
+
             return user.Id;
         }
 
-        /// <summary>
-        /// retrieve a user from the database using his unique username
-        /// </summary>
-        /// <param name="username">the username of the user</param>
-        /// <returns>
-        /// <para>user object containing all information + deck and stack on success</para>
-        /// <para>null if there is no user with that username or an error occured</para>
-        ///</returns>
+
         public User? GetUserByName(string username)
         {
             // Get static user information
@@ -83,6 +69,7 @@ namespace MTCG.Logic
 
             if (user == null)
             {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user {username} from database: User doesn't exist", null);
                 return null;
             }
 
@@ -92,14 +79,7 @@ namespace MTCG.Logic
             return user;
         }
 
-        /// <summary>
-        /// retrieve a user from the database using his authentication token
-        /// </summary>
-        /// <param name="token">the authentication token in format "xxx-mtcgToken"</param>
-        /// <returns>
-        /// <para>user object containing all information + deck and stack on success</para>
-        /// <para>null if there is no user with that token or an error occured</para>
-        /// </returns>
+
         public User? GetUserByToken(string token)
         {
             // Get static user information
@@ -107,6 +87,7 @@ namespace MTCG.Logic
 
             if (user == null)
             {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user by token {token} from database: User doesn't exist", null);
                 return null;
             }
 
@@ -116,14 +97,7 @@ namespace MTCG.Logic
             return user;
         }
 
-        /// <summary>
-        /// retrieve a user from the database using his unique Id
-        /// </summary>
-        /// <param name="userId">the id of the user</param>
-        /// <returns>
-        /// <para>user object containing all information + deck and stack on success</para>
-        /// <para>null if there is no user with that Id or an error occured</para>
-        ///</returns>
+
         public User? GetUserById(int userId)
         {
             // Get static user information
@@ -131,6 +105,7 @@ namespace MTCG.Logic
 
             if (user == null)
             {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user with ID {userId} from database: User doesn't exist", null);
                 return null;
             }
 
@@ -139,6 +114,7 @@ namespace MTCG.Logic
 
             return user;
         }
+
 
         public User AddStackToUser(User user)
         {
@@ -155,14 +131,22 @@ namespace MTCG.Logic
             Stack userStack = new Stack();
             foreach (string cardId in cardIds)
             {
-                userStack.Cards.Add(_cardRepository.GetCardById(cardId));
+                Card? cardToAdd = _cardService.GetCardById(cardId);
+
+                if (cardToAdd == null)
+                {
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't add Card to Stack of user {user.Username}: Card doesn't exist", null);
+                    continue;
+                }
+
+                userStack.Cards.Add(cardToAdd);
             }
             user.Stack = userStack;
 
             return user;
         }
 
-        // TODO: This function is very similar to AddStackToUser -> Refactor
+
         public User AddDeckToUser(User user)
         {
             // Get the IDs of the cards the user has in his deck
@@ -178,24 +162,27 @@ namespace MTCG.Logic
             Deck userDeck = new Deck();
             foreach (string cardId in cardIds)
             {
-                userDeck.Cards.Add(_cardRepository.GetCardById(cardId));
+                Card? cardToAdd = _cardService.GetCardById(cardId);
+
+                if (cardToAdd == null)
+                {
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't add Card to Deck of user {user.Username}: Card doesn't exist", null);
+                    continue;
+                }
+
+                userDeck.Cards.Add(cardToAdd);
             }
             user.Deck = userDeck;
 
             return user;
         }
 
-        /// <summary>
-        /// returns a list of usernames of all users currently registered to the game
-        /// </summary>
-        /// <returns>
-        /// <para>A list of strings containing the usernames (unique) of each user</para>
-        /// </returns>
+
         public List<string> GetListOfUsers()
         {
-            // TODO: Is this function necessary? It's purpose is so that no one but the userService interacts with userRepository
             return _userRepository.GetListOfUsers();
         }
+
 
         public string UserToJson(User user)
         {
@@ -216,6 +203,7 @@ namespace MTCG.Logic
 
             return JsonSerializer.Serialize(jsonObject);
         }
+
 
         public void UpdateUserStats(User winner, User loser, bool tie)
         {

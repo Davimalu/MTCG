@@ -4,6 +4,7 @@ using MTCG.Interfaces.HTTP;
 using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
+using MTCG.Interfaces.Logic;
 
 namespace MTCGTests.Endpoints
 {
