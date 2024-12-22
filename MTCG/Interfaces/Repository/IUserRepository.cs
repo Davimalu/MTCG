@@ -1,7 +1,7 @@
 ﻿using MTCG.DAL;
 using MTCG.Models;
 
-namespace MTCG.Interfaces
+namespace MTCG.Interfaces.Repository
 {
     public interface IUserRepository
     {

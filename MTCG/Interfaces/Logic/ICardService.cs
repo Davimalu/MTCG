@@ -9,7 +9,10 @@ public interface ICardService
     /// retrieves a card by its ID
     /// </summary>
     /// <param name="cardId">string representing the cardID</param>
-    /// <returns>instance of a card Object containing all information stored in the database</returns>
+    /// <returns>
+    /// <para>instance of a card Object containing all information stored in the database</para>
+    /// <para>null if there is no card with that ID</para>
+    /// </returns>
     Card? GetCardById(string cardId);
     /// <summary>
     /// saves a new card to the database

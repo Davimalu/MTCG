@@ -15,7 +15,7 @@ using MTCG.Interfaces.Logic;
 
 namespace MTCG.Repository
 {
-    public class CardRepository
+    public class CardRepository : ICardRepository
     {
         #region Singleton
         private static CardRepository? _instance;

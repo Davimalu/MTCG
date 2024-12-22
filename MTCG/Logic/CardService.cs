@@ -6,7 +6,7 @@ namespace MTCG.Logic
 {
     public class CardService : ICardService
     {
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
+        private readonly ICardRepository _cardRepository = CardRepository.Instance;
 
         #region Singleton
         private static CardService? _instance;
@@ -24,7 +24,13 @@ namespace MTCG.Logic
             }
         }
         #endregion
-
+        #region DependencyInjection
+        public CardService(ICardRepository cardRepository)
+        {
+            _cardRepository = cardRepository;
+        }
+        #endregion
+        public CardService() { }
 
         public Card? GetCardById(string cardId)
         {

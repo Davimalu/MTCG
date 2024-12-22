@@ -1,6 +1,6 @@
 ﻿using MTCG.DAL;
-using MTCG.Interfaces;
 using MTCG.Interfaces.Logic;
+using MTCG.Interfaces.Repository;
 using MTCG.Logic;
 using MTCG.Models;
 using MTCG.Models.Enums;
