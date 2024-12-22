@@ -15,7 +15,7 @@ namespace MTCG.Endpoints
         private readonly IUserService _userService = UserService.Instance;
         private readonly ITradingService _tradingService = TradingService.Instance;
         private readonly ICardService _cardService = CardService.Instance;
-        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
+        private readonly IHttpHeaderService _httpHeaderService = new HttpHeaderService();
 
         private readonly IEventService _eventService = new EventService();
 
@@ -26,12 +26,12 @@ namespace MTCG.Endpoints
 
         #region DependencyInjection
         public TradingsEndpoint(IUserService userService, ITradingService tradingService, ICardService cardsService,
-            IHttpHeaderService ihttpHeaderService, IEventService eventService)
+            IHttpHeaderService httpHeaderService, IEventService eventService)
         {
             _userService = userService;
             _tradingService = tradingService;
             _cardService = cardsService;
-            _ihttpHeaderService = ihttpHeaderService;
+            _httpHeaderService = httpHeaderService;
             _eventService = eventService;
         }
         #endregion
@@ -39,7 +39,7 @@ namespace MTCG.Endpoints
         public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+            string token = _httpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)

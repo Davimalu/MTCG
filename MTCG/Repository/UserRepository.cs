@@ -27,18 +27,11 @@ namespace MTCG.Repository
         }
         #endregion
 
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
+
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
 
-        /// <summary>
-        /// saves a new user to the database
-        /// </summary>
-        /// <param name="user">user object containing all user data, Stack and Deck are optional/ignored</param>
-        /// <returns>
-        /// <para>ID of the newly created database entry on success</para>
-        /// <para>null on error</para>
-        /// </returns>
+
         public int? SaveUserToDatabase(User user)
         {
             lock (ThreadSync.DatabaseLock)
@@ -78,14 +71,7 @@ namespace MTCG.Repository
             }
         }
 
-        /// <summary>
-        /// retrieve a user from the database using his name
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns>
-        /// <para>user object containing all information from the users table on success (NO Stack/Deck)</para>
-        /// <para>null if there's no user with that name or an error occured</para>
-        /// </returns>
+
         public User? GetUserByName(string username)
         {
             lock (ThreadSync.DatabaseLock)
@@ -100,53 +86,33 @@ namespace MTCG.Repository
                 DatabaseService.AddParameterWithValue(dbCommand, "@username", DbType.String, username);
 
                 // Execute query and Error Handling
+                IDataReader? reader = null;
+
                 try
                 {
-                    using IDataReader reader = dbCommand.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        UserStatistics stats = new UserStatistics()
-                        {
-                            Wins = reader.GetInt32(8),
-                            Losses = reader.GetInt32(9),
-                            Ties = reader.GetInt32(10),
-                            EloPoints = reader.GetInt32(11)
-                        };
-
-                        return new User()
-                        {
-                            Id = reader.GetInt32(0),
-                            Username = reader.GetString(1),
-                            DisplayName = reader.GetString(2),
-                            Biography = reader.GetString(3),
-                            Image = reader.GetString(4),
-                            Password = reader.GetString(5),
-                            AuthToken = reader.GetString(6),
-                            CoinCount = reader.GetInt32(7),
-                            Stats = stats
-                        };
-                    }
+                    reader = dbCommand.ExecuteReader();
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Error retrieving {username} from the database!", ex);
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve User {username} from the database", ex);
                     return null;
                 }
 
+                if (reader.Read())
+                {
+                    User newUser = CreateUserFromDatabaseEntry(reader);
+                    reader.Close();
+                    return newUser;
+                }
+
                 // If no entries were returned...
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve User {username} from the database: Nonexistent user", null);
+                reader.Close();
                 return null;
             }
         }
 
-        /// <summary>
-        /// update the information of an existing user in the users table; does NOT update the users stack or deck
-        /// </summary>
-        /// <param name="user">user object containing the updated user data, Stack and Deck are optional/ignored</param>
-        /// <returns>
-        /// <para>ID of the updated database entry on success</para>
-        /// <para>null if the user has not yet been added to the database or on error</para>
-        /// </returns>
+
         public int? UpdateUser(User user)
         {
             lock (ThreadSync.DatabaseLock)
@@ -180,7 +146,7 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Changes for user {user.Username} couldn't be written to the database!", ex);
+                    _eventService.LogEvent(EventType.Error, $"Couldn't write changes for User {user.Username} to the database!", ex);
                     return null;
                 }
 
@@ -188,14 +154,7 @@ namespace MTCG.Repository
             }
         }
 
-        /// <summary>
-        /// retrieve a user from the database using his token
-        /// </summary>
-        /// <param name="token">the authentication token in format "xxx-mtcgToken"</param>
-        /// <returns>
-        /// <para>user object containing all information from the users table on success (NO Stack/Deck)</para>
-        /// <para>null if there's no user with that token or an error occured</para>
-        /// </returns>
+
         public User? GetUserByToken(string token)
         {
             lock (ThreadSync.DatabaseLock)
@@ -210,53 +169,33 @@ namespace MTCG.Repository
                 DatabaseService.AddParameterWithValue(dbCommand, "@token", DbType.String, token);
 
                 // Execute query and error handling
+                IDataReader? reader = null;
+
                 try
                 {
-                    using IDataReader reader = dbCommand.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        UserStatistics stats = new UserStatistics()
-                        {
-                            Wins = reader.GetInt32(8),
-                            Losses = reader.GetInt32(9),
-                            Ties = reader.GetInt32(10),
-                            EloPoints = reader.GetInt32(11)
-                        };
-
-                        return new User()
-                        {
-                            Id = reader.GetInt32(0),
-                            Username = reader.GetString(1),
-                            DisplayName = reader.GetString(2),
-                            Biography = reader.GetString(3),
-                            Image = reader.GetString(4),
-                            Password = reader.GetString(5),
-                            AuthToken = reader.GetString(6),
-                            CoinCount = reader.GetInt32(7),
-                            Stats = stats
-                        };
-                    }
+                    reader = dbCommand.ExecuteReader();
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Error retrieving user with token {token} from the database!", ex);
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve user with Token {token} from the database!", ex);
                     return null;
                 }
 
+                if (reader.Read())
+                {
+                    User newUser = CreateUserFromDatabaseEntry(reader);
+                    reader.Close();
+                    return newUser;
+                }
+
                 // If no entries were returned...
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve User with Token {token} from the database: Nonexistent user", null);
+                reader.Close();
                 return null;
             }
         }
 
-        /// <summary>
-        /// retrieve a user from the database using his Id
-        /// </summary>
-        /// <param name="userId">the unique id of the user</param>
-        /// <returns>
-        /// <para>user object containing all information from the users table on success (NO Stack/Deck)</para>
-        /// <para>null if there's no user with that id or an error occured</para>
-        /// </returns>
+
         public User? GetUserById(int userId)
         {
             lock (ThreadSync.DatabaseLock)
@@ -271,51 +210,33 @@ namespace MTCG.Repository
                 DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, userId);
 
                 // Execute query and error handling
+                IDataReader? reader = null;
+
                 try
                 {
-                    using IDataReader reader = dbCommand.ExecuteReader();
-
-                    if (reader.Read())
-                    {
-                        UserStatistics stats = new UserStatistics()
-                        {
-                            Wins = reader.GetInt32(8),
-                            Losses = reader.GetInt32(9),
-                            Ties = reader.GetInt32(10),
-                            EloPoints = reader.GetInt32(11)
-                        };
-
-                        return new User()
-                        {
-                            Id = reader.GetInt32(0),
-                            Username = reader.GetString(1),
-                            DisplayName = reader.GetString(2),
-                            Biography = reader.GetString(3),
-                            Image = reader.GetString(4),
-                            Password = reader.GetString(5),
-                            AuthToken = reader.GetString(6),
-                            CoinCount = reader.GetInt32(7),
-                            Stats = stats
-                        };
-                    }
+                    reader = dbCommand.ExecuteReader();
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Error retrieving user with ID {userId} from the database!", ex);
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve user with ID {userId} from the database!", ex);
                     return null;
                 }
 
+                if (reader.Read())
+                {
+                    User newUser = CreateUserFromDatabaseEntry(reader);
+                    reader.Close();
+                    return newUser;
+                }
+
                 // If no entries were returned...
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve User with ID {userId} from the database: Nonexistent user", null);
+                reader.Close();
                 return null;
             }
         }
 
-        /// <summary>
-        /// returns a list of usernames of all users currently in the database
-        /// </summary>
-        /// <returns>
-        /// <para>A list of strings containing the usernames (Primary Key) of each user</para>
-        /// </returns>
+
         public List<string> GetListOfUsers()
         {
             lock (ThreadSync.DatabaseLock)
@@ -325,24 +246,57 @@ namespace MTCG.Repository
                 // Prepare SQL statement
                 using IDbCommand dbCommand = _databaseService.CreateCommand("SELECT username FROM users");
 
-                // Execute query
+                // Execute query and error handling
+                IDataReader? reader = null;
+
                 try
                 {
-                    using IDataReader reader = dbCommand.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        users.Add(reader.GetString(0));
-                    }
+                    reader = dbCommand.ExecuteReader();
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Error retrieving list of all users from the database!", ex);
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve list of users from the database", ex);
                     return users;
                 }
 
+                while (reader.Read())
+                {
+                    users.Add(reader.GetString(0));
+                }
+
+                reader.Close();
                 return users;
             }
+        }
+
+
+        /// <summary>
+        /// Create a new user object from a database entry
+        /// </summary>
+        /// <param name="reader">IDataReader of a query which is currently reading an entry from the `users` table</param>
+        /// <returns>User object containing all the information stored in the database</returns>
+        private User CreateUserFromDatabaseEntry(IDataReader reader)
+        {
+            UserStatistics stats = new UserStatistics()
+            {
+                Wins = reader.GetInt32(8),
+                Losses = reader.GetInt32(9),
+                Ties = reader.GetInt32(10),
+                EloPoints = reader.GetInt32(11)
+            };
+
+            return new User()
+            {
+                Id = reader.GetInt32(0),
+                Username = reader.GetString(1),
+                DisplayName = reader.GetString(2),
+                Biography = reader.GetString(3),
+                Image = reader.GetString(4),
+                Password = reader.GetString(5),
+                AuthToken = reader.GetString(6),
+                CoinCount = reader.GetInt32(7),
+                Stats = stats
+            };
         }
     }
 }
