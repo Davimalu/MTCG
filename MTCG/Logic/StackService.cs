@@ -22,6 +22,7 @@ namespace MTCG.Logic
         }
         #endregion
 
+
         public void AddCardToStack(Card card, Stack stack)
         {
             stack.Cards.Add(card);
@@ -32,9 +33,10 @@ namespace MTCG.Logic
         {
             foreach (Card card in package.Cards)
             {
-                stack.Cards.Add(card);
+                AddCardToStack(card, stack);
             }
         }
+
 
         public bool RemoveCardFromStack(Card card, Stack stack)
         {
