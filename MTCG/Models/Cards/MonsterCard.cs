@@ -13,10 +13,7 @@ namespace MTCG.Models.Cards
             this.ElementType = elementType;
         }
 
-        public MonsterCard()
-        {
-
-        }
+        public MonsterCard() { }
 
         // Copy Constructor
         public MonsterCard(Card card)

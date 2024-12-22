@@ -13,10 +13,7 @@ namespace MTCG.Models.Cards
             this.ElementType = elementType;
         }
 
-        public SpellCard()
-        {
-
-        }
+        public SpellCard() { }
 
         // Copy Constructor
         public SpellCard(Card card)

@@ -1,9 +1,8 @@
-﻿using MTCG.Interfaces;
-using MTCG.Interfaces.Logic;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Models;
-using System.Text.Json;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;
+using System.Text.Json;
 
 namespace MTCG.Logic
 {
@@ -27,6 +26,7 @@ namespace MTCG.Logic
 
         public string? StartBattle(User playerA, User playerB)
         {
+            _battleLog.Clear(); // Explicitly clear list | If this isn't done, the battleLog is persisted between requests
             int counter = 1;
 
             // The fight continues as long as both players still have cards in their deck and less than 100 rounds have been played
