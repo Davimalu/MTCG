@@ -120,7 +120,7 @@ namespace MTCGTests.Logic
 
             _stackService.RemoveCardFromStack(Arg.Any<Card>(), Arg.Any<Stack>()).Returns(true);
             _tradeRepository.AddTradeOfferToDatabase(Arg.Any<TradeOffer>()).Returns(1);
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer>());
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer>());
 
             // Act
             var result = _tradingService.CreateTradeOffer(user, card, true, 100);
@@ -167,7 +167,7 @@ namespace MTCGTests.Logic
             };
 
             _tradeRepository.GetTradeDealByCardId("card1").Returns(tradeOffer);
-            _tradeRepository.RemoveTradeDeal(tradeOffer).Returns(true);
+            _tradeRepository.RemoveTradeOfferFromDatabase(tradeOffer).Returns(true);
             _userService.GetUserById(3).Returns(tradeOffer.User);
             _cardService.GetCardById("card1").Returns(tradeOffer.Card);
 
@@ -185,7 +185,7 @@ namespace MTCGTests.Logic
         {
             // Arrange
             var faultyOffer = new TradeOffer { Card = new MonsterCard { Id = "card1" }, User = new User { Id = 23, Username = "TestUser" } };
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { faultyOffer });
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer> { faultyOffer });
 
             _userService.GetUserById(Arg.Any<int>()).Returns((User?)null);
 
@@ -194,7 +194,7 @@ namespace MTCGTests.Logic
 
             // Assert
             Assert.That(result, Is.Empty);
-            _tradeRepository.Received(1).RemoveTradeDeal(Arg.Is<TradeOffer>(offer => offer.Id == faultyOffer.Id)); // The
+            _tradeRepository.Received(1).RemoveTradeOfferFromDatabase(Arg.Is<TradeOffer>(offer => offer.Id == faultyOffer.Id)); // The
 
         }
 
@@ -203,7 +203,7 @@ namespace MTCGTests.Logic
         {
             // Arrange
             var newOffer = new TradeOffer { Card = new MonsterCard { Id = "card1", Damage = 50 }, User = new User { Username = "TestUser" } };
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer>());
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer>());
 
             // Act
             var result = _tradingService.TryToTrade(newOffer);
@@ -220,7 +220,7 @@ namespace MTCGTests.Logic
             var newOffer = new TradeOffer { Card = new MonsterCard { Id = "card1", Damage = 50 }, User = user, Id = 1 };
             var otherOffer = new TradeOffer { Card = new MonsterCard { Id = "card2", Damage = 60 }, User = user, Id = 2 };
 
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer> { newOffer, otherOffer });
 
             // Act
             var result = _tradingService.TryToTrade(newOffer);
@@ -252,7 +252,7 @@ namespace MTCGTests.Logic
                 RequestedDamage = 30
             };
 
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer> { newOffer, otherOffer });
             _userService.GetUserById(1).Returns(user1);
             _userService.GetUserById(2).Returns(user2);
             _cardService.GetCardById("card1").Returns(newOffer.Card);
@@ -288,7 +288,7 @@ namespace MTCGTests.Logic
                 RequestedDamage = 30
             };
 
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer> { newOffer, otherOffer });
             _userService.GetUserById(1).Returns(user1);
             _userService.GetUserById(2).Returns(user2);
             _cardService.GetCardById("card1").Returns(newOffer.Card);
@@ -324,7 +324,7 @@ namespace MTCGTests.Logic
                 RequestedDamage = 30
             };
 
-            _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
+            _tradeRepository.GetAllTradeOffers().Returns(new List<TradeOffer> { newOffer, otherOffer });
             _userService.GetUserById(1).Returns(user1);
             _userService.GetUserById(2).Returns(user2);
             _cardService.GetCardById("card1").Returns(newOffer.Card);

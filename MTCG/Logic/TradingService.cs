@@ -108,7 +108,7 @@ namespace MTCG.Logic
 
         public bool RemoveTradeOffer(TradeOffer offerToRemove)
         {
-            if (_tradeRepository.RemoveTradeDeal(offerToRemove))
+            if (_tradeRepository.RemoveTradeOfferFromDatabase(offerToRemove))
             {
                 // If the trade offer was successfully deleted, re-add card to stack of user
                 _stackService.AddCardToStack(offerToRemove.Card, offerToRemove.User.Stack);
@@ -143,7 +143,7 @@ namespace MTCG.Logic
 
         public TradeOffer? GetTradeOfferById(int tradeId)
         {
-            TradeOffer? offer = _tradeRepository.GetTradeDealById(tradeId);
+            TradeOffer? offer = _tradeRepository.GetTradeOfferById(tradeId);
 
             if (offer == null)
             {
@@ -163,7 +163,7 @@ namespace MTCG.Logic
 
         public List<TradeOffer> GetAllActiveTradeOffers()
         {
-            List<TradeOffer> offers = _tradeRepository.GetAllTradeDeals();
+            List<TradeOffer> offers = _tradeRepository.GetAllTradeOffers();
 
             // Populate user and card fields of all results
             foreach (TradeOffer offer in offers.ToList())
