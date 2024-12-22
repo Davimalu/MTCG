@@ -8,6 +8,7 @@ namespace MTCG.Models
         public static Object UserLock = new Object();
         public static Object DatabaseLock = new Object();
         public static Object PackageLock = new Object();
+        public static Object PrintLock = new Object();
 
         public static Object CardLock = new Object();
     }

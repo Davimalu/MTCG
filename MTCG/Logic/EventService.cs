@@ -1,4 +1,5 @@
 ﻿using MTCG.Interfaces.Logic;
+using MTCG.Models;
 using MTCG.Models.Enums;
 
 namespace MTCG.Logic
@@ -33,14 +34,18 @@ namespace MTCG.Logic
                     break;
             }
 
-            Console.Write($"[{consoleText}] {message}");
-            if (ex != null)
+            // Thread Safety: Make sure that these lines are printed in succession and not interrupted by another thread:
+            lock (ThreadSync.PrintLock)
             {
-                Console.Write($"\n[{consoleText}] {ex.Message}");
-            }
+                Console.Write($"[{consoleText}] {message}");
+                if (ex != null)
+                {
+                    Console.Write($"\n[{consoleText}] {ex.Message}");
+                }
 
-            Console.ResetColor();
-            Console.WriteLine();
+                Console.ResetColor();
+                Console.WriteLine();
+            }
         }
     }
 }

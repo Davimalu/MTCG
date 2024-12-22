@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MTCG.DAL;
+﻿using MTCG.DAL;
 using MTCG.Interfaces.Logic;
 using MTCG.Interfaces.Repository;
 using MTCG.Logic;
 using MTCG.Models;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;
+using System.Data;
 
 namespace MTCG.Repository
 {
