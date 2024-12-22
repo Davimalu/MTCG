@@ -41,21 +41,25 @@ namespace MTCG.Logic
 
         public bool RegisterUser(string username, string password)
         {
-            // Check if user already exists
-            if (_userService.GetUserByName(username) != null)
+            // Thread Safety: Ensure that the user is not created by a different thread between checking if the user exists and the actual creation of that user
+            lock (ThreadSync.UserLock)
             {
-                // User already exists
-                _eventService.LogEvent(EventType.Warning, $"Couldn't register user: User already exists", null);
-                return false;
+                // Check if user already exists
+                if (_userService.GetUserByName(username) != null)
+                {
+                    // User already exists
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't register user: User already exists", null);
+                    return false;
+                }
+
+                // Create user
+
+                // Hash password
+                string hashedPassword = HashPassword(password);
+
+                // Add user to database
+                _userService.SaveUserToDatabase(new User(username, hashedPassword));
             }
-
-            // Create user
-
-            // Hash password
-            string hashedPassword = HashPassword(password);
-
-            // Add user to database
-            _userService.SaveUserToDatabase(new User(username, hashedPassword));
 
             return true;
         }

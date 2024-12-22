@@ -419,7 +419,7 @@ namespace MTCGTests.Logic
             var playerB = new User
             {
                 Username = "PlayerB",
-                Deck = new Deck { Cards = new List<Card> { new MonsterCard("Card 03", "Dragon", 15, ElementType.Fire), new MonsterCard("Card 04", "SpellCard", 15, ElementType.Fire) } }
+                Deck = new Deck { Cards = new List<Card> { new MonsterCard("Card 03", "Dragon", 15, ElementType.Fire), new SpellCard("Card 04", "SpellCard", 15, ElementType.Fire) } }
             };
 
             // Act
