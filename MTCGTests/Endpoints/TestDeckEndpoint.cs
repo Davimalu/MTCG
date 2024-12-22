@@ -1,11 +1,10 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using NSubstitute;
 using System.Text.Json;
-using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {

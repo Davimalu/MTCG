@@ -1,17 +1,11 @@
 ﻿using MTCG.DAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
+using MTCG.Interfaces.Logic;
 using MTCG.Logic;
-using static System.Net.Mime.MediaTypeNames;
-using System.Xml.Linq;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using Npgsql;
-using MTCG.Interfaces.Logic;
-using MTCG.Models.Cards;
+using System.Data;
+using MTCG.Interfaces.Repository;
 
 namespace MTCG.Repository
 {
@@ -37,14 +31,7 @@ namespace MTCG.Repository
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
 
-        /// <summary>
-        /// saves a new card to the database
-        /// </summary>
-        /// <param name="card"></param>
-        /// <returns>
-        /// <para>true if card was successfully added to database</para>
-        /// <para>false if card couldn't be added to database</para>
-        /// </returns>>
+
         public bool AddCardToDatabase(Card card)
         {
             // Prepare SQL Statement
@@ -79,14 +66,7 @@ namespace MTCG.Repository
             return true;
         }
 
-        /// <summary>
-        /// Retrieves a card - identified by its cardId - from the database
-        /// </summary>
-        /// <param name="cardId"></param>
-        /// <returns>
-        /// <para>Monster- or Spellcard object</para>
-        /// <para>null if there is no card in the database with the specified Id</para>
-        /// </returns>
+
         public Card? GetCardById(string cardId)
         {
             // Prepare SQL Statement
@@ -97,9 +77,17 @@ namespace MTCG.Repository
                                                                   """);
             DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardId);
 
-            // Execute query
-            // TODO: Add error handling?
-            using IDataReader reader = dbCommand.ExecuteReader();
+            // Execute query and error handling
+            IDataReader? reader = null;
+            try
+            {
+                reader = dbCommand.ExecuteReader();
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, $"Couldn't retrieve card with ID {cardId} from Database", ex);
+                return null;
+            }
 
             // Check if query returned a result
             if (reader.Read())
@@ -112,15 +100,18 @@ namespace MTCG.Repository
                 // Generate appropriate card type
                 if (reader.GetString(3) == "Spell") // Spell Card
                 {
+                    reader.Close();
                     return new SpellCard(id, name, damage, elementType);
                 }
                 else // Monster Card
                 {
+                    reader.Close();
                     return new MonsterCard(id, name, damage, elementType);
                 }
             }
 
             // Return null if no results
+            reader.Close();
             return null;
         }
     }
