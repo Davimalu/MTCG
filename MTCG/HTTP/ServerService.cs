@@ -15,6 +15,7 @@ namespace MTCG.HTTP
 
         private TcpListener? _server;
 
+
         public bool StartServer()
         {
             try
@@ -32,6 +33,16 @@ namespace MTCG.HTTP
             _eventService.LogEvent(EventType.Highlight, $"Server started on Port {PORT_NO}", null);
             return true;
         }
+
+
+        public void StopServer()
+        {
+            if (_server != null)
+            {
+                _server.Stop();
+            }
+        }
+
 
         public void AcceptConnections()
         {

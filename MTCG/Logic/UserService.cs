@@ -84,7 +84,7 @@ namespace MTCG.Logic
 
             if (user == null)
             {
-                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user {username} from database: User doesn't exist", null);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user {username}: User doesn't exist", null);
                 return null;
             }
 
@@ -102,7 +102,7 @@ namespace MTCG.Logic
 
             if (user == null)
             {
-                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user by token {token} from database: User doesn't exist", null);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user by token {token}: User doesn't exist", null);
                 return null;
             }
 
@@ -120,7 +120,7 @@ namespace MTCG.Logic
 
             if (user == null)
             {
-                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user with ID {userId} from database: User doesn't exist", null);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve user with ID {userId}: User doesn't exist", null);
                 return null;
             }
 
