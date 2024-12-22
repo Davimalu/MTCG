@@ -29,16 +29,10 @@ namespace MTCG.Repository
         #endregion
 
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
+        private readonly RepositoryHelper _repositoryHelper = new RepositoryHelper();
         private readonly IEventService _eventService = new EventService();
 
-        /// <summary>
-        /// saves a new package to the database
-        /// </summary>
-        /// <param name="package">package object containing all cards that belong to this package</param>
-        /// <returns>
-        ///<para>true if package was added successfully</para>
-        ///<para>false if package couldn't be added to database</para>
-        /// </returns>
+
         public bool AddPackageToDatabase(Package package)
         {
             lock (ThreadSync.DatabaseLock)
@@ -53,7 +47,7 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Error adding package to database", ex);
+                    _eventService.LogEvent(EventType.Error, $"Couldn't add package to database", ex);
                     return false;
                 }
 
@@ -69,18 +63,17 @@ namespace MTCG.Repository
             }
         }
 
-        /// <summary>
-        /// saves the information on which cards belong to this package in the database
-        /// </summary>
-        /// <param name="package">package object containing the packageId of the database entry in table 'packages' and all cards that belong to this package</param>
-        /// <returns>
-        ///<para>true if all associations were successfully saved to the database</para>
-        /// <para>false if at least one association couldn't be saved in the database</para>
-        /// </returns>
+
         public bool AddCardsToPackage(Package package)
         {
             lock (ThreadSync.DatabaseLock)
             {
+                if (package.Id == null)
+                {
+                    _eventService.LogEvent(EventType.Warning, $"`AddCardsToPackage` must not be called on it's own! The function must be executed as part of `AddPackageToDatabase`", null);
+                    return false;
+                }
+
                 // for all cards in the package...
                 foreach (var card in package.Cards)
                 {
@@ -103,7 +96,7 @@ namespace MTCG.Repository
                     catch (Exception ex)
                     {
                         _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be associated with package", ex);
-                        // TODO: Delete package
+                        DeleteAllPackageAssociations((int)package.Id); // Also delete all other associations that may have been saved before this failed transaction
                         return false;
                     }
 
@@ -111,7 +104,7 @@ namespace MTCG.Repository
                     if (rowsAffected <= 0)
                     {
                         _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be associated with package", null);
-                        // TODO: Delete package | DELETE WHERE Id = packageId
+                        DeleteAllPackageAssociations((int)package.Id); // Also delete all other associations that may have been saved before this failed transaction
                         return false;
                     }
                 }
@@ -120,14 +113,44 @@ namespace MTCG.Repository
             }
         }
 
+
         /// <summary>
-        /// gets the packageId of a random package from the packages table
+        /// deletes all associations of a package identified by its packageId with its cards
         /// </summary>
+        /// <param name="packageId">the packageId of the package</param>
         /// <returns>
-        /// <para>packageId of a random package on success</para>
-        /// <para>0 if no packages available</para>
+        /// <para>true on success</para>
+        /// <para>false on error</para>
         /// </returns>
-        public int GetRandomPackageId()
+        private bool DeleteAllPackageAssociations(int packageId)
+        {
+            lock (ThreadSync.DatabaseLock)
+            {
+                // Prepare SQL query
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
+                                                                            DELETE FROM cardsPackages
+                                                                            WHERE packageId = @packageId;
+                                                                            """);
+
+                DatabaseService.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
+
+                // Execute query and error handling
+                try
+                {
+                    dbCommand.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't delete associations of package {packageId} from the database", ex);
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+
+        public int? GetIdOfRandomPackage()
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -138,27 +161,35 @@ namespace MTCG.Repository
                                                                       LIMIT 1
                                                                       """);
 
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
-
-                if (reader.Read())
+                // Execute query and error handling
+                IDataReader? reader = null;
+                try
                 {
-                    return reader.GetInt32(0);
+                    reader = dbCommand.ExecuteReader();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve random package from Database", ex);
+                    return null;
                 }
 
-                return 0;
+                // See if there any results
+                if (reader.Read())
+                {
+                    int randomPackageId = reader.GetInt32(0);
+                    reader.Close();
+                    return randomPackageId;
+                }
+
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve random package from Database: No packages available", null);
+
+                reader.Close();
+                return null;
             }
         }
 
-        /// <summary>
-        /// retrieves a package from the database using its packageId
-        /// </summary>
-        /// <param name="packageId"></param>
-        /// <returns>
-        /// <para>package containing all metadata and associated cards on success</para>
-        /// <para>null if the package doesn't exist or has no cards associated with it</para>
-        /// </returns>
-        public Package? GetPackageFromId(int packageId)
+
+        public Package? GetPackageById(int packageId)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -171,36 +202,36 @@ namespace MTCG.Repository
 
                 DatabaseService.AddParameterWithValue(dbCommand, "@packageId", DbType.Int32, packageId);
 
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
+
+                // Execute query and error handling
+                IDataReader? reader = null;
+
+                try
+                {
+                    reader = dbCommand.ExecuteReader();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve package with ID {packageId} from Database", ex);
+                    return null;
+                }
 
                 List<Card> cards = new List<Card>(5);
 
                 // Create a card object out of each entry that was returned
                 while (reader.Read())
                 {
-                    string id = reader.GetString(0);
-                    string name = reader.GetString(1);
-                    float damage = reader.GetFloat(2);
-                    ElementType elementType = Enum.Parse<ElementType>(reader.GetString(4));
-
-                    // Generate appropriate card type
-                    if (reader.GetString(3) == "Spell") // Spell Card
-                    {
-                        cards.Add(new SpellCard(id, name, damage, elementType));
-                    }
-                    else // Monster Card
-                    {
-                        cards.Add(new MonsterCard(id, name, damage, elementType));
-                    }
+                    cards.Add(_repositoryHelper.CreateCardFromDatabaseEntry(reader));
                 }
 
                 // If the package doesn't exist or has no cards associated with it...
                 if (cards.Count == 0)
                 {
+                    reader.Close();
                     return null;
                 }
 
+                reader.Close();
                 return new Package()
                 {
                     Id = packageId,
@@ -209,14 +240,7 @@ namespace MTCG.Repository
             }
         }
 
-        /// <summary>
-        /// delete a package from the database using its packageId; does NOT delete the cards that were added with that package
-        /// </summary>
-        /// <param name="packageId"></param>
-        /// <returns>
-        /// <para>true if package was deleted successfully</para>
-        /// <para>false if there was no package with that packageId or if SQL error occured</para>
-        /// </returns>
+
         public bool DeletePackageById(int packageId)
         {
             lock (ThreadSync.DatabaseLock)
@@ -237,21 +261,14 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Package with ID {packageId} couldn't be removed from database!");
-                    Console.WriteLine($"[ERROR] {ex.Message}");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Error, $"Couldn't remove Package with ID {packageId} from the database", ex);
                     return false;
                 }
 
                 // Check if at least one row was affected
                 if (rowsAffected <= 0)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Package with ID {packageId} couldn't be removed from database!");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't remove Package with ID {packageId} from the database", null);
                     return false;
                 }
 

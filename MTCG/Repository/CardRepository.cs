@@ -31,6 +31,7 @@ namespace MTCG.Repository
 
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
         private readonly IEventService _eventService = new EventService();
+        private readonly RepositoryHelper _repositoryHelper = new RepositoryHelper();
 
 
         public bool AddCardToDatabase(Card card)
@@ -98,22 +99,9 @@ namespace MTCG.Repository
                 // Check if query returned a result
                 if (reader.Read())
                 {
-                    string id = reader.GetString(0);
-                    string name = reader.GetString(1);
-                    float damage = reader.GetFloat(2);
-                    ElementType elementType = Enum.Parse<ElementType>(reader.GetString(4));
-
-                    // Generate appropriate card type
-                    if (reader.GetString(3) == "Spell") // Spell Card
-                    {
-                        reader.Close();
-                        return new SpellCard(id, name, damage, elementType);
-                    }
-                    else // Monster Card
-                    {
-                        reader.Close();
-                        return new MonsterCard(id, name, damage, elementType);
-                    }
+                    Card cardToReturn = _repositoryHelper.CreateCardFromDatabaseEntry(reader);
+                    reader.Close();
+                    return cardToReturn;
                 }
 
                 // Return null if no results

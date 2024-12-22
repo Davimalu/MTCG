@@ -81,8 +81,8 @@ namespace MTCGTests.Logic
         {
             // Arrange
             var package = new Package { Cards = new List<Card>() };
-            _packageRepository.GetRandomPackageId().Returns(1);
-            _packageRepository.GetPackageFromId(1).Returns(package);
+            _packageRepository.GetIdOfRandomPackage().Returns(1);
+            _packageRepository.GetPackageById(1).Returns(package);
 
             // Act
             var result = _packageService.GetRandomPackage();
@@ -97,8 +97,8 @@ namespace MTCGTests.Logic
         public void GetRandomPackage_ShouldReturnNull_WhenNoPackageExists()
         {
             // Arrange
-            _packageRepository.GetRandomPackageId().Returns(1);
-            _packageRepository.GetPackageFromId(1).Returns((Package?)null);
+            _packageRepository.GetIdOfRandomPackage().Returns(1);
+            _packageRepository.GetPackageById(1).Returns((Package?)null);
 
             // Act
             var result = _packageService.GetRandomPackage();

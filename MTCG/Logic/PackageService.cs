@@ -69,11 +69,20 @@ namespace MTCG.Logic
             lock (ThreadSync.PackageLock)
             {
                 // Get random package from database
-                int randomPackageId = _packageRepository.GetRandomPackageId();
-                Package? tmpPackage = _packageRepository.GetPackageFromId(randomPackageId);
+                int? randomPackageId = _packageRepository.GetIdOfRandomPackage();
+                if (randomPackageId == null)
+                {
+                    return null;
+                }
+
+                Package? tmpPackage = _packageRepository.GetPackageById((int)randomPackageId);
+                if (tmpPackage == null)
+                {
+                    return null;
+                }
 
                 // Delete retrieved package from database
-                _packageRepository.DeletePackageById(randomPackageId);
+                _packageRepository.DeletePackageById((int)randomPackageId);
 
                 return tmpPackage;
             }
