@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MTCG.Interfaces;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
 
@@ -26,29 +22,46 @@ namespace MTCG.Logic
             }
         }
         #endregion
+        #region DependencyInjection
+        public ScoreboardService(IUserService userService)
+        {
+            _userService = userService;
+        }
+        #endregion
 
-        private readonly UserService _userService = UserService.Instance;
+        public ScoreboardService() { }
 
+        private readonly IUserService _userService = UserService.Instance;
+
+
+        /// <summary>
+        /// populates the scoreboard with the up-to-date user information
+        /// </summary>
+        /// <param name="scoreboard">the scoreboard object to be filled</param>
         public void FillScoreboard(Scoreboard scoreboard)
         {
-            List<string> allUsers = _userService.GetListOfUsers();
-
-            // Get stats of each user
-            foreach (string user in allUsers)
+            // Thread Safety: Ensure that no user information is changed / new users are added while the scoreboard is being generated
+            lock (ThreadSync.UserLock)
             {
-                User? tmpUser = _userService.GetUserByName(user);
+                List<string> allUsers = _userService.GetListOfUsers();
 
-                ScoreboardEntry newEntry = new ScoreboardEntry()
+                // Get stats of each user
+                foreach (string user in allUsers)
                 {
-                    Username = tmpUser.Username,
-                    ChosenName = tmpUser.DisplayName,
-                    EloPoints = tmpUser.Stats.EloPoints,
-                    Losses = tmpUser.Stats.Losses,
-                    Ties = tmpUser.Stats.Ties,
-                    Wins = tmpUser.Stats.Wins
-                };
+                    User tmpUser = _userService.GetUserByName(user)!;
 
-                scoreboard.Entries.Add(newEntry);
+                    ScoreboardEntry newEntry = new ScoreboardEntry()
+                    {
+                        Username = tmpUser.Username,
+                        ChosenName = tmpUser.DisplayName,
+                        EloPoints = tmpUser.Stats.EloPoints,
+                        Losses = tmpUser.Stats.Losses,
+                        Ties = tmpUser.Stats.Ties,
+                        Wins = tmpUser.Stats.Wins
+                    };
+
+                    scoreboard.Entries.Add(newEntry);
+                }
             }
 
             // Sort list using Comparison<T> delegate: https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object
