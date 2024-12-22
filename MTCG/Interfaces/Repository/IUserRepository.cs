@@ -9,5 +9,7 @@ namespace MTCG.Interfaces.Repository
         User? GetUserByName(string username);
         int? UpdateUser(User user);
         User? GetUserByToken(string token);
+        User? GetUserById(int userId);
+        List<string> GetListOfUsers();
     }
 }

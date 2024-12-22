@@ -3,6 +3,7 @@ using MTCG.Models;
 using MTCG.Models.Enums;
 using MTCG.Repository;
 using System.Text.Json;
+using MTCG.Interfaces.Repository;
 
 namespace MTCG.Logic
 {
@@ -24,10 +25,23 @@ namespace MTCG.Logic
             }
         }
         #endregion
+        #region DependencyInjection
+        public UserService(IUserRepository userRepository, IStackRepository stackRepository,
+            IDeckRepository deckRepository, ICardService cardService, IEventService eventService)
+        {
+            _userRepository = userRepository;
+            _stackRepository = stackRepository;
+            _deckRepository = deckRepository;
+            _cardService = cardService;
+            _eventService = eventService;
+        }
+        #endregion
 
-        private readonly UserRepository _userRepository = UserRepository.Instance;
-        private readonly StackRepository _stackRepository = StackRepository.Instance;
-        private readonly DeckRepository _deckRepository = DeckRepository.Instance;
+        public UserService() { }
+
+        private readonly IUserRepository _userRepository = UserRepository.Instance;
+        private readonly IStackRepository _stackRepository = StackRepository.Instance;
+        private readonly IDeckRepository _deckRepository = DeckRepository.Instance;
         private readonly ICardService _cardService = CardService.Instance;
 
         private readonly IEventService _eventService = new EventService();

@@ -1,4 +1,5 @@
 ﻿using MTCG.DAL;
+using MTCG.Interfaces.Repository;
 using MTCG.Models;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MTCG.Repository
 {
-    public class StackRepository
+    public class StackRepository : IStackRepository
     {
         #region Singleton
         private static StackRepository? _instance;
