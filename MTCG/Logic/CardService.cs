@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MTCG.Interfaces.Logic;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Repository;
 
@@ -30,9 +25,60 @@ namespace MTCG.Logic
         }
         #endregion
 
-        public string GetCardType(Card card)
+
+        public Card? GetCardById(string cardId)
         {
-            // Determine whether the card is a Monster or a Spell Card from the name of the card
+            return _cardRepository.GetCardById(cardId);
+        }
+
+
+        public bool SaveCardToDatabase(Card card)
+        {
+            // Determine the element type of the card
+            if (Enum.TryParse(GetElementTypeFromName(card), out ElementType elementType))
+            {
+                card.ElementType = elementType;
+            }
+
+            // Determine the type (monster or spell card) of the card
+            Card cardToAdd;
+            if (GetCardTypeFromName(card) == "Monster")
+            {
+                cardToAdd = new MonsterCard(card);
+            }
+            else
+            {
+                cardToAdd = new SpellCard(card);
+            }
+
+            return _cardRepository.AddCardToDatabase(cardToAdd);
+        }
+
+
+        public bool UserOwnsCard(User user, Card card)
+        {
+            // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
+            return user.Stack.Cards.Any(cardsInStack => cardsInStack.Id == card.Id);
+        }
+
+
+        public bool UserHasCardInDeck(User user, Card card)
+        {
+            // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
+            return user.Deck.Cards.Any(cardsInDeck => cardsInDeck.Id == card.Id);
+        }
+
+
+        /// <summary>
+        /// determines whether the card is a Monster or a Spell Card from the name of the card
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns>
+        /// <para>"Spell" if the card is a Spell Card</para>
+        /// <para>"Monster" if the card is a Monster Card</para>
+        /// </returns>
+        private string GetCardTypeFromName(Card card)
+        {
             if (card.Name.Contains("Spell"))
             {
                 return "Spell";
@@ -43,9 +89,18 @@ namespace MTCG.Logic
             }
         }
 
-        public string GetElementType(Card card)
+
+        /// <summary>
+        /// determines the element type of the card from the name of the card
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns>
+        /// <para>"Water" if the Element Type is Water</para>
+        /// <para>"Fire" if the Element Type is Fire</para>
+        /// <para>"Normal" if the Element Type is Normal</para>
+        /// </returns>
+        private string GetElementTypeFromName(Card card)
         {
-            // Determine the element type of the card from the name of the card
             if (card.Name.Contains("Water"))
             {
                 return "Water";
@@ -58,43 +113,6 @@ namespace MTCG.Logic
             {
                 return "Normal";
             }
-        }
-
-        public Card? GetCardById(string cardId)
-        {
-            return _cardRepository.GetCardById(cardId);
-        }
-
-        public bool SaveCardToDatabase(Card card)
-        {
-            if (Enum.TryParse(GetElementType(card), out ElementType elementType))
-            {
-                card.ElementType = elementType;
-            }
-
-            Card cardToAdd;
-            if (GetCardType(card) == "Monster")
-            {
-                cardToAdd = new MonsterCard(card);
-            }
-            else
-            {
-                cardToAdd = new SpellCard(card);
-            }
-
-            return _cardRepository.AddCardToDatabase(cardToAdd);
-        }
-
-        public bool UserOwnsCard(User user, Card card)
-        {
-            // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
-            return user.Stack.Cards.Any(cardsInStack => cardsInStack.Id == card.Id);
-        }
-
-        public bool UserHasCardInDeck(User user, Card card)
-        {
-            // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value
-            return user.Deck.Cards.Any(cardsInDeck => cardsInDeck.Id == card.Id);
         }
     }
 }
