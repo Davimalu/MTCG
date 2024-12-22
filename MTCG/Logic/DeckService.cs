@@ -22,6 +22,14 @@ namespace MTCG.Logic
             }
         }
         #endregion
+        #region DependencyInjection
+        public DeckService(IEventService eventService)
+        {
+            _eventService = eventService;
+        }
+        #endregion
+
+        public DeckService() { }
 
         private readonly IEventService _eventService = new EventService();
 
