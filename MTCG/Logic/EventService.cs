@@ -1,11 +1,5 @@
-﻿using MTCG.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Models.Enums;
-using MTCG.Interfaces.Logic;
 
 namespace MTCG.Logic
 {
@@ -44,7 +38,7 @@ namespace MTCG.Logic
             {
                 Console.Write($"\n[{consoleText}] {ex.Message}");
             }
-            
+
             Console.ResetColor();
             Console.WriteLine();
         }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MTCG.Interfaces.Logic;
+﻿using MTCG.Interfaces.Logic;
+using MTCG.Interfaces.Repository;
 using MTCG.Models;
 using MTCG.Repository;
 
@@ -27,39 +23,59 @@ namespace MTCG.Logic
             }
         }
         #endregion
+        #region DependencyInjection
+        public PackageService(IPackageRepository packageRepository)
+        {
+            _packageRepository = packageRepository;
+        }
+        #endregion
 
-        private readonly PackageRepository _packageRepository = PackageRepository.Instance;
+        public PackageService() { }
+
+        private readonly IPackageRepository _packageRepository = PackageRepository.Instance;
+
 
         public bool AddCardToPackage(Card card, Package package)
         {
-            // Check if package is already full
-            if (package.Cards.Count() >= 5)
+            // Thread Safety: Ensure that no other thread adds a card to the package between checking if the package is already full and the actual adding of the card
+            lock (ThreadSync.CardLock)
             {
-                return false;
-            }
+                // Check if package is already full
+                if (package.Cards.Count() >= 5)
+                {
+                    return false;
+                }
 
-            // Add card to package
-            package.Cards.Add(card);
-            return true;
+                // Add card to package
+                package.Cards.Add(card);
+                return true;
+            }
         }
+
 
         public bool SavePackageToDatabase(Package package)
         {
-            return _packageRepository.AddPackageToDatabase(package);
+            lock (ThreadSync.PackageLock)
+            {
+                return _packageRepository.AddPackageToDatabase(package);
+            }
         }
+
 
         public Package? GetRandomPackage()
         {
-            // TODO: THREAD SAFETY
+            // Thread Safety: Ensure that no other thread tries to access (and in succession delete) the same package at the same time
+            lock (ThreadSync.PackageLock)
+            {
+                // Get random package from database
+                int randomPackageId = _packageRepository.GetRandomPackageId();
+                Package? tmpPackage = _packageRepository.GetPackageFromId(randomPackageId);
 
-            // Get random package from database
-            int randomPackageId = _packageRepository.GetRandomPackageId();
-            Package? tmpPackage = _packageRepository.GetPackageFromId(randomPackageId);
+                // Delete retrieved package from database
+                _packageRepository.DeletePackageById(randomPackageId);
 
-            // Delete retrieved package from database
-            _packageRepository.DeletePackageById(randomPackageId);
-
-            return tmpPackage;
+                return tmpPackage;
+            }
         }
     }
 }

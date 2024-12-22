@@ -6,13 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using MTCG.DAL;
 using MTCG.Interfaces.Logic;
+using MTCG.Interfaces.Repository;
 using MTCG.Logic;
 using MTCG.Models;
 using MTCG.Models.Enums;
 
 namespace MTCG.Repository
 {
-    public class PackageRepository
+    public class PackageRepository : IPackageRepository
     {
         #region Singleton
         private static PackageRepository? _instance;
