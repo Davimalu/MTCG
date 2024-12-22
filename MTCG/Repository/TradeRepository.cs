@@ -232,7 +232,7 @@ namespace MTCG.Repository
             }
         }
 
-        public int SetTradeOfferInactive(int tradeIdToUpdate)
+        public bool SetTradeOfferInactive(int tradeIdToUpdate)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -246,10 +246,9 @@ namespace MTCG.Repository
                 DatabaseService.AddParameterWithValue(dbCommand, "@id", DbType.Int32, tradeIdToUpdate);
 
                 // Execute query and error handling
-                int tradeId;
                 try
                 {
-                    tradeId = (int)(dbCommand.ExecuteScalar() ?? 0);
+                    dbCommand.ExecuteScalar();
                 }
                 catch (Exception ex)
                 {
@@ -258,10 +257,10 @@ namespace MTCG.Repository
                     Console.WriteLine($"[ERROR] Trade offer with ID {tradeIdToUpdate} couldn't be set to inactive");
                     Console.WriteLine($"[ERROR] {ex.Message}");
                     Console.ResetColor();
-                    return -1;
+                    return false;
                 }
 
-                return tradeId;
+                return true;
             }
         }
     }

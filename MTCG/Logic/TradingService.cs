@@ -26,12 +26,12 @@ namespace MTCG.Logic
         }
         #endregion
         #region DependencyInjection
-        public TradingService(ITradeRepository tradeRepository, IUserService userService,
-            ICardRepository cardRepository, IEventService eventService)
+        public TradingService(ITradeRepository tradeRepository, IUserService userService, ICardRepository cardRepository, IStackService stackService, IEventService eventService)
         {
             _tradeRepository = tradeRepository;
             _userService = userService;
             _cardRepository = cardRepository;
+            _stackService = stackService;
             _eventService = eventService;
         }
         #endregion
@@ -101,6 +101,12 @@ namespace MTCG.Logic
                 return false;
             }
 
+            return RemoveTradeOffer(offerToRemove);
+        }
+
+
+        public bool RemoveTradeOffer(TradeOffer offerToRemove)
+        {
             if (_tradeRepository.RemoveTradeDeal(offerToRemove))
             {
                 // If the trade offer was successfully deleted, re-add card to stack of user
@@ -164,7 +170,7 @@ namespace MTCG.Logic
                 if (!PopulateTradeOfferFields(offer))
                 {
                     // Trade Offer is faulty and should be removed
-                    RemoveTradeOfferByCardId(offer.Card.Id);
+                    RemoveTradeOffer(offer);
                     offers.Remove(offer);
                 }
             }

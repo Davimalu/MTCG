@@ -9,5 +9,5 @@ public interface ITradeRepository
     List<TradeOffer> GetAllTradeDeals();
     TradeOffer? GetTradeDealById(int tradeId);
     TradeOffer? GetTradeDealByCardId(string cardIdToLookup);
-    int SetTradeOfferInactive(int tradeIdToUpdate);
+    bool SetTradeOfferInactive(int tradeIdToUpdate);
 }

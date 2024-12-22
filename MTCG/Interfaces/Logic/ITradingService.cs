@@ -16,6 +16,16 @@ public interface ITradingService
     /// <para>null on failure to create the trade offer or if some parameters were missing</para>
     /// </returns>
     TradeOffer? CreateTradeOffer(User user, Card card, bool requestedMonsterCard, float requestedDamage);
+
+    /// <summary>
+    /// remove the trade offer specified from the database
+    /// </summary>
+    /// <param name="offerToRemove">TradeOffer Object containing all relevant information</param>
+    /// <returns>
+    /// <para>true if the trade offer was successfully removed</para>
+    /// <para>false if this trade offer wasn't in the database or on error</para>
+    /// </returns>
+    bool RemoveTradeOffer(TradeOffer offerToRemove);
     /// <summary>
     /// remove a trade offer specified by the cardId of the card that was offered in the TradeOffer
     /// </summary>
