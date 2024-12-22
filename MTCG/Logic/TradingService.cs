@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MTCG.Interfaces;
 using MTCG.Interfaces.Logic;
+using MTCG.Interfaces.Repository;
 using MTCG.Models;
+using MTCG.Models.Enums;
 using MTCG.Repository;
 
 namespace MTCG.Logic
@@ -27,14 +25,30 @@ namespace MTCG.Logic
             }
         }
         #endregion
-
-        private readonly TradeRepository _tradeRepository = TradeRepository.Instance;
-        private readonly UserService _userService = UserService.Instance;
-        private readonly CardRepository _cardRepository = CardRepository.Instance;
-
-        public TradeDeal? CreateTradeOffer(User user, Card card, bool requestedMonsterCard, float requestedDamage)
+        #region DependencyInjection
+        public TradingService(ITradeRepository tradeRepository, IUserService userService,
+            ICardRepository cardRepository, IEventService eventService)
         {
-            TradeDeal deal = new TradeDeal()
+            _tradeRepository = tradeRepository;
+            _userService = userService;
+            _cardRepository = cardRepository;
+            _eventService = eventService;
+        }
+        #endregion
+
+        public TradingService() { }
+
+        private readonly ITradeRepository _tradeRepository = TradeRepository.Instance;
+        private readonly IUserService _userService = UserService.Instance;
+        private readonly ICardRepository _cardRepository = CardRepository.Instance;
+        private readonly IStackService _stackService = StackService.Instance;
+
+        private readonly IEventService _eventService = new EventService();
+
+
+        public TradeOffer? CreateTradeOffer(User user, Card card, bool requestedMonsterCard, float requestedDamage)
+        {
+            TradeOffer offer = new TradeOffer()
             {
                 Id = null,
                 User = user,
@@ -43,90 +57,161 @@ namespace MTCG.Logic
                 RequestedDamage = requestedDamage
             };
 
-            int? tradeId = _tradeRepository.AddTradeDeal(deal);
-
-            if (tradeId != null)
+            // Get card from users' stack
+            Card? cardToRemove = user.Stack.Cards.FirstOrDefault(item => item.Id == card.Id);
+            if (cardToRemove == null)
             {
-                deal.Id = tradeId;
-
-                // Remove card from stack of user
-                var cardToRemove = user.Stack.Cards.FirstOrDefault(item => item.Id == card.Id);
-                if (cardToRemove != null)
-                {
-                    user.Stack.Cards.Remove(cardToRemove);
-                }
-
-                _userService.SaveUserToDatabase(user);
-
-                // Now that the offer was created, see if there is another trade offer that is compatible with this one
-                TryToTrade(deal);
-
-                return deal;
+                // User doesn't own card
+                _eventService.LogEvent(EventType.Warning, $"Couldn't create trade offer: User {user.Username} doesn't own Card {card.Name}", null);
+                return null;
             }
 
-            return null;
+            // Remove card from stack of user
+            if (!_stackService.RemoveCardFromStack(cardToRemove, user.Stack))
+            {
+                // User doesn't own card
+                _eventService.LogEvent(EventType.Warning, $"Couldn't create trade offer: User {user.Username} doesn't own Card {card.Name}", null);
+                return null;
+            }
+
+            // Add trade offer to database
+            offer.Id = _tradeRepository.AddTradeOfferToDatabase(offer);
+            if (offer.Id == null)
+            {
+                _eventService.LogEvent(EventType.Error, $"Couldn't create trade offer: Database query failed", null);
+                return null;
+            }
+
+            // Update user in database (card was removed from Stack)
+            _userService.SaveUserToDatabase(user);
+
+            // Now that the offer was created, see if there is another trade offer that is compatible with this one
+            TryToTrade(offer);
+
+            return offer;
         }
+
 
         public bool RemoveTradeOfferByCardId(string cardId)
         {
-            TradeDeal dealToRemove = GetTradeOfferByCardId(cardId);
+            TradeOffer? offerToRemove = GetTradeOfferByCardId(cardId);
+            if (offerToRemove == null)
+            {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't remove trade offer for card {cardId}: There is no trade offer for this card", null);
+                return false;
+            }
 
-            if (_tradeRepository.RemoveTradeDeal(dealToRemove))
+            if (_tradeRepository.RemoveTradeDeal(offerToRemove))
             {
                 // If the trade offer was successfully deleted, re-add card to stack of user
-                dealToRemove.User.Stack.Cards.Add(dealToRemove.Card);
-                _userService.SaveUserToDatabase(dealToRemove.User);
+                _stackService.AddCardToStack(offerToRemove.Card, offerToRemove.User.Stack);
+                _userService.SaveUserToDatabase(offerToRemove.User);
+
                 return true;
             }
 
             return false;
         }
 
-        public TradeDeal? GetTradeOfferByCardId(string cardId)
-        {
-            TradeDeal deal = _tradeRepository.GetTradeDealByCardId(cardId);
 
-            if (deal != null)
+        public TradeOffer? GetTradeOfferByCardId(string cardId)
+        {
+            TradeOffer? offer = _tradeRepository.GetTradeDealByCardId(cardId);
+
+            if (offer == null)
             {
-                // Populate user and card field
-                deal.User = _userService.GetUserById(deal.User.Id);
-                deal.Card = _cardRepository.GetCardById(deal.Card.Id);
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve trade offer for card {cardId}: There is no trade offer for this card", null);
+                return null;
             }
 
-            return deal;
+            // Populate user and card fields
+            if (!PopulateTradeOfferFields(offer))
+            {
+                return null;
+            }
+
+            return offer;
         }
 
-        public TradeDeal GetTradeOfferById(int tradeId)
+
+        public TradeOffer? GetTradeOfferById(int tradeId)
         {
-            TradeDeal deal = _tradeRepository.GetTradeDealById(tradeId);
+            TradeOffer? offer = _tradeRepository.GetTradeDealById(tradeId);
 
-            // Populate user and card field
-            deal.User = _userService.GetUserById(deal.User.Id);
-            deal.Card = _cardRepository.GetCardById(deal.Card.Id);
+            if (offer == null)
+            {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't retrieve trade offer with ID {tradeId}: There is no trade offer with this ID", null);
+                return null;
+            }
 
-            return deal;
+            // Populate user and card fields
+            if (!PopulateTradeOfferFields(offer))
+            {
+                return null;
+            }
+
+            return offer;
         }
 
-        public List<TradeDeal> GetTradeOffers()
+
+        public List<TradeOffer> GetAllActiveTradeOffers()
         {
-            List<TradeDeal> deals = _tradeRepository.GetAllTradeDeals();
+            List<TradeOffer> offers = _tradeRepository.GetAllTradeDeals();
 
             // Populate user and card fields of all results
-            foreach (TradeDeal deal in deals)
+            foreach (TradeOffer offer in offers.ToList())
             {
-                deal.User = _userService.GetUserById(deal.User.Id);
-                deal.Card = _cardRepository.GetCardById(deal.Card.Id);
+                if (!PopulateTradeOfferFields(offer))
+                {
+                    // Trade Offer is faulty and should be removed
+                    RemoveTradeOfferByCardId(offer.Card.Id);
+                    offers.Remove(offer);
+                }
             }
 
-            return deals;
+            return offers;
         }
 
-        public bool TryToTrade(TradeDeal newDeal)
+
+        /// <summary>
+        /// populate the user and card field of the trade offer with instances of these objects containing all information stored about them
+        /// </summary>
+        /// <param name="offer">TradeOffer object containing the userID and cardID</param>
+        /// <returns>
+        /// <para>true if the TradeOffer object was successfully populated with the User and Card Information</para>
+        /// <para>false on error, e.g. User and/or Card associated with the trade offer don't exist</para>
+        /// </returns>
+        private bool PopulateTradeOfferFields(TradeOffer offer)
+        {
+            // 
+            // The errors in these error checks should be near impossible, but I guess it's good practice to check for them anyway
+            User? offeringUser = _userService.GetUserById(offer.User.Id);
+            Card? offeredCard = _cardRepository.GetCardById(offer.Card.Id);
+
+            if (offeringUser == null)
+            {
+                _eventService.LogEvent(EventType.Error, $"Couldn't retrieve trade offer: The user associated with this trade offer doesn't exist", null);
+                return false;
+            }
+
+            if (offeredCard == null)
+            {
+                _eventService.LogEvent(EventType.Error, $"Couldn't retrieve trade offer: The card associated with this trade offer doesn't exist", null);
+                return false;
+            }
+
+            offer.User = offeringUser;
+            offer.Card = offeredCard;
+            return true;
+        }
+
+
+        public bool TryToTrade(TradeOffer newOffer)
         {
             // Ensure that no user information is changed while this function is executed - otherwise the User objects might contain outdated information by the time SaveUserToDatabase() is called
             lock (ThreadSync.UserLock)
             {
-                List<TradeDeal> allOffers = GetTradeOffers();
+                List<TradeOffer> allOffers = GetAllActiveTradeOffers();
 
                 // No other offers exist -> cannot trade
                 if (allOffers.Count < 2)
@@ -134,35 +219,39 @@ namespace MTCG.Logic
                     return false;
                 }
 
-                foreach (TradeDeal deal in allOffers)
+                foreach (TradeOffer otherOffer in allOffers)
                 {
-                    if (deal.User.Username == newDeal.User.Username || deal.Id == null ||newDeal.Id == null)
+                    // Skip combinations where the user would trade with themselves
+                    if (otherOffer.User.Username == newOffer.User.Username || otherOffer.Id == null || newOffer.Id == null)
                     {
                         continue;
                     }
 
                     // Check if the card of the new offer is compatible with the requirements of existing offers
-                    if ((newDeal.Card is MonsterCard && deal.RequestedMonster == true) ||
-                        (!(newDeal.Card is MonsterCard) && deal.RequestedMonster == false))
+                    if ((newOffer.Card is MonsterCard && otherOffer.RequestedMonster == true) ||
+                        (!(newOffer.Card is MonsterCard) && otherOffer.RequestedMonster == false))
                     {
-                        if (newDeal.Card.Damage >= deal.RequestedDamage)
+                        if (newOffer.Card.Damage >= otherOffer.RequestedDamage)
                         {
                             // The other offer would accept this card
                             // Now check if the requirements of this offer would accept the card of the other offer
-                            if ((deal.Card is MonsterCard && newDeal.RequestedMonster == true) ||
-                                !(deal.Card is MonsterCard) && newDeal.RequestedMonster == false)
+                            if ((otherOffer.Card is MonsterCard && newOffer.RequestedMonster == true) ||
+                                !(otherOffer.Card is MonsterCard) && newOffer.RequestedMonster == false)
                             {
-                                if (deal.Card.Damage >= newDeal.RequestedDamage)
+                                if (otherOffer.Card.Damage >= newOffer.RequestedDamage)
                                 {
                                     // Both trade offers are compatible, commence trade!
-                                    deal.User.Stack.Cards.Add(newDeal.Card);
-                                    newDeal.User.Stack.Cards.Add(deal.Card);
+                                    _stackService.AddCardToStack(newOffer.Card, otherOffer.User.Stack);
+                                    _stackService.AddCardToStack(otherOffer.Card, newOffer.User.Stack);
 
-                                    _userService.SaveUserToDatabase(deal.User);
-                                    _userService.SaveUserToDatabase(newDeal.User);
+                                    _userService.SaveUserToDatabase(otherOffer.User);
+                                    _userService.SaveUserToDatabase(newOffer.User);
 
-                                    _tradeRepository.SetTradeOfferInactive((int)deal.Id);
-                                    _tradeRepository.SetTradeOfferInactive((int)newDeal.Id);
+                                    _tradeRepository.SetTradeOfferInactive((int)otherOffer.Id);
+                                    _tradeRepository.SetTradeOfferInactive((int)newOffer.Id);
+
+                                    _eventService.LogEvent(EventType.Highlight, $"{newOffer.User.Username} received card {otherOffer.Card.Name} in trade with {otherOffer.User.Username}", null);
+                                    _eventService.LogEvent(EventType.Highlight, $"{otherOffer.User.Username} received card {newOffer.Card.Name} in trade with {newOffer.User.Username}", null);
 
                                     return true;
                                 }

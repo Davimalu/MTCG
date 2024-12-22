@@ -6,12 +6,13 @@ using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
 using MTCG.DAL;
+using MTCG.Interfaces.Repository;
 using MTCG.Logic;
 using MTCG.Models;
 
 namespace MTCG.Repository
 {
-    public class TradeRepository
+    public class TradeRepository : ITradeRepository
     {
         #region Singleton
         private static TradeRepository? _instance;
@@ -32,7 +33,7 @@ namespace MTCG.Repository
 
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
 
-        public int? AddTradeDeal(TradeDeal deal)
+        public int? AddTradeOfferToDatabase(TradeOffer offer)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -43,11 +44,11 @@ namespace MTCG.Repository
                                                                         RETURNING tradeId;
                                                                       """);
 
-                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, deal.User.Id);
-                DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, deal.Card.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, offer.User.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, offer.Card.Id);
                 DatabaseService.AddParameterWithValue(dbCommand, "@requestedCardType", DbType.String,
-                    deal.RequestedMonster ? "Monster" : "Spell");
-                DatabaseService.AddParameterWithValue(dbCommand, "@requestedDamage", DbType.Single, deal.RequestedDamage);
+                    offer.RequestedMonster ? "Monster" : "Spell");
+                DatabaseService.AddParameterWithValue(dbCommand, "@requestedDamage", DbType.Single, offer.RequestedDamage);
 
 
                 // Execute query and error handling
@@ -62,7 +63,7 @@ namespace MTCG.Repository
                     Console.BackgroundColor = ConsoleColor.Red;
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine(
-                        $"[ERROR] Trade deal of user {deal.User.Username} couldn't be written to the database!");
+                        $"[ERROR] Trade offer of user {offer.User.Username} couldn't be written to the database!");
                     Console.WriteLine($"[ERROR] {ex.Message}");
                     Console.ResetColor();
                     return -1;
@@ -72,7 +73,7 @@ namespace MTCG.Repository
             }
         }
 
-        public bool RemoveTradeDeal(TradeDeal deal)
+        public bool RemoveTradeDeal(TradeOffer offer)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -82,7 +83,7 @@ namespace MTCG.Repository
                                                                       WHERE tradeId = @tradeId;
                                                                       """);
 
-                DatabaseService.AddParameterWithValue(dbCommand, "@tradeId", DbType.Int32, deal.Id);
+                DatabaseService.AddParameterWithValue(dbCommand, "@tradeId", DbType.Int32, offer.Id);
 
                 // Execute query and error handling
                 int rowsAffected;
@@ -95,7 +96,7 @@ namespace MTCG.Repository
                 {
                     Console.BackgroundColor = ConsoleColor.Red;
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Error deleting trade deal of {deal.User.Username} from the database!");
+                    Console.WriteLine($"[ERROR] Error deleting trade offer of {offer.User.Username} from the database!");
                     Console.WriteLine($"[ERROR] {ex.Message}");
                     Console.ResetColor();
                     return false;
@@ -111,7 +112,7 @@ namespace MTCG.Repository
             }
         }
 
-        public List<TradeDeal> GetAllTradeDeals()
+        public List<TradeOffer> GetAllTradeDeals()
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -124,7 +125,7 @@ namespace MTCG.Repository
                 // TODO: Add error handling?
                 using IDataReader reader = dbCommand.ExecuteReader();
 
-                List<TradeDeal> deals = new List<TradeDeal>();
+                List<TradeOffer> deals = new List<TradeOffer>();
 
 
                 /* Since there is only one database connection that is shared between all threads and queries, two queries cannot run simultaneously
@@ -141,7 +142,7 @@ namespace MTCG.Repository
                     string requestedCardType = reader.GetString(3);
                     float requestedDamage = reader.GetFloat(4);
 
-                    deals.Add(new TradeDeal()
+                    deals.Add(new TradeOffer()
                         {
                             Id = tradeId,
                             User = new User() {Id = userId},
@@ -155,7 +156,7 @@ namespace MTCG.Repository
             }
         }
 
-        public TradeDeal? GetTradeDealById(int tradeId)
+        public TradeOffer? GetTradeDealById(int tradeId)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -179,7 +180,7 @@ namespace MTCG.Repository
                     ElementType requestedElementType = Enum.Parse<ElementType>(reader.GetString(4));
                     float requestedDamage = reader.GetFloat(5);
 
-                    return (new TradeDeal()
+                    return (new TradeOffer()
                     {
                         Id = tradeId,
                         User = new User() { Id = userId },
@@ -193,7 +194,7 @@ namespace MTCG.Repository
             }
         }
 
-        public TradeDeal? GetTradeDealByCardId(string cardIdToLookup)
+        public TradeOffer? GetTradeDealByCardId(string cardIdToLookup)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -217,7 +218,7 @@ namespace MTCG.Repository
                     string requestedCardType = reader.GetString(3);
                     float requestedDamage = reader.GetFloat(4);
 
-                    return (new TradeDeal()
+                    return (new TradeOffer()
                     {
                         Id = tradeId,
                         User = new User() { Id = userId },

@@ -66,10 +66,10 @@ namespace MTCG.Endpoints
 
         private (int, string?) HandleListTradeOffers()
         {
-            List<TradeDeal> tradeOffers = _tradingService.GetTradeOffers();
+            List<Models.TradeOffer> tradeOffers = _tradingService.GetAllActiveTradeOffers();
 
             List<TradeOffer> response = new List<TradeOffer>();
-            foreach (TradeDeal offer in tradeOffers)
+            foreach (Models.TradeOffer offer in tradeOffers)
             {
                 response.Add(new TradeOffer()
                 {
@@ -144,7 +144,7 @@ namespace MTCG.Endpoints
             }
 
             // If none of these checks failed, create the trade offer...
-            TradeDeal? deal = _tradingService.CreateTradeOffer(user, cardToTrade, type == "monster", minimumDamage);
+            Models.TradeOffer? deal = _tradingService.CreateTradeOffer(user, cardToTrade, type == "monster", minimumDamage);
 
             if (deal == null)
             {
@@ -180,7 +180,7 @@ namespace MTCG.Endpoints
             // Extract the substring starting after the last slash | /tradings/27051a20-8580-43ff-a473-e986b52f297a -> 27051a20-8580-43ff-a473-e986b52f297a
             string cardIdOfTradeToRemove = headers.Path.Substring(index);
 
-            TradeDeal? dealToRemove = _tradingService.GetTradeOfferByCardId(cardIdOfTradeToRemove);
+            Models.TradeOffer? dealToRemove = _tradingService.GetTradeOfferByCardId(cardIdOfTradeToRemove);
 
             if (dealToRemove == null)
             {

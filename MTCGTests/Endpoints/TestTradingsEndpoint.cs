@@ -54,9 +54,9 @@ namespace MTCGTests.Endpoints
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
-            var tradeDeals = new List<TradeDeal>
+            var tradeDeals = new List<TradeOffer>
             {
-                new TradeDeal
+                new TradeOffer
                 {
                     User = user,
                     Card = new MonsterCard { Id = "card-1", Name = "Dragon", Damage = 50 },
@@ -65,7 +65,7 @@ namespace MTCGTests.Endpoints
                 }
             };
 
-            _tradingService.GetTradeOffers().Returns(tradeDeals);
+            _tradingService.GetAllActiveTradeOffers().Returns(tradeDeals);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
@@ -101,7 +101,7 @@ namespace MTCGTests.Endpoints
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
-            _tradingService.GetTradeOfferByCardId("nonexistent-card-id").Returns((TradeDeal?)null);
+            _tradingService.GetTradeOfferByCardId("nonexistent-card-id").Returns((TradeOffer?)null);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
@@ -180,7 +180,7 @@ namespace MTCGTests.Endpoints
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
-            var tradeDeal = new TradeDeal
+            var tradeDeal = new TradeOffer
             {
                 User = otherUser,
                 Card = new MonsterCard { Id = "card-1", Name = "Dragon", Damage = 50 }
@@ -204,7 +204,7 @@ namespace MTCGTests.Endpoints
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
-            var tradeDeal = new TradeDeal
+            var tradeDeal = new TradeOffer
             {
                 User = user,
                 Card = new MonsterCard { Id = "card-1", Name = "Dragon", Damage = 50 }
