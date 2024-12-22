@@ -70,7 +70,7 @@ namespace MTCG.Logic
             if (user.Deck.Cards.Count > 0)
             {
                 _deckRepository.ClearUserDeck(user);
-                _deckRepository.SaveDeckOfUser(user);
+                _deckRepository.SaveDeckOfUserToDatabase(user);
             }
 
             return user.Id;

@@ -7,20 +7,18 @@ public interface IDeckRepository
     /// <summary>
     /// saves the deck of a user to the database
     /// </summary>
-    /// <param name="user">user object containing his deck object</param>
+    /// <param name="user">user object containing the deck object to be stored in the database</param>
     /// <returns>
     /// <para>true if the users deck was successfully stored in the database</para>
     /// <para>false if the user was not yet added to the database, the deck was empty or an error occured</para>
     /// </returns>
-    bool SaveDeckOfUser(User user);
-
+    bool SaveDeckOfUserToDatabase(User user);
     /// <summary>
     /// retrieves all cards of a user's deck
     /// </summary>
     /// <param name="user"></param>
     /// <returns>a list of all the cardIds of the cards from the user's deck</returns>
     List<string>? GetCardIdsOfUserDeck(User user);
-
     /// <summary>
     /// delete the deck of a user form the database
     /// </summary>

@@ -1,12 +1,10 @@
 ﻿using MTCG.DAL;
+using MTCG.Interfaces.Logic;
 using MTCG.Interfaces.Repository;
+using MTCG.Logic;
 using MTCG.Models;
-using System;
-using System.Collections.Generic;
+using MTCG.Models.Enums;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MTCG.Repository
 {
@@ -30,62 +28,9 @@ namespace MTCG.Repository
         #endregion
 
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
+        private readonly IEventService _eventService = new EventService();
 
-        /// <summary>
-        /// delete the stack of a user form the database
-        /// </summary>
-        /// <param name="user">user object, must contain at least the userId</param>
-        /// <returns>
-        /// <para>true on success</para>
-        /// <para>false if user or his stack were not yet added to database or on error</para>
-        /// </returns>
-        public bool ClearUserStack(User user)
-        {
-            lock (ThreadSync.DatabaseLock)
-            {
-                // Prepare SQL query
-                using IDbCommand dbCommand = _databaseService.CreateCommand("""
-                                                                      DELETE FROM userStacks
-                                                                      WHERE userid = @userId;
-                                                                      """);
 
-                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
-
-                // Execute query and error handling
-                int rowsAffected;
-
-                try
-                {
-                    rowsAffected = dbCommand.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Error deleting stack of {user.Username} from the database!");
-                    Console.WriteLine($"[ERROR] {ex.Message}");
-                    Console.ResetColor();
-                    return false;
-                }
-
-                // Check if at least one row was affected
-                if (rowsAffected <= 0)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// saves the stack of a user to the database
-        /// </summary>
-        /// <param name="user">user object containing his stack object</param>
-        /// <returns>
-        /// <para>true if the users stack was successfully stored in the database</para>
-        /// <para>false if the user was not yet added to the database, the stack was empty or an error occured</para>
-        /// </returns>
         public bool SaveStackOfUser(User user)
         {
             lock (ThreadSync.DatabaseLock)
@@ -111,18 +56,14 @@ namespace MTCG.Repository
                     }
                     catch (Exception ex)
                     {
-                        Console.BackgroundColor = ConsoleColor.Red;
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine($"[ERROR] Stack of user {user.Username} couldn't be written to the database!");
-                        Console.WriteLine($"[ERROR] {ex.Message}");
-                        Console.ResetColor();
+                        _eventService.LogEvent(EventType.Error, $"Couldn't write Stack of user {user.Username} to the database", ex);
                         return false;
                     }
 
                     // Stack empty or user didn't exist
                     if (rowsAffected <= 0)
                     {
-                        Console.WriteLine($"[WARNING] Stack of user {user.Username} couldn't be written to the database!");
+                        _eventService.LogEvent(EventType.Warning, $"Couldn't write Stack of user {user.Username} to the database", null);
                         return false;
                     }
                 }
@@ -148,19 +89,64 @@ namespace MTCG.Repository
 
                 DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
-                // Execute query
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
+                // Execute query and error handling
+                IDataReader? reader = null;
+                try
+                {
+                    reader = dbCommand.ExecuteReader();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve cards of User {user.Username}'s Stack", ex);
+                    return null;
+                }
 
                 // Add each entry to the list of cardIds
-                List<string> cardsOfUser = new List<string>();
+                List<string> cardsOfUser = [];
 
                 while (reader.Read())
                 {
                     cardsOfUser.Add(reader.GetString(0));
                 }
 
+                reader.Close();
                 return cardsOfUser;
+            }
+        }
+
+
+        public bool ClearUserStack(User user)
+        {
+            lock (ThreadSync.DatabaseLock)
+            {
+                // Prepare SQL query
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
+                                                                            DELETE FROM userStacks
+                                                                            WHERE userid = @userId;
+                                                                            """);
+
+                DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
+
+                // Execute query and error handling
+                int rowsAffected;
+
+                try
+                {
+                    rowsAffected = dbCommand.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't delete Stack of User {user.Username} from the database", ex);
+                    return false;
+                }
+
+                // Check if at least one row was affected
+                if (rowsAffected <= 0)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
     }

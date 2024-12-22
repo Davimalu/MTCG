@@ -1,12 +1,10 @@
 ﻿using MTCG.DAL;
+using MTCG.Interfaces.Logic;
 using MTCG.Interfaces.Repository;
+using MTCG.Logic;
 using MTCG.Models;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MTCG.Models.Enums;
 
 namespace MTCG.Repository
 {
@@ -30,19 +28,10 @@ namespace MTCG.Repository
         #endregion
 
         private readonly DatabaseService _databaseService = DatabaseService.Instance;
+        private readonly IEventService _eventService = new EventService();
 
-        // TODO: The Deck functions are almost the same as all the stack functions -> Can this be written shorter somehow?
-        // TODO: Refactor Deck and Stack functions into Stack- and Deck-Repository?
 
-        /// <summary>
-        /// saves the deck of a user to the database
-        /// </summary>
-        /// <param name="user">user object containing his deck object</param>
-        /// <returns>
-        /// <para>true if the users deck was successfully stored in the database</para>
-        /// <para>false if the user was not yet added to the database, the deck was empty or an error occured</para>
-        /// </returns>
-        public bool SaveDeckOfUser(User user)
+        public bool SaveDeckOfUserToDatabase(User user)
         {
             lock (ThreadSync.DatabaseLock)
             {
@@ -67,18 +56,14 @@ namespace MTCG.Repository
                     }
                     catch (Exception ex)
                     {
-                        Console.BackgroundColor = ConsoleColor.Red;
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine($"[ERROR] Deck of user {user.Username} couldn't be written to the database!");
-                        Console.WriteLine($"[ERROR] {ex.Message}");
-                        Console.ResetColor();
+                        _eventService.LogEvent(EventType.Error, $"Couldn't write Deck of user {user.Username} to the database", ex);
                         return false;
                     }
 
-                    // Stack empty or user didn't exist
+                    // Deck empty or user didn't exist
                     if (rowsAffected <= 0)
                     {
-                        Console.WriteLine($"[WARNING] Deck of user {user.Username} couldn't be written to the database!");
+                        _eventService.LogEvent(EventType.Warning, $"Couldn't write Deck of user {user.Username} to the database", null);
                         return false;
                     }
                 }
@@ -87,11 +72,7 @@ namespace MTCG.Repository
             }
         }
 
-        /// <summary>
-        /// retrieves all cards of a user's deck
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>a list of all the cardIds of the cards from the user's deck</returns>
+
         public List<string>? GetCardIdsOfUserDeck(User user)
         {
             lock (ThreadSync.DatabaseLock)
@@ -104,30 +85,32 @@ namespace MTCG.Repository
 
                 DatabaseService.AddParameterWithValue(dbCommand, "@userId", DbType.Int32, user.Id);
 
-                // Execute query
-                // TODO: Add error handling?
-                using IDataReader reader = dbCommand.ExecuteReader();
+                // Execute query and error handling
+                IDataReader? reader = null;
+                try
+                {
+                    reader = dbCommand.ExecuteReader();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't retrieve cards of User {user.Username}'s Deck", ex);
+                    return null;
+                }
 
                 // Add each entry to the list of cardIds
-                List<string> cardsOfUser = new List<string>();
+                List<string> cardsOfUser = [];
 
                 while (reader.Read())
                 {
                     cardsOfUser.Add(reader.GetString(0));
                 }
 
+                reader.Close();
                 return cardsOfUser;
             }
         }
 
-        /// <summary>
-        /// delete the deck of a user form the database
-        /// </summary>
-        /// <param name="user">user object, must contain at least the userId</param>
-        /// <returns>
-        /// <para>true on success</para>
-        /// <para>false if user or his deck were not yet added to database or on error</para>
-        /// </returns>
+
         public bool ClearUserDeck(User user)
         {
             lock (ThreadSync.DatabaseLock)
@@ -149,11 +132,7 @@ namespace MTCG.Repository
                 }
                 catch (Exception ex)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"[ERROR] Error deleting deck of {user.Username} from the database!");
-                    Console.WriteLine($"[ERROR] {ex.Message}");
-                    Console.ResetColor();
+                    _eventService.LogEvent(EventType.Error, $"Couldn't delete deck of User {user.Username} from the database", ex);
                     return false;
                 }
 
