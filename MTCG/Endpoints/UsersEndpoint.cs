@@ -76,32 +76,37 @@ namespace MTCG.Endpoints
                 return (400, JsonSerializer.Serialize("Invalid request body"));
             }
 
-            // Try registering the user
-            if (_authService.RegisterUser(tmpUser.Username, tmpUser.Password))
+            // Thread Safety: Ensure that two threads don't try to register the same user at the same time
+            lock (ThreadSync.UserLock)
             {
-                _eventService.LogEvent(EventType.Highlight, $"New user account created: {tmpUser.Username}", null);
-
-                var response = new
+                // Try registering the user
+                if (_authService.RegisterUser(tmpUser.Username, tmpUser.Password))
                 {
-                    message = "User Created",
-                    User = new
-                    {
-                        Username = tmpUser.Username,
-                        DisplayName = tmpUser.DisplayName,
-                        Biography = tmpUser.Biography,
-                        Image = tmpUser.Image,
-                        Stats = tmpUser.Stats,
-                        CoinCount = tmpUser.CoinCount
-                    }
-                };
+                    _eventService.LogEvent(EventType.Highlight, $"New user account created: {tmpUser.Username}", null);
 
-                return (201, JsonSerializer.Serialize(response));
-            }
-            else
-            {
-                return (409, JsonSerializer.Serialize("User already exists"));
+                    var response = new
+                    {
+                        message = "User Created",
+                        User = new
+                        {
+                            Username = tmpUser.Username,
+                            DisplayName = tmpUser.DisplayName,
+                            Biography = tmpUser.Biography,
+                            Image = tmpUser.Image,
+                            Stats = tmpUser.Stats,
+                            CoinCount = tmpUser.CoinCount
+                        }
+                    };
+
+                    return (201, JsonSerializer.Serialize(response));
+                }
+                else
+                {
+                    return (409, JsonSerializer.Serialize("User already exists"));
+                }
             }
         }
+
 
         private (int, string?) HandleUserRetrieval(HTTPHeader headers)
         {
