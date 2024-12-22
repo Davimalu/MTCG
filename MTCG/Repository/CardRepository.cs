@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MTCG.Models;
 using System.Data;
 using MTCG.Logic;
 using static System.Net.Mime.MediaTypeNames;
@@ -12,6 +11,7 @@ using System.Xml.Linq;
 using MTCG.Models.Enums;
 using Npgsql;
 using MTCG.Interfaces.Logic;
+using MTCG.Models.Cards;
 
 namespace MTCG.Repository
 {

@@ -34,7 +34,7 @@ namespace MTCG.Endpoints
         }
         #endregion
 
-        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             switch (headers.Method)
             {
@@ -108,7 +108,7 @@ namespace MTCG.Endpoints
         }
 
 
-        private (int, string?) HandleUserRetrieval(HTTPHeader headers)
+        private (int, string?) HandleUserRetrieval(HttpHeader headers)
         {
             // Check if the user which information is to be retrieved is the same user as the authenticated user
             AuthenticationError authorizationError = RequestedUserIsAuthenticatedUser(headers);
@@ -131,7 +131,7 @@ namespace MTCG.Endpoints
             }
         }
 
-        private (int, string?) HandleUserUpdate(HTTPHeader headers, string? body)
+        private (int, string?) HandleUserUpdate(HttpHeader headers, string? body)
         {
             // Check if the user which information is to be updated is the same user as the authenticated user
             AuthenticationError authorizationError = RequestedUserIsAuthenticatedUser(headers);
@@ -209,7 +209,7 @@ namespace MTCG.Endpoints
         /// </summary>
         /// <param name="headers"></param>
         /// <returns></returns>
-        public AuthenticationError RequestedUserIsAuthenticatedUser(HTTPHeader headers)
+        public AuthenticationError RequestedUserIsAuthenticatedUser(HttpHeader headers)
         {
             // Check if path is valid
             if (!IsValidRetrievalPath(headers.Path))

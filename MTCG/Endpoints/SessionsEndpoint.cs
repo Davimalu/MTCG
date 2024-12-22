@@ -26,7 +26,7 @@ namespace MTCG.Endpoints
         }
         #endregion
 
-        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             switch (headers.Method)
             {

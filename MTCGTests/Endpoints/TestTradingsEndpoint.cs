@@ -5,6 +5,7 @@ using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
+using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -33,7 +34,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_UserNotAuthorized_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings", Method = "GET", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
@@ -49,7 +50,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_ListTradeOffers_Returns200WithTradeOffers()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings", Method = "GET", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -79,7 +80,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_CreateTradeOffer_EmptyBody_Returns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -96,7 +97,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_DELETE_DeleteTradeOffer_NoTradeFound_Returns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings/nonexistent-card-id", Method = "DELETE", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings/nonexistent-card-id", Method = "DELETE", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -115,7 +116,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_PUT_InvalidMethod_Returns405()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings", Method = "PUT", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings", Method = "PUT", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -132,7 +133,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_CreateTradeOffer_InvalidJson_Returns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -151,7 +152,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_CreateTradeOffer_CardNotOwned_Returns403()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -174,7 +175,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_DeleteTradeOffer_TradeOwnedByAnotherUser_Returns403()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings/card-1", Method = "DELETE", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings/card-1", Method = "DELETE", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             var otherUser = new User { Username = "OtherUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
@@ -199,7 +200,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_DeleteTradeOffer_Success_Returns200()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/tradings/card-1", Method = "DELETE", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/tradings/card-1", Method = "DELETE", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);

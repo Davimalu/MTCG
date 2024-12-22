@@ -5,6 +5,7 @@ using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
 using MTCG.Interfaces.Logic;
+using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -27,7 +28,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_UserNotAuthorized_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/cards", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/cards", Method = "GET", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns(("invalid-token"));
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
@@ -43,7 +44,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_AuthorizedUser_Returns200WithCards()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/cards", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/cards", Method = "GET", Version = "1.1" };
             var stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1", Name = "TestCard" }, new SpellCard { Id = "2", Name = "AnotherTestCard" } } };
             var user = new User { Stack = stack };
 
@@ -62,7 +63,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_AuthorizedUser_UnsupportedMethod_Returns405()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/cards", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/cards", Method = "POST", Version = "1.1" };
 
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User());

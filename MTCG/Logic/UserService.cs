@@ -4,6 +4,7 @@ using MTCG.Models.Enums;
 using MTCG.Repository;
 using System.Text.Json;
 using MTCG.Interfaces.Repository;
+using MTCG.Models.Cards;
 
 namespace MTCG.Logic
 {

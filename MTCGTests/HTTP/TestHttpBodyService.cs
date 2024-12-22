@@ -22,7 +22,7 @@ namespace MTCGTests.HTTP
         public void ParseHTTPBody_ShouldReturnBody_WhenContentLengthIsPresent()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Method = "POST",
                 Path = "/users",
@@ -44,7 +44,7 @@ namespace MTCGTests.HTTP
         public void ParseHTTPBody_ShouldReturnNull_WhenContentLengthIsMissing()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Method = "GET",
                 Path = "/users",
@@ -65,7 +65,7 @@ namespace MTCGTests.HTTP
         public void ParseHTTPBody_ShouldLogWarningAndReturnNull_WhenContentLengthIsInvalid()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Method = "PUT",
                 Path = "/users",
@@ -90,7 +90,7 @@ namespace MTCGTests.HTTP
         public void ParseHTTPBody_ShouldLogWarningAndReturnNull_WhenContentLengthIsNegative()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Method = "DELETE",
                 Path = "/users",

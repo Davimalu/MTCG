@@ -1,6 +1,7 @@
 ﻿using MTCG.Interfaces.Logic;
 using MTCG.Interfaces.Repository;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Repository;
 
 namespace MTCG.Logic

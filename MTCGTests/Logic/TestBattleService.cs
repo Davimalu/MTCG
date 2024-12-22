@@ -1,7 +1,8 @@
-﻿using MTCG.Interfaces;
-using MTCG.Interfaces.Logic;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
+using MTCG.Models.Enums;
 using NSubstitute;
 
 namespace MTCGTests.Logic
@@ -123,7 +124,7 @@ namespace MTCGTests.Logic
             var playerA = new User
             {
                 Username = "PlayerA",
-                Deck = new Deck { Cards = new List<Card> { new MonsterCard("Card 01","Goblin", 10, ElementType.Normal) } }
+                Deck = new Deck { Cards = new List<Card> { new MonsterCard("Card 01", "Goblin", 10, ElementType.Normal) } }
             };
 
             var playerB = new User

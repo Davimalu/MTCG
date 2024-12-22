@@ -2,6 +2,7 @@
 using MTCG.Interfaces.Logic;
 using MTCG.Interfaces.Repository;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using MTCG.Repository;
 
@@ -189,7 +190,7 @@ namespace MTCG.Logic
         /// </returns>
         private bool PopulateTradeOfferFields(TradeOffer offer)
         {
-            if (offer.User.Id == null)
+            if (offer.User.Id == null || offer.Card.Id == null)
             {
                 return false;
             }

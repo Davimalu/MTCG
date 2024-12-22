@@ -1,4 +1,6 @@
-﻿namespace MTCG.Models
+﻿using MTCG.Models.Cards;
+
+namespace MTCG.Models
 {
     public class Stack
     {
@@ -7,7 +9,7 @@
         // Constructor
         public Stack()
         {
-            // Initalize empty stack
+            // Initialize empty stack
             Cards = new List<Card>();
         }
     }

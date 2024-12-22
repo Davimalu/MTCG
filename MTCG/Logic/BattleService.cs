@@ -2,6 +2,7 @@
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using System.Text.Json;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 
 namespace MTCG.Logic

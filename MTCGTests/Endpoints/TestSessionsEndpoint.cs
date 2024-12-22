@@ -26,7 +26,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_EmptyBody_Returns400WithErrorMessage()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
@@ -40,7 +40,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_InvalidJson_Returns400WithErrorMessage()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
             var invalidBody = "Invalid JSON";
 
             // Act
@@ -56,7 +56,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_InvalidCredentials_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "test", Password = "wrongPassword" });
             _authService.LoginUser("test", "wrongPassword").Returns((User?)null);
 
@@ -71,7 +71,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_ValidCredentials_Returns200WithSuccessMessage()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/sessions", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "test", Password = "correctPassword" });
             var user = new User { Username = "test", AuthToken = "valid-token" };
             _authService.LoginUser("test", "correctPassword").Returns(user);
@@ -89,7 +89,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_UnsupportedMethod_Returns405WithErrorMessage()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/sessions", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/sessions", Method = "GET", Version = "1.1" };
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);

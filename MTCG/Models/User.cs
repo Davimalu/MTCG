@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace MTCG.Models
+﻿namespace MTCG.Models
 {
     public class User
     {
@@ -16,14 +13,10 @@ namespace MTCG.Models
         public Stack Stack { get; set; } = new Stack();
         public Deck Deck { get; set; } = new Deck();
 
-        private int _coinCount = 20;
-
+        private int _coinCount;
         public int CoinCount
         {
-            get
-            {
-                return _coinCount;
-            }
+            get => _coinCount;
             set
             {
                 // Check if coin count is negative

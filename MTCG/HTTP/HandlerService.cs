@@ -54,7 +54,7 @@ namespace MTCG.HTTP
                 AutoFlush = true
             };
 
-            HTTPHeader? headers = _headerService.ParseHttpHeader(reader);
+            HttpHeader? headers = _headerService.ParseHttpHeader(reader);
             if (headers == null)
             {
                 _responseService.SendResponseToClient(writer, 400, JsonSerializer.Serialize("Invalid HTTP Header"));
@@ -105,7 +105,7 @@ namespace MTCG.HTTP
         /// <para>-> ensures that only one request of a specific user is processed at a time</para>
         /// </summary>
         /// <param name="headers"></param>
-        private void LockUser(HTTPHeader headers)
+        private void LockUser(HttpHeader headers)
         {
             lock (ThreadSync.UserLock)
             {
@@ -127,7 +127,7 @@ namespace MTCG.HTTP
         /// <para>-> signals other waiting threads that they can continue processing the request of a specific user</para>
         /// </summary>
         /// <param name="headers"></param>
-        private static void UnlockUser(HTTPHeader headers)
+        private static void UnlockUser(HttpHeader headers)
         {
             lock (ThreadSync.UserLock)
             {

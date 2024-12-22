@@ -28,7 +28,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_UserNotAuthorized_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/scoreboard", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/scoreboard", Method = "GET", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid_token");
             _userService.GetUserByToken("invalid_token").Returns((User?)null);
 
@@ -44,7 +44,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_MethodNotAllowed_Returns405()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/scoreboard", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/scoreboard", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
             _userService.GetUserByToken("valid_token").Returns(new User());
 

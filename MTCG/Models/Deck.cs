@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using MTCG.Models.Cards;
 
 namespace MTCG.Models
 {

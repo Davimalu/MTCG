@@ -33,7 +33,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_EmptyBodyReturns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/users", Method = "POST", Version = "1.1" };
 
             // Act
             var result = _usersEndpoint.HandleRequest(null, headers, null);
@@ -47,7 +47,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_InvalidJsonReturns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/users", Method = "POST", Version = "1.1" };
             string invalidJson = "{ Invalid [JS]ON";
 
             // Act
@@ -63,7 +63,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_ValidUserRegistrationReturns201()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/users", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "testuser", Password = "password" });
 
             _authService.RegisterUser("testuser", "password").Returns(true);
@@ -81,7 +81,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_AlreadyExistingUserRegistrationReturns409()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/users", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/users", Method = "POST", Version = "1.1" };
             var body = JsonSerializer.Serialize(new User { Username = "testuser", Password = "password" });
 
             _authService.RegisterUser("testuser", "password").Returns(false);
@@ -98,7 +98,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_InvalidPathReturns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "GET", Path = "/invalid/path", Version = "1.1" };
+            var headers = new HttpHeader { Method = "GET", Path = "/invalid/path", Version = "1.1" };
 
             // Act
             var result = _usersEndpoint.HandleRequest(null, headers, null);
@@ -112,7 +112,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_NonExistentUserReturns404()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/users/nonexistent", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/users/nonexistent", Method = "GET", Version = "1.1" };
             _userService.GetUserByName("nonexistent").Returns((User?)null);
 
             // Act
@@ -127,7 +127,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_ValidPathReturns200AndUserJson()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "GET", Path = "/users/testuser", Version = "1.1" };
+            var headers = new HttpHeader { Method = "GET", Path = "/users/testuser", Version = "1.1" };
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
@@ -148,7 +148,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_UnauthenticatedUserReturns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "GET", Path = "/users/testuser", Version = "1.1" };
+            var headers = new HttpHeader { Method = "GET", Path = "/users/testuser", Version = "1.1" };
             var token = "invalid-mtcgToken";
             var user = new User { Username = "testuser" };
 
@@ -168,7 +168,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_PUT_NoBodyReturns400AndLogsWarning()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "PUT", Path = "/users/testuser", Version = "1.1" };
+            var headers = new HttpHeader { Method = "PUT", Path = "/users/testuser", Version = "1.1" };
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
@@ -189,7 +189,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_PUT_InvalidBodyReturns400AndLogsWarning()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "PUT", Path = "/users/testuser", Version = "1.1" };
+            var headers = new HttpHeader { Method = "PUT", Path = "/users/testuser", Version = "1.1" };
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
@@ -212,7 +212,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_PUT_ValidBodyUpdatesUserAndReturns200()
         {
             // Arrange
-            var headers = new HTTPHeader { Method = "PUT", Path = "/users/testuser", Version = "1.1" };
+            var headers = new HttpHeader { Method = "PUT", Path = "/users/testuser", Version = "1.1" };
             var token = "testuser-mtcgToken";
             var user = new User { Username = "testuser" };
 
@@ -258,7 +258,7 @@ namespace MTCGTests.Endpoints
         [Test]
         public void HandleRequest_InvalidMethod_Returns405()
         {
-            var headers = new HTTPHeader { Path = "/users", Method = "DELETE", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/users", Method = "DELETE", Version = "1.1" };
 
             var result = _usersEndpoint.HandleRequest(null, headers, null);
 

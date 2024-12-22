@@ -1,5 +1,7 @@
 ﻿using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
+using MTCG.Models.Enums;
 using MTCG.Repository;
 
 namespace MTCG.Logic
@@ -85,7 +87,7 @@ namespace MTCG.Logic
         /// </returns>
         private string GetCardTypeFromName(Card card)
         {
-            if (card.Name.Contains("Spell"))
+            if (card.Name != null && card.Name.Contains("Spell"))
             {
                 return "Spell";
             }
@@ -107,11 +109,11 @@ namespace MTCG.Logic
         /// </returns>
         private string GetElementTypeFromName(Card card)
         {
-            if (card.Name.Contains("Water"))
+            if (card.Name != null && card.Name.Contains("Water"))
             {
                 return "Water";
             }
-            else if (card.Name.Contains("Fire"))
+            else if (card.Name != null && card.Name.Contains("Fire"))
             {
                 return "Fire";
             }

@@ -5,6 +5,7 @@ using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
+using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -33,7 +34,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_UserNotAuthorized_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
@@ -49,7 +50,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_InvalidMethod_Returns405()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/packages", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/packages", Method = "GET", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
@@ -65,7 +66,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_EmptyBody_Returns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
@@ -81,7 +82,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_InvalidJson_Returns400()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
@@ -99,7 +100,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_ValidRequest_CreatesPackageSuccessfully()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 

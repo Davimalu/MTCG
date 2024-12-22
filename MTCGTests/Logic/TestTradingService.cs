@@ -3,6 +3,7 @@ using MTCG.Interfaces.Logic;
 using MTCG.Interfaces.Repository;
 using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using MTCG.Repository;
 using NSubstitute;

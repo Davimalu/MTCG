@@ -7,6 +7,7 @@ using MTCG.Models;
 using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
+using MTCG.Models.Cards;
 
 namespace MTCG.Endpoints
 {
@@ -36,7 +37,7 @@ namespace MTCG.Endpoints
         }
         #endregion
 
-        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
             string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
@@ -61,7 +62,7 @@ namespace MTCG.Endpoints
             }
         }
 
-        private (int, string?) HandleGetUserDeck(HTTPHeader headers, User user)
+        private (int, string?) HandleGetUserDeck(HttpHeader headers, User user)
         {
             // Check for query Parameters
             Dictionary<string, string> queryParameters = _ihttpHeaderService.GetQueryParameters(headers);

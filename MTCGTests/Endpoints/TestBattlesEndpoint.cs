@@ -37,7 +37,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_UserNotAuthorized_ReturnsUnauthorized()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/battles", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/battles", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("valid-token").Returns((User?)null);
 
@@ -53,7 +53,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_MethodNotAllowed_ReturnsMethodNotAllowed()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/battles", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/battles", Method = "GET", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "testUser" });
 

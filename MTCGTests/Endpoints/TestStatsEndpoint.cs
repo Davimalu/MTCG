@@ -26,7 +26,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_UserNotAuthorized_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/stats", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/stats", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns((string?)null);
 
             // Act
@@ -41,7 +41,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_UserAuthorized_ReturnsStats()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/stats", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/stats", Method = "GET", Version = "1.1" };
             var user = new User { Stats = new UserStatistics { Wins = 10, Losses = 5 } };
 
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
@@ -59,7 +59,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_InvalidMethod_UserAuthorized_Returns405()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/stats", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/stats", Method = "POST", Version = "1.1" };
             var user = new User { Stats = new UserStatistics { Wins = 10, Losses = 5 } };
 
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");

@@ -59,7 +59,7 @@ namespace MTCGTests.HTTP
         public void GetTokenFromHeader_ReturnsNull_WhenAuthorizationHeaderIsMissing()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Path = "/",
                 Method = "GET",
@@ -78,7 +78,7 @@ namespace MTCGTests.HTTP
         public void GetTokenFromHeader_ReturnsToken_WhenAuthorizationHeaderIsValid()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Path = "/",
                 Method = "GET",
@@ -120,7 +120,7 @@ namespace MTCGTests.HTTP
         public void GetQueryParameters_ReturnsEmptyDictionary_WhenNoQueryParametersExist()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Path = "/deck",
                 Method = "GET",
@@ -139,7 +139,7 @@ namespace MTCGTests.HTTP
         public void GetQueryParameters_ReturnsDictionary_WhenQueryParametersExist()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Path = "/deck?format=plain&test=true",
                 Method = "GET",
@@ -160,7 +160,7 @@ namespace MTCGTests.HTTP
         public void GetPathWithoutQueryParameters_ReturnsPathWithoutQuery()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Path = "/deck?format=plain",
                 Method = "GET",
@@ -179,7 +179,7 @@ namespace MTCGTests.HTTP
         public void GetPathWithoutQueryParameters_ReturnsPath_WhenNoQueryExists()
         {
             // Arrange
-            var headers = new HTTPHeader
+            var headers = new HttpHeader
             {
                 Path = "/deck",
                 Method = "GET",

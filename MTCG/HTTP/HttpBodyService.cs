@@ -18,7 +18,7 @@ namespace MTCG.HTTP
         }
         #endregion
 
-        public string? ParseHttpBody(StreamReader reader, HTTPHeader headers)
+        public string? ParseHttpBody(StreamReader reader, HttpHeader headers)
         {
             if (headers.Headers.TryGetValue("Content-Length", out var contentLengthValue))
             {

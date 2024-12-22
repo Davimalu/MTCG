@@ -35,7 +35,7 @@ namespace MTCG.Endpoints
         }
         #endregion
 
-        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
             string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
@@ -56,7 +56,7 @@ namespace MTCG.Endpoints
             }
         }
 
-        private (int, string?) HandlePackageAcquiring(HTTPHeader headers, User user)
+        private (int, string?) HandlePackageAcquiring(HttpHeader headers, User user)
         {
             // Buy new package
             if (headers is { Method: "POST", Path: "/transactions/packages" })

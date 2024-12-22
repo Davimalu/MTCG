@@ -34,7 +34,7 @@ namespace MTCG.Endpoints
         }
         #endregion
 
-        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
             string token = _httpHeaderService.GetTokenFromHeader(headers)!;

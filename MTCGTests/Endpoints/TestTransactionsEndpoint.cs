@@ -6,6 +6,7 @@ using MTCG.Models;
 using MTCG.Models.Enums;
 using NSubstitute;
 using System.Text.Json;
+using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -40,7 +41,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_UserNotAuthorized_Returns401()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/transactions", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/transactions", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
@@ -56,7 +57,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_GET_MethodNotAllowed_Returns405()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/transactions", Method = "GET", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/transactions", Method = "GET", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user" });
 
@@ -72,7 +73,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_NotEnoughMoney_Returns402()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user", CoinCount = 3 });
 
@@ -88,7 +89,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_NoPackagesAvailable_Returns410()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user", CoinCount = 10 });
             _packageService.GetRandomPackage().Returns((Package?)null);
@@ -105,7 +106,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_PackageAcquired_Returns201()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             var user = new User { Username = "test-user", CoinCount = 10, Stack = new Stack() };
             var package = new Package
@@ -141,7 +142,7 @@ namespace MTCGTests.Endpoints
         public void HandleRequest_POST_InvalidPath_Returns404()
         {
             // Arrange
-            var headers = new HTTPHeader { Path = "/invalid/path", Method = "POST", Version = "1.1" };
+            var headers = new HttpHeader { Path = "/invalid/path", Method = "POST", Version = "1.1" };
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user", CoinCount = 10 });
 

@@ -4,5 +4,5 @@ namespace MTCG.HTTP;
 
 public interface IHttpBodyService
 {
-    string? ParseHttpBody(StreamReader reader, HTTPHeader headers);
+    string? ParseHttpBody(StreamReader reader, HttpHeader headers);
 }

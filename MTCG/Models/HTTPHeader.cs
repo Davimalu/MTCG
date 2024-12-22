@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MTCG.HTTP;
-
-namespace MTCG.Models
+﻿namespace MTCG.Models
 {
-    public class HTTPHeader
+    public class HttpHeader
     {
         public required string Method { get; set; }
         public required string Path { get; set; }
         public required string Version { get; set; }
+        public Dictionary<string, string> Headers { get; set; } // Dictionary to store all other header fields
 
-        // Dictionary to store all other header fields
-        public Dictionary<string, string> Headers { get; set; }
-
-        public HTTPHeader()
+        public HttpHeader()
         {
             // Initialize empty dictionary
             Headers = new Dictionary<string, string>();

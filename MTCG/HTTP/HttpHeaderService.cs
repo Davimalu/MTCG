@@ -20,7 +20,7 @@ namespace MTCG.HTTP
         }
         #endregion
 
-        public HTTPHeader? ParseHttpHeader(StreamReader reader)
+        public HttpHeader? ParseHttpHeader(StreamReader reader)
         {
             // First line of HTTP Header, should be something like    GET /users HTTP/1.1
             string? line = reader.ReadLine();
@@ -43,7 +43,7 @@ namespace MTCG.HTTP
             var path = httpParts[1];
             var version = httpParts[2];
 
-            HTTPHeader headers = new HTTPHeader()
+            HttpHeader headers = new HttpHeader()
             {
                 Method = method,
                 Path = path,
@@ -77,7 +77,7 @@ namespace MTCG.HTTP
         }
 
 
-        public string? GetTokenFromHeader(HTTPHeader headers)
+        public string? GetTokenFromHeader(HttpHeader headers)
         {
             // Provided authorization string should be something like "Bearer admin-mtcgToken"
 
@@ -100,7 +100,7 @@ namespace MTCG.HTTP
         }
 
 
-        public Dictionary<string, string> GetQueryParameters(HTTPHeader headers)
+        public Dictionary<string, string> GetQueryParameters(HttpHeader headers)
         {
             Dictionary<string, string> queryParameters = new Dictionary<string, string>(); // Dictionary to store key Value Pairs
 
@@ -128,7 +128,7 @@ namespace MTCG.HTTP
         }
 
 
-        public string GetPathWithoutQueryParameters(HTTPHeader headers)
+        public string GetPathWithoutQueryParameters(HttpHeader headers)
         {
             if (headers.Path.Contains('?'))
             {

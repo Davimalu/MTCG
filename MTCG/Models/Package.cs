@@ -1,4 +1,4 @@
-﻿using MTCG.Logic;
+﻿using MTCG.Models.Cards;
 
 namespace MTCG.Models
 {

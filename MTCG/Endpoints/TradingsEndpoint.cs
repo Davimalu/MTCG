@@ -8,6 +8,7 @@ using MTCG.Models.Enums;
 using MTCG.Repository;
 using System.Net.Sockets;
 using System.Text.Json;
+using MTCG.Models.Cards;
 
 namespace MTCG.Endpoints
 {
@@ -37,7 +38,7 @@ namespace MTCG.Endpoints
         }
         #endregion
 
-        public (int, string?) HandleRequest(TcpClient? client, HTTPHeader headers, string? body)
+        public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
             string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
@@ -90,7 +91,7 @@ namespace MTCG.Endpoints
             return (200, json);
         }
 
-        private (int, string?) HandleCreateTradeOffer(HTTPHeader headers, string? body, User user)
+        private (int, string?) HandleCreateTradeOffer(HttpHeader headers, string? body, User user)
         {
             string? cardId, type;
             float minimumDamage = -1;
@@ -171,7 +172,7 @@ namespace MTCG.Endpoints
             return (201, json);
         }
 
-        private (int, string?) HandleDeleteTradeOffer(HTTPHeader headers, User user)
+        private (int, string?) HandleDeleteTradeOffer(HttpHeader headers, User user)
         {
             // Get cardId of the trade the user wants to remove
 
