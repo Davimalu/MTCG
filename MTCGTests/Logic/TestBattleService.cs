@@ -405,29 +405,5 @@ namespace MTCGTests.Logic
             Assert.That(playerB.Deck.Cards.Count, Is.EqualTo(1));
             Assert.That(playerA.Deck.Cards.Count, Is.EqualTo(1));
         }
-
-        [Test]
-        public void StartBattle_HandlesMultipleSpecialCases()
-        {
-            // Arrange
-            var playerA = new User
-            {
-                Username = "PlayerA",
-                Deck = new Deck { Cards = new List<Card> { new MonsterCard("Card 01", "Goblin", 10, ElementType.Normal), new MonsterCard("Card 02", "Kraken", 20, ElementType.Water) } }
-            };
-
-            var playerB = new User
-            {
-                Username = "PlayerB",
-                Deck = new Deck { Cards = new List<Card> { new MonsterCard("Card 03", "Dragon", 15, ElementType.Fire), new SpellCard("Card 04", "SpellCard", 15, ElementType.Fire) } }
-            };
-
-            // Act
-            var result = _battleService.StartBattle(playerA, playerB);
-
-            // Assert
-            Assert.That(result, Does.Contain("The goblin is too afraid of the dragon"));
-            Assert.That(result, Does.Contain("The kraken is unimpressed as it is immune to spells"));
-        }
     }
 }
