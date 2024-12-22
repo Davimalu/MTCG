@@ -26,11 +26,11 @@ namespace MTCG.Logic
         }
         #endregion
         #region DependencyInjection
-        public TradingService(ITradeRepository tradeRepository, IUserService userService, ICardRepository cardRepository, IStackService stackService, IEventService eventService)
+        public TradingService(ITradeRepository tradeRepository, IUserService userService, ICardService cardService, IStackService stackService, IEventService eventService)
         {
             _tradeRepository = tradeRepository;
             _userService = userService;
-            _cardRepository = cardRepository;
+            _cardService = cardService;
             _stackService = stackService;
             _eventService = eventService;
         }
@@ -40,7 +40,7 @@ namespace MTCG.Logic
 
         private readonly ITradeRepository _tradeRepository = TradeRepository.Instance;
         private readonly IUserService _userService = UserService.Instance;
-        private readonly ICardRepository _cardRepository = CardRepository.Instance;
+        private readonly ICardService _cardService = CardService.Instance;
         private readonly IStackService _stackService = StackService.Instance;
 
         private readonly IEventService _eventService = new EventService();
@@ -192,7 +192,7 @@ namespace MTCG.Logic
             // 
             // The errors in these error checks should be near impossible, but I guess it's good practice to check for them anyway
             User? offeringUser = _userService.GetUserById(offer.User.Id);
-            Card? offeredCard = _cardRepository.GetCardById(offer.Card.Id);
+            Card? offeredCard = _cardService.GetCardById(offer.Card.Id);
 
             if (offeringUser == null)
             {

@@ -13,7 +13,7 @@ namespace MTCGTests.Logic
     {
         private ITradeRepository _tradeRepository;
         private IUserService _userService;
-        private ICardRepository _cardRepository;
+        private ICardService _cardService;
         private IStackService _stackService;
         private IEventService _eventService;
         private TradingService _tradingService;
@@ -23,14 +23,14 @@ namespace MTCGTests.Logic
         {
             _tradeRepository = Substitute.For<ITradeRepository>();
             _userService = Substitute.For<IUserService>();
-            _cardRepository = Substitute.For<ICardRepository>();
+            _cardService = Substitute.For<ICardService>();
             _stackService = Substitute.For<IStackService>();
             _eventService = Substitute.For<IEventService>();
 
             _tradingService = new TradingService(
                 _tradeRepository,
                 _userService,
-                _cardRepository,
+                _cardService,
                 _stackService,
                 _eventService
             );
@@ -168,7 +168,7 @@ namespace MTCGTests.Logic
             _tradeRepository.GetTradeDealByCardId("card1").Returns(tradeOffer);
             _tradeRepository.RemoveTradeDeal(tradeOffer).Returns(true);
             _userService.GetUserById(3).Returns(tradeOffer.User);
-            _cardRepository.GetCardById("card1").Returns(tradeOffer.Card);
+            _cardService.GetCardById("card1").Returns(tradeOffer.Card);
 
             // Act
             var result = _tradingService.RemoveTradeOfferByCardId("card1");
@@ -254,8 +254,8 @@ namespace MTCGTests.Logic
             _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
             _userService.GetUserById(1).Returns(user1);
             _userService.GetUserById(2).Returns(user2);
-            _cardRepository.GetCardById("card1").Returns(newOffer.Card);
-            _cardRepository.GetCardById("card2").Returns(otherOffer.Card);
+            _cardService.GetCardById("card1").Returns(newOffer.Card);
+            _cardService.GetCardById("card2").Returns(otherOffer.Card);
 
             // Act
             var result = _tradingService.TryToTrade(newOffer);
@@ -290,8 +290,8 @@ namespace MTCGTests.Logic
             _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
             _userService.GetUserById(1).Returns(user1);
             _userService.GetUserById(2).Returns(user2);
-            _cardRepository.GetCardById("card1").Returns(newOffer.Card);
-            _cardRepository.GetCardById("card2").Returns(otherOffer.Card);
+            _cardService.GetCardById("card1").Returns(newOffer.Card);
+            _cardService.GetCardById("card2").Returns(otherOffer.Card);
 
             // Act
             var result = _tradingService.TryToTrade(newOffer);
@@ -326,8 +326,8 @@ namespace MTCGTests.Logic
             _tradeRepository.GetAllTradeDeals().Returns(new List<TradeOffer> { newOffer, otherOffer });
             _userService.GetUserById(1).Returns(user1);
             _userService.GetUserById(2).Returns(user2);
-            _cardRepository.GetCardById("card1").Returns(newOffer.Card);
-            _cardRepository.GetCardById("card2").Returns(otherOffer.Card);
+            _cardService.GetCardById("card1").Returns(newOffer.Card);
+            _cardService.GetCardById("card2").Returns(otherOffer.Card);
 
             _tradeRepository.SetTradeOfferInactive(1).Returns(true);
             _tradeRepository.SetTradeOfferInactive(2).Returns(true);
