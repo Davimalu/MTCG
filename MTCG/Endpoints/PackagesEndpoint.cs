@@ -1,13 +1,12 @@
 ﻿using MTCG.HTTP;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
-using MTCG.Models.Cards;
 
 namespace MTCG.Endpoints
 {
@@ -16,6 +15,7 @@ namespace MTCG.Endpoints
         private readonly ICardService _cardService = CardService.Instance;
         private readonly IUserService _userService = UserService.Instance;
         private readonly IPackageService _packageService = PackageService.Instance;
+        private readonly IAIService _aiService = AIService.Instance;
         private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         private readonly IEventService _eventService = new EventService();
@@ -52,11 +52,16 @@ namespace MTCG.Endpoints
             switch (headers.Method)
             {
                 case "POST":
+                    if (headers.Path.Equals("/packages/ai"))
+                    {
+                        return HandleAddingPackageWithChatGpt(body);
+                    }
                     return HandleAddingPackage(body);
                 default:
                     return (405, JsonSerializer.Serialize("Method Not Allowed"));
             }
         }
+
 
         private (int, string?) HandleAddingPackage(string? body)
         {
@@ -138,5 +143,53 @@ namespace MTCG.Endpoints
 
             return (201, JsonSerializer.Serialize(response));
         }
+
+
+        private (int, string?) HandleAddingPackageWithChatGpt(string? body)
+        {
+            // Check for valid input
+            if (body == null)
+            {
+                return (400, JsonSerializer.Serialize("Empty request body"));
+            }
+
+            // Check if all information was provided
+            RequestBody? request = null;
+            try
+            {
+                request = JsonSerializer.Deserialize<RequestBody>(body);
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Warning, $"Couldn't parse request body of theme and API Key", ex);
+                return (400, JsonSerializer.Serialize("Invalid request body"));
+            }
+
+            if (request == null)
+            {
+                return (400, JsonSerializer.Serialize("Invalid request format"));
+            }
+
+            var tmp = _aiService.GetListOfCards(request.Theme, request.ApiKey);
+            var cardsToAdd = JsonSerializer.Deserialize<CardsWrapper>(tmp);
+
+            return HandleAddingPackage(JsonSerializer.Serialize(cardsToAdd.Cards));
+        }
+    }
+
+
+    internal class RequestBody
+    {
+        public required string Theme { get; set; }
+        public required string ApiKey { get; set; }
+    }
+
+
+    /// <summary>
+    /// This class is only necessary for deserialization-purposes since the OpenAI API can only return objects, not arrays
+    /// </summary>
+    internal class CardsWrapper
+    {
+        public List<MonsterCard> Cards { get; set; } = new List<MonsterCard>();
     }
 }
