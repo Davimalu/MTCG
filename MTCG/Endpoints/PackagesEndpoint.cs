@@ -103,12 +103,30 @@ namespace MTCG.Endpoints
             // Check if all cards were successfully added
             if (cardsAdded != numberOfCards)
             {
-                return (500, JsonSerializer.Serialize("Error writing cards to database"));
+                // If 0 cards were added, that package probably already exists
+                // If more than 0 but less than `numberOfCards` were added, there was an error adding SOME of the cards
+                if (cardsAdded > 0)
+                {
+                    // Delete already added cards
+                    foreach (var card in cardsToAdd)
+                    {
+                        _cardService.DeleteCardFromDatabase(card);
+                    }
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't add package to database: Error saving some of the cards", null);
+                    return (500, JsonSerializer.Serialize("Error writing cards to database"));
+                }
+                _eventService.LogEvent(EventType.Warning, $"Couldn't add package to database: Package already exists", null);
+                return (400, JsonSerializer.Serialize("Package already exists"));
             }
 
             // Add package to database
             if (!_packageService.SavePackageToDatabase(tmpPackage))
             {
+                // Delete already added cards
+                foreach (var card in cardsToAdd)
+                {
+                    _cardService.DeleteCardFromDatabase(card);
+                }
                 return (500, JsonSerializer.Serialize("Error writing package to database"));
             }
 

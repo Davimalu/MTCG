@@ -24,6 +24,15 @@ public interface ICardService
     /// <para>false on error</para>
     /// </returns>
     bool SaveCardToDatabase(Card card);
+    /// <summary>
+    /// deletes a card, identified by its cardId
+    /// </summary>
+    /// <param name="card">Monster- or SpellCard containing the cardId by which the card was saved to the database</param>
+    /// <returns>
+    /// <para>True if card was successfully deleted</para>
+    /// <para>False on error or if card was never saved</para>
+    /// </returns>
+    bool DeleteCardFromDatabase(Card card);
     bool UserOwnsCard(User user, Card card);
     bool UserHasCardInDeck(User user, Card card);
 }

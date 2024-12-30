@@ -64,6 +64,12 @@ namespace MTCG.Logic
         }
 
 
+        public bool DeleteCardFromDatabase(Card card)
+        {
+            return _cardRepository.DeleteCardFromDatabase(card);
+        }
+
+
         public bool UserOwnsCard(User user, Card card)
         {
             // https://stackoverflow.com/questions/4651285/checking-if-a-list-of-objects-contains-a-property-with-a-specific-value

@@ -58,15 +58,58 @@ namespace MTCG.Repository
                 catch (PostgresException ex) when (ex.SqlState == "23505")
                 {
                     // Handle duplicate key error | For a duplicate key error, the SQL state is 23505
-                    _eventService.LogEvent(EventType.Warning, $"Card {card.Name} already exists in the database", ex);
-                    return true;
+                    _eventService.LogEvent(EventType.Warning, $"Card {card.Name} couldn't be added to database: Card already exists", ex);
+                    return false;
                 }
                 catch (Exception ex)
                 {
-                    _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be added to database", ex);
+                    _eventService.LogEvent(EventType.Error, $"Card {card.Name} couldn't be added to database: Unknown Error", ex);
                     return false;
                 }
 
+                _eventService.LogEvent(EventType.Highlight, $"Card {card.Name} added to the database", null);
+                return true;
+            }
+        }
+
+
+        public bool DeleteCardFromDatabase(Card cardToDelete)
+        {
+            lock (ThreadSync.DatabaseLock)
+            {
+                // Prepare SQL query | Only delete the card if it's not part of a package
+                using IDbCommand dbCommand = _databaseService.CreateCommand("""
+                                                                            DELETE FROM cards
+                                                                            WHERE cardId = @cardId
+                                                                              AND NOT EXISTS (
+                                                                                  SELECT 1
+                                                                                  FROM cardsPackages
+                                                                                  WHERE cardsPackages.cardId = @cardId
+                                                                              );
+                                                                            """);
+
+                DatabaseService.AddParameterWithValue(dbCommand, "@cardId", DbType.String, cardToDelete.Id);
+
+                // Execute query and error handling
+                int rowsAffected;
+
+                try
+                {
+                    rowsAffected = dbCommand.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    _eventService.LogEvent(EventType.Error, $"Couldn't delete Card {cardToDelete.Name} from the database", ex);
+                    return false;
+                }
+
+                // Check if at least one row was affected
+                if (rowsAffected <= 0)
+                {
+                    return false;
+                }
+
+                _eventService.LogEvent(EventType.Warning, $"Card {cardToDelete.Name} deleted from the database", null);
                 return true;
             }
         }

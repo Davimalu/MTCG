@@ -22,4 +22,13 @@ public interface ICardRepository
     /// <para>null on error if there is no card in the database with the specified Id</para>
     /// </returns>
     Card? GetCardById(string cardId);
+    /// <summary>
+    /// deletes a card - identified by its cardId - from the database
+    /// </summary>
+    /// <param name="cardToDelete">Monster- or SpellCard containing the cardId by which the card was saved to the database</param>
+    /// <returns>
+    /// <para>True if card was successfully deleted from the database</para>
+    /// <para>False on error or if card was never in the database</para>
+    /// </returns>
+    bool DeleteCardFromDatabase(Card cardToDelete);
 }
