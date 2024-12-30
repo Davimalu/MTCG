@@ -8,7 +8,7 @@ POST http://localhost:10001/tradings
 Authorization: Bearer kienboec-mtcgToken
 
 {
-  "CardToTrade": "d60e23cf-2238-4d49-844f-c7589ee5342e",
-  "Type": "monster",
-  "MinimumDamage": 5
+  "CardToTrade": "8c20639d-6400-4534-bd0f-ae563f11f57a",
+  "Type": "spell",
+  "MinimumDamage": 50
 }
