@@ -66,12 +66,14 @@ namespace MTCG.Endpoints
                 // Check if user has enough coins
                 if (user.CoinCount < 5)
                 {
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't acquire package for User {user.Username}: Not enough money", null);
                     return (402, JsonSerializer.Serialize("Not enough money"));
                 }
 
                 Package? package = _packageService.GetRandomPackage();
                 if (package == null)
                 {
+                    _eventService.LogEvent(EventType.Warning, $"Couldn't acquire package for User {user.Username}: No packages available", null);
                     return (410, JsonSerializer.Serialize("No packages available"));
                 }
 

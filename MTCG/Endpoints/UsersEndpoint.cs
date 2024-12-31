@@ -201,6 +201,7 @@ namespace MTCG.Endpoints
                 }
             };
 
+            _eventService.LogEvent(EventType.Highlight, $"Updated user information of user {userToBeUpdated.Username}", null);
             return (200, JsonSerializer.Serialize(response));
         }
 

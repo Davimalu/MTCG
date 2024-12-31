@@ -6,6 +6,7 @@ using MTCG.Logic;
 using MTCG.Models;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
+using MTCG.Models.Enums;
 
 namespace MTCG.Endpoints
 {
@@ -17,6 +18,7 @@ namespace MTCG.Endpoints
         private static object _localLock = new();
 
         private readonly IUserService _userService = UserService.Instance;
+        private readonly IEventService _eventService = new EventService();
         private readonly IBattleService _battleService = new BattleService();
         private readonly IHttpHeaderService _httpHeaderService = new HttpHeaderService();
 
@@ -56,11 +58,16 @@ namespace MTCG.Endpoints
 
         private (int, string?) HandleStartBattle(User user)
         {
+            _eventService.LogEvent(EventType.Highlight, $"User {user.Username} wants to start a battle", null);
+
             // Start battle if there is already (at least) one other player waiting
             if (_battleQueue.TryDequeue(out var otherOne))
             {
                 // TODO: Is there a better way to dequeue a tuple?
                 (User otherUser, int otherThread) = otherOne;
+
+                _eventService.LogEvent(EventType.Highlight, $"Opponent found!", null);
+                _eventService.LogEvent(EventType.Highlight, $"Starting battle between {user.Username} and {otherUser.Username}!", null);
 
                 string? battleLog = _battleService.StartBattle(user, otherUser);
 
@@ -77,6 +84,8 @@ namespace MTCG.Endpoints
             {
                 // Wait till another user joins the queue and triggers the start of the battle, then wait to be messaged by the thread handling the 2nd user
                 _battleQueue.Enqueue((user, Thread.CurrentThread.ManagedThreadId));
+
+                _eventService.LogEvent(EventType.Highlight, $"There are currently no other players who wish to battle. Adding player to queue...", null);
 
                 lock (_localLock)
                 {
