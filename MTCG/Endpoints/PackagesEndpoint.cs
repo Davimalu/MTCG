@@ -170,14 +170,53 @@ namespace MTCG.Endpoints
                 return (400, JsonSerializer.Serialize("Invalid request format"));
             }
 
-            var tmp = _aiService.GetListOfCards(request.Theme, request.ApiKey);
-            var cardsToAdd = JsonSerializer.Deserialize<CardsWrapper>(tmp);
+            var cardsObject = _aiService.GetListOfCards(request.Theme, request.ApiKey);
+            if (cardsObject == null)
+            {
+                return (500, JsonSerializer.Serialize("Received no response from the OpenAI API"));
+            }
 
-            return HandleAddingPackage(JsonSerializer.Serialize(cardsToAdd.Cards));
+            // cardsObject contains a single property, which contains an array of cards
+            // We need to get this array and check for errors on the way
+            CardsWrapper? cardsWrapper = null;
+            try
+            {
+                cardsWrapper = JsonSerializer.Deserialize<CardsWrapper>(cardsObject);
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Couldn't parse response from the OpenAI API: Invalid Response", ex);
+            }
+
+            if (cardsWrapper == null)
+            {
+                return (500, JsonSerializer.Serialize("Received an invalid from the OpenAI API"));
+            }
+
+            // HandleAddingPackage(string? body) requires a JSON String containing an array of cards as its argument
+            string? cardsToAdd = null;
+            try
+            {
+                cardsToAdd = JsonSerializer.Serialize(cardsWrapper.Cards);
+            }
+            catch (Exception ex)
+            {
+                _eventService.LogEvent(EventType.Error, "Received an invalid response from the OpenAI API", ex);
+            }
+
+            if (cardsToAdd == null)
+            {
+                return (500, JsonSerializer.Serialize("Received an invalid from the OpenAI API"));
+            }
+
+            return HandleAddingPackage(cardsToAdd);
         }
     }
 
 
+    /// <summary>
+    /// Wrapper class for deserialization of the request body of requests to /packages/ai
+    /// </summary>
     internal class RequestBody
     {
         public required string Theme { get; set; }
@@ -186,7 +225,7 @@ namespace MTCG.Endpoints
 
 
     /// <summary>
-    /// This class is only necessary for deserialization-purposes since the OpenAI API can only return objects, not arrays
+    /// Wrapper class for deserialization of the OpenAI API response since the OpenAI API can only return objects, not arrays
     /// </summary>
     internal class CardsWrapper
     {
