@@ -77,25 +77,5 @@ namespace MTCG.Logic
 
             return returnString;
         }
-
-
-        public string SerializeDeckToJson(Deck deck)
-        {
-            List<FrontendCard> cards = new List<FrontendCard>();
-
-            foreach (Card card in deck.Cards)
-            {
-                cards.Add(new FrontendCard()
-                {
-                    CardId = card.Id ?? "N/A",
-                    CardName = card.Name,
-                    Damage = card.Damage,
-                    CardType = (card is MonsterCard ? "Monster Card" : "Spell Card"),
-                    ElementType = card.ElementType.ToString()
-                });
-            }
-
-            return JsonSerializer.Serialize(cards);
-        }
     }
 }
