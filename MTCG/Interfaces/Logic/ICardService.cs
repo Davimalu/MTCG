@@ -23,7 +23,7 @@ public interface ICardService
     /// <para>true on success</para>
     /// <para>false on error</para>
     /// </returns>
-    bool SaveCardToDatabase(Card card);
+    Card? SaveCardToDatabase(Card card);
     /// <summary>
     /// deletes a card, identified by its cardId
     /// </summary>
@@ -41,4 +41,10 @@ public interface ICardService
     /// <param name="cards">Stack, Deck or other object that contains an array of cards named `Cards`</param>
     /// <returns></returns>
     string SerializeCardsToJson(IEnumerable<Card> cards);
+    /// <summary>
+    /// converts a card from its representation in the backend to a more human-readable frontend representation
+    /// </summary>
+    /// <param name="card"></param>
+    /// <returns></returns>
+    FrontendCard BackendCardToFrontendCard(Card card);
 }

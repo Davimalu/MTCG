@@ -4,6 +4,7 @@ using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -15,6 +16,7 @@ namespace MTCG.Endpoints
         private readonly IUserService _userService = UserService.Instance;
         private readonly IPackageService _packageService = PackageService.Instance;
         private readonly IStackService _stackService = StackService.Instance;
+        private readonly ICardService _cardService = CardService.Instance;
 
         private readonly IEventService _eventService = new EventService();
         private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
@@ -80,10 +82,17 @@ namespace MTCG.Endpoints
                 user.CoinCount -= 5;
                 _userService.SaveUserToDatabase(user);
 
+                // Convert newly acquired cards into nicer format
+                List<FrontendCard> fancyCards = new List<FrontendCard>();
+                foreach (Card card in package.Cards)
+                {
+                    fancyCards.Add(_cardService.BackendCardToFrontendCard(card));
+                }
+
                 var response = new
                 {
                     message = "Package acquired",
-                    AcquiredCards = package.Cards
+                    AcquiredCards = fancyCards
                 };
 
                 _eventService.LogEvent(EventType.Highlight, $"User {user.Username} acquired a package!", null);

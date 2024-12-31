@@ -110,11 +110,18 @@ namespace MTCG.Endpoints
 
             _eventService.LogEvent(EventType.Highlight, $"Deck of user {user.Username} updated", null);
 
+            // Convert cards of the users deck into nicer format
+            List<FrontendCard> fancyDeck = new List<FrontendCard>();
+            foreach (Card card in user.Deck.Cards)
+            {
+                fancyDeck.Add(_cardService.BackendCardToFrontendCard(card));
+            }
+
             var response = new
             {
                 message = "Deck updated",
                 Username = user.Username,
-                Deck = user.Deck.Cards
+                Deck = fancyDeck
             };
 
             return (200, JsonSerializer.Serialize(response));

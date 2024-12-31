@@ -42,7 +42,7 @@ namespace MTCG.Logic
         }
 
 
-        public bool SaveCardToDatabase(Card card)
+        public Card? SaveCardToDatabase(Card card)
         {
             // Determine the element type of the card
             if (Enum.TryParse(GetElementTypeFromName(card), out ElementType elementType))
@@ -61,7 +61,11 @@ namespace MTCG.Logic
                 cardToAdd = new SpellCard(card);
             }
 
-            return _cardRepository.AddCardToDatabase(cardToAdd);
+            if (_cardRepository.AddCardToDatabase(cardToAdd))
+            {
+                return cardToAdd;
+            }
+            return null;
         }
 
 
@@ -138,18 +142,25 @@ namespace MTCG.Logic
 
             foreach (Card card in cards)
             {
-                frontendCards.Add(new FrontendCard()
-                {
-                    CardId = card.Id ?? "N/A",
-                    CardName = card.Name,
-                    Damage = card.Damage,
-                    CardType = card is MonsterCard ? "Monster Card" : "Spell Card",
-                    ElementType = card.ElementType.ToString()
-                });
+                frontendCards.Add(BackendCardToFrontendCard(card));
             }
 
             return JsonSerializer.Serialize(frontendCards);
         }
 
+
+        public FrontendCard BackendCardToFrontendCard(Card card)
+        {
+            FrontendCard newCard = new FrontendCard()
+            {
+                CardId = card.Id ?? "N/A",
+                CardName = card.Name,
+                Damage = card.Damage,
+                CardType = card is MonsterCard ? "Monster Card" : "Spell Card",
+                ElementType = card.ElementType.ToString()
+            };
+
+            return newCard;
+        }
     }
 }

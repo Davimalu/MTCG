@@ -11,6 +11,7 @@ namespace MTCG.Endpoints
     public class CardsEndpoint : IHttpEndpoint
     {
         private readonly IUserService _userService = UserService.Instance;
+        private readonly ICardService _cardService = CardService.Instance;
         private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
 
         public CardsEndpoint()
@@ -42,7 +43,7 @@ namespace MTCG.Endpoints
             {
                 // Get list of cards
                 case "GET":
-                    return (200, JsonSerializer.Serialize(user.Stack));
+                    return (200, _cardService.SerializeCardsToJson(user.Stack.Cards));
                 default:
                     return (405, JsonSerializer.Serialize("Method not allowed"));
             }
