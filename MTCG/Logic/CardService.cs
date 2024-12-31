@@ -4,6 +4,7 @@ using MTCG.Models;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using MTCG.Repository;
+using System.Text.Json;
 
 namespace MTCG.Logic
 {
@@ -129,5 +130,26 @@ namespace MTCG.Logic
                 return "Normal";
             }
         }
+
+
+        public string SerializeCardsToJson(IEnumerable<Card> cards)
+        {
+            List<FrontendCard> frontendCards = new List<FrontendCard>();
+
+            foreach (Card card in cards)
+            {
+                frontendCards.Add(new FrontendCard()
+                {
+                    CardId = card.Id ?? "N/A",
+                    CardName = card.Name,
+                    Damage = card.Damage,
+                    CardType = card is MonsterCard ? "Monster Card" : "Spell Card",
+                    ElementType = card.ElementType.ToString()
+                });
+            }
+
+            return JsonSerializer.Serialize(frontendCards);
+        }
+
     }
 }

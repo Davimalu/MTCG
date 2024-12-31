@@ -35,4 +35,10 @@ public interface ICardService
     bool DeleteCardFromDatabase(Card card);
     bool UserOwnsCard(User user, Card card);
     bool UserHasCardInDeck(User user, Card card);
+    /// <summary>
+    /// serializes a given list of cards into a human-readable JSON representation
+    /// </summary>
+    /// <param name="cards">Stack, Deck or other object that contains an array of cards named `Cards`</param>
+    /// <returns></returns>
+    string SerializeCardsToJson(IEnumerable<Card> cards);
 }

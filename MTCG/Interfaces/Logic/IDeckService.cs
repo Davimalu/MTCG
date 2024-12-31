@@ -29,11 +29,4 @@ public interface IDeckService
     /// <param name="deck"></param>
     /// <returns></returns>
     string SerializeDeckToPlaintext(Deck deck);
-    /// <summary>
-    /// serializes a given deck into a human-readable JSON representation
-    /// </summary>
-    /// <param name="deck"></param>
-    /// <returns></returns>
-
-    string SerializeDeckToJson(Deck deck);
 }

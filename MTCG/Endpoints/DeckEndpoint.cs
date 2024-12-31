@@ -85,7 +85,7 @@ namespace MTCG.Endpoints
             else // No Query Parameters
             {
                 _eventService.LogEvent(EventType.Highlight, $"Retrieved deck of user {user.Username} in JSON", null);
-                return (200, _deckService.SerializeDeckToJson(user.Deck));
+                return (200, _cardService.SerializeCardsToJson(user.Deck.Cards));
             }
         }
 
