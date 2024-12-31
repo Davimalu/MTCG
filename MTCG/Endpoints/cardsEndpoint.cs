@@ -1,11 +1,10 @@
 ﻿using MTCG.HTTP;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
+using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
 using System.Net.Sockets;
 using System.Text.Json;
-using MTCG.Interfaces.Logic;
 
 namespace MTCG.Endpoints
 {

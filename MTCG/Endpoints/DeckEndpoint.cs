@@ -62,6 +62,7 @@ namespace MTCG.Endpoints
             }
         }
 
+
         private (int, string?) HandleGetUserDeck(HttpHeader headers, User user)
         {
             // Check for query Parameters
@@ -84,7 +85,7 @@ namespace MTCG.Endpoints
             else // No Query Parameters
             {
                 _eventService.LogEvent(EventType.Highlight, $"Retrieved deck of user {user.Username} in JSON", null);
-                return (200, JsonSerializer.Serialize(user.Deck.Cards));
+                return (200, _deckService.SerializeDeckToJson(user.Deck));
             }
         }
 
@@ -117,6 +118,7 @@ namespace MTCG.Endpoints
 
             return (200, JsonSerializer.Serialize(response));
         }
+
 
         /// <summary>
         /// parses the JSON deck configuration of a user and checks if it's valid
