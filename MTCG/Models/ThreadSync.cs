@@ -2,7 +2,7 @@
 
 namespace MTCG.Models
 {
-    public class ThreadSync
+    public static class ThreadSync
     {
         public static ConcurrentDictionary<string, bool> ConnectedUsers = new ConcurrentDictionary<string, bool>();
         public static Object UserLock = new Object();

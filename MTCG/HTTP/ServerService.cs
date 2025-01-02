@@ -44,7 +44,7 @@ namespace MTCG.HTTP
         }
 
 
-        public void AcceptConnections()
+        public void AcceptConnection()
         {
             // Check if server is running
             if (_server == null)

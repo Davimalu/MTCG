@@ -44,7 +44,7 @@ namespace MTCG
             // Listen for incoming Connections
             while (!ShutdownEvent.IsSet)
             {
-                ServerService.AcceptConnections();
+                ServerService.AcceptConnection();
             }
 
             Task.WhenAll().Wait(); // Wait for all running tasks to complete
