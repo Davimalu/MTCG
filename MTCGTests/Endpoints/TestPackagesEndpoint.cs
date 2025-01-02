@@ -115,7 +115,12 @@ namespace MTCGTests.Endpoints
 
             string body = JsonSerializer.Serialize(cards);
 
-            _cardService.SaveCardToDatabase(Arg.Any<Card>()).Returns(true);
+            // Mock SaveCardToDatabase to return the same card passed to it
+            // callInfo is an object that represents the details of the call to the mocked method.
+            // callInfo.Arg<Card>() retrieves the argument of type Card that was passed to the method
+            // See https://nsubstitute.github.io/help/return-from-function/
+            _cardService.SaveCardToDatabase(Arg.Any<Card>()).Returns(callInfo => callInfo.Arg<Card>());
+
             _packageService.AddCardToPackage(Arg.Any<Card>(), Arg.Any<Package>()).Returns(true);
             _packageService.SavePackageToDatabase(Arg.Any<Package>()).Returns(true);
 
