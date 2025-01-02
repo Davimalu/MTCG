@@ -158,6 +158,7 @@ namespace MTCGTests.Endpoints
 
             _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
+            _cardService.SerializeCardsToJson(Arg.Any<IEnumerable<Card>>()).Returns(JsonSerializer.Serialize(user.Stack.Cards));
 
             // Lambda expression that dynamically creates a new Card object. The Id property of the Card is set to the value of the argument passed to the GetCardById method.
             _cardService.GetCardById(Arg.Any<string>()).Returns(x => new MonsterCard { Id = x.Arg<string>() });

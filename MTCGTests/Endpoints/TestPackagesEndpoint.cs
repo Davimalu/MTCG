@@ -122,6 +122,7 @@ namespace MTCGTests.Endpoints
 
             _packageService.AddCardToPackage(Arg.Any<Card>(), Arg.Any<Package>()).Returns(true);
             _packageService.SavePackageToDatabase(Arg.Any<Package>()).Returns(true);
+            _cardService.SerializeCardsToJson(Arg.Any<IEnumerable<Card>>()).Returns(JsonSerializer.Serialize(cards));
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, body);
