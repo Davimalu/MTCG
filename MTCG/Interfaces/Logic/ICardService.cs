@@ -20,8 +20,8 @@ public interface ICardService
     /// </summary>
     /// <param name="card">instance of a card object containing all information to be saved to the database</param>
     /// <returns>
-    /// <para>true on success</para>
-    /// <para>false on error</para>
+    /// <para>instance of the card object that was added to the database on success</para>
+    /// <para>null on error</para>
     /// </returns>
     Card? SaveCardToDatabase(Card card);
     /// <summary>

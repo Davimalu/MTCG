@@ -50,7 +50,7 @@ namespace MTCGTests.Logic
         }
 
         [Test]
-        public void SaveCardToDatabase_ShouldReturnTrue_WhenCardIsSavedSuccessfully()
+        public void SaveCardToDatabase_ShouldReturnCard_WhenCardIsSavedSuccessfully()
         {
             // Arrange
             var card = new SpellCard { Id = "1", Name = "Water Spell", Damage = 100, ElementType = ElementType.Water};
@@ -60,11 +60,15 @@ namespace MTCGTests.Logic
             var result = _cardService.SaveCardToDatabase(card);
 
             // Assert
-            Assert.That(result, Is.True);
+            Assert.IsNotNull(result); // Ensure a card is returned
+            Assert.That(result, Is.InstanceOf<SpellCard>()); // Verify the returned card type is SpellCard
+            Assert.That(result.Name, Is.EqualTo("Water Spell")); // Verify card properties
+            Assert.That(result.Damage, Is.EqualTo(100));
+            Assert.That(result.ElementType, Is.EqualTo(ElementType.Water));
         }
 
         [Test]
-        public void SaveCardToDatabase_ShouldReturnFalse_WhenSaveFails()
+        public void SaveCardToDatabase_ShouldReturnNull_WhenSaveFails()
         {
             // Arrange
             var card = new SpellCard { Id = "1", Name = "Water Spell", Damage = 100, ElementType = ElementType.Water };
@@ -74,7 +78,7 @@ namespace MTCGTests.Logic
             var result = _cardService.SaveCardToDatabase(card);
 
             // Assert
-            Assert.That(result, Is.False);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
