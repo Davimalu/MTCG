@@ -7,6 +7,7 @@ using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace MTCG.Endpoints
 {
@@ -83,21 +84,14 @@ namespace MTCG.Endpoints
                 user.CoinCount -= 5;
                 _userService.SaveUserToDatabase(user);
 
-                // Convert newly acquired cards into nicer format
-                List<FrontendCard> fancyCards = new List<FrontendCard>();
-                foreach (Card card in package.Cards)
+                var response = new JsonObject()
                 {
-                    fancyCards.Add(_cardService.BackendCardToFrontendCard(card));
-                }
-
-                var response = new
-                {
-                    message = "Package acquired",
-                    AcquiredCards = fancyCards
+                    ["message"] = "Package acquired",
+                    ["AcquiredCards"] = JsonNode.Parse(_cardService.SerializeCardsToJson(package.Cards))!
                 };
 
                 _eventService.LogEvent(EventType.Highlight, $"User {user.Username} acquired a package!", null);
-                return (201, JsonSerializer.Serialize(response));
+                return (201, response.ToJsonString());
             }
 
             return (404, "Not found");

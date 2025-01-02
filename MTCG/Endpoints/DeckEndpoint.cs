@@ -1,13 +1,13 @@
 ﻿using MTCG.HTTP;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
-using MTCG.Models.Cards;
+using System.Text.Json.Nodes;
 
 namespace MTCG.Endpoints
 {
@@ -110,21 +110,14 @@ namespace MTCG.Endpoints
 
             _eventService.LogEvent(EventType.Highlight, $"Deck of user {user.Username} updated", null);
 
-            // Convert cards of the users deck into nicer format
-            List<FrontendCard> fancyDeck = new List<FrontendCard>();
-            foreach (Card card in user.Deck.Cards)
+            var response = new JsonObject()
             {
-                fancyDeck.Add(_cardService.BackendCardToFrontendCard(card));
-            }
-
-            var response = new
-            {
-                message = "Deck updated",
-                Username = user.Username,
-                Deck = fancyDeck
+                ["message"] = "Deck updated",
+                ["Username"] = user.Username,
+                ["Deck"] = JsonNode.Parse(_cardService.SerializeCardsToJson(user.Deck.Cards))!
             };
 
-            return (200, JsonSerializer.Serialize(response));
+            return (200, response.ToJsonString());
         }
 
 

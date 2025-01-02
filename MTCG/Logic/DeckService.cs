@@ -1,4 +1,6 @@
-﻿using MTCG.Interfaces.Logic;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;

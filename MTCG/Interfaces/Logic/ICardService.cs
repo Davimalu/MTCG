@@ -39,12 +39,6 @@ public interface ICardService
     /// serializes a given list of cards into a human-readable JSON representation
     /// </summary>
     /// <param name="cards">Stack, Deck or other object that contains an array of cards named `Cards`</param>
-    /// <returns></returns>
+    /// <returns>human-readable JSON string containing all the cards in the list</returns>
     string SerializeCardsToJson(IEnumerable<Card> cards);
-    /// <summary>
-    /// converts a card from its representation in the backend to a more human-readable frontend representation
-    /// </summary>
-    /// <param name="card"></param>
-    /// <returns></returns>
-    FrontendCard BackendCardToFrontendCard(Card card);
 }

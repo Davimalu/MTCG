@@ -7,6 +7,7 @@ using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace MTCG.Endpoints
 {
@@ -137,20 +138,13 @@ namespace MTCG.Endpoints
                 return (500, JsonSerializer.Serialize("Error writing package to database"));
             }
 
-            // Convert newly added cards into nicer format
-            List<FrontendCard> addedCardsFancy = new List<FrontendCard>();
-            foreach (Card card in tmpPackage.Cards)
+            var response = new JsonObject()
             {
-                addedCardsFancy.Add(_cardService.BackendCardToFrontendCard(card));
-            }
-
-            var response = new
-            {
-                message = "Package created successfully",
-                AddedCards = addedCardsFancy
+                ["message"] = "Package created successfully",
+                ["AddedCards"] = JsonNode.Parse(_cardService.SerializeCardsToJson(tmpPackage.Cards))!
             };
 
-            return (201, JsonSerializer.Serialize(response));
+            return (201, response.ToJsonString());
         }
 
 
