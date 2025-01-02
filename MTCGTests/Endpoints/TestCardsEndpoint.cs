@@ -6,6 +6,7 @@ using NSubstitute;
 using System.Text.Json;
 using MTCG.Interfaces.Logic;
 using MTCG.Models.Cards;
+using MTCG.Models.Enums;
 
 namespace MTCGTests.Endpoints
 {
@@ -45,8 +46,29 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/cards", Method = "GET", Version = "1.1" };
-            var stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1", Name = "TestCard" }, new SpellCard { Id = "2", Name = "AnotherTestCard" } } };
-            var user = new User { Stack = stack };
+            var stack = new Stack
+            {
+                Cards = new List<Card>
+                {
+                    new MonsterCard
+                    {
+                        Id = "1", Name = "TestCard", Damage = 42, ElementType = ElementType.Water
+                    },
+                    new SpellCard
+                    {
+                        Id = "2", Name = "AnotherTestCard", Damage = (float)42.4, ElementType = ElementType.Fire
+                    }
+                }
+            };
+            var user = new User { Username = "TestUser", Stack = stack };
+
+            var fancyStack = new List<FrontendCard>
+            {
+                new FrontendCard { CardId = "1", CardName = "TestCard", Damage = 42, CardType = "Monster Card", ElementType = "Water"},
+                new FrontendCard { CardId = "2", CardName = "AnotherTestCard", Damage = (float)42.4, CardType = "Spell Card", ElementType = "Fire"},
+            };
+            var serializedFancyDeck = JsonSerializer.Serialize(fancyStack);
+
 
             _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
@@ -56,7 +78,7 @@ namespace MTCGTests.Endpoints
 
             // Assert
             Assert.That(result.Item1, Is.EqualTo(200));
-            Assert.That(result.Item2, Is.EqualTo(JsonSerializer.Serialize(user.Stack)));
+            Assert.That(result.Item2, Is.EqualTo(serializedFancyDeck));
         }
 
         [Test]
