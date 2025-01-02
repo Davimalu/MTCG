@@ -16,7 +16,7 @@ namespace MTCG.Endpoints
         private readonly IAuthService _authService = AuthService.Instance;
         private readonly IUserService _userService = UserService.Instance;
         private readonly IEventService _eventService = new EventService();
-        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
+        private readonly IHttpHeaderService _httpHeaderService = new HttpHeaderService();
 
         public UsersEndpoint()
         {
@@ -25,12 +25,12 @@ namespace MTCG.Endpoints
 
         #region DependencyInjection
         // Unit Testing
-        public UsersEndpoint(IAuthService authService, IEventService eventService, IUserService userService, IHttpHeaderService ihttpHeaderService)
+        public UsersEndpoint(IAuthService authService, IEventService eventService, IUserService userService, IHttpHeaderService httpHeaderService)
         {
             _authService = authService;
             _eventService = eventService;
             _userService = userService;
-            _ihttpHeaderService = ihttpHeaderService;
+            _httpHeaderService = httpHeaderService;
         }
         #endregion
 
@@ -125,7 +125,7 @@ namespace MTCG.Endpoints
                     return (403, JsonSerializer.Serialize("User not authorized"));
                 default:
                     // Retrieve user information | values != null, otherwise one of the other cases would have happened
-                    string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+                    string token = _httpHeaderService.GetTokenFromHeader(headers)!;
                     User userByToken = _userService.GetUserByToken(token)!;
                     return (200, _userService.UserToJson(userByToken));
             }
@@ -149,7 +149,7 @@ namespace MTCG.Endpoints
                     return (403, JsonSerializer.Serialize("User not authorized"));
                 default:
                     // Retrieve user information | values != null, otherwise one of the other cases would have happened
-                    string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+                    string token = _httpHeaderService.GetTokenFromHeader(headers)!;
                     userToBeUpdated = _userService.GetUserByToken(token)!;
                     break;
             }
@@ -228,7 +228,7 @@ namespace MTCG.Endpoints
             }
 
             // Get username from authentication token
-            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+            string token = _httpHeaderService.GetTokenFromHeader(headers)!;
             User? userByToken = _userService.GetUserByToken(token);
 
             if (userByToken == null)

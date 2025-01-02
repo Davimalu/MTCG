@@ -16,7 +16,7 @@ namespace MTCG.Endpoints
         private readonly ICardService _cardService = CardService.Instance;
         private readonly IUserService _userService = UserService.Instance;
         private readonly IDeckService _deckService = DeckService.Instance;
-        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
+        private readonly IHttpHeaderService _httpHeaderService = new HttpHeaderService();
 
         private readonly IEventService _eventService = new EventService();
 
@@ -27,12 +27,12 @@ namespace MTCG.Endpoints
 
         #region DependencyInjection
         public DeckEndpoint(ICardService cardService, IUserService userService, IDeckService deckService,
-            IHttpHeaderService ihttpHeaderService, IEventService eventService)
+            IHttpHeaderService httpHeaderService, IEventService eventService)
         {
             _cardService = cardService;
             _userService = userService;
             _deckService = deckService;
-            _ihttpHeaderService = ihttpHeaderService;
+            _httpHeaderService = httpHeaderService;
             _eventService = eventService;
         }
         #endregion
@@ -40,7 +40,7 @@ namespace MTCG.Endpoints
         public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
-            string token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+            string token = _httpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)
@@ -66,7 +66,7 @@ namespace MTCG.Endpoints
         private (int, string?) HandleGetUserDeck(HttpHeader headers, User user)
         {
             // Check for query Parameters
-            Dictionary<string, string> queryParameters = _ihttpHeaderService.GetQueryParameters(headers);
+            Dictionary<string, string> queryParameters = _httpHeaderService.GetQueryParameters(headers);
 
             // https://learn.microsoft.com/de-de/dotnet/api/system.collections.generic.dictionary-2.trygetvalue?view=net-8.0
             if (queryParameters.TryGetValue("format", out string? format))

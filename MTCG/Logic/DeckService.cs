@@ -1,10 +1,7 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using System.Text.Json;
-using MTCG.Interfaces.Logic;
+﻿using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;
-using System.Xml.Linq;
 
 namespace MTCG.Logic
 {

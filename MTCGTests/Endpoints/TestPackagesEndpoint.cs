@@ -1,11 +1,10 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using NSubstitute;
 using System.Text.Json;
-using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -15,7 +14,7 @@ namespace MTCGTests.Endpoints
         private ICardService _cardService;
         private IUserService _userService;
         private IPackageService _packageService;
-        private IHttpHeaderService _ihttpHeaderService;
+        private IHttpHeaderService _httpHeaderService;
         private IEventService _eventService;
 
         [SetUp]
@@ -24,10 +23,10 @@ namespace MTCGTests.Endpoints
             _cardService = Substitute.For<ICardService>();
             _userService = Substitute.For<IUserService>();
             _packageService = Substitute.For<IPackageService>();
-            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
+            _httpHeaderService = Substitute.For<IHttpHeaderService>();
             _eventService = Substitute.For<IEventService>();
 
-            _endpoint = new PackagesEndpoint(_cardService, _userService, _packageService, _ihttpHeaderService, _eventService);
+            _endpoint = new PackagesEndpoint(_cardService, _userService, _packageService, _httpHeaderService, _eventService);
         }
 
         [Test]
@@ -35,7 +34,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
             // Act
@@ -51,7 +50,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/packages", Method = "GET", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
             // Act
@@ -67,7 +66,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
             // Act
@@ -83,7 +82,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
             string invalidBody = "Invalid JSON";
@@ -101,7 +100,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "admin" });
 
             var cards = new List<Card>

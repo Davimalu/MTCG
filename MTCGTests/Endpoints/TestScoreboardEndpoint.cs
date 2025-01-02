@@ -1,5 +1,4 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
@@ -12,7 +11,7 @@ namespace MTCGTests.Endpoints
     {
         private IUserService _userService;
         private IScoreboardService _scoreboardService;
-        private IHttpHeaderService _ihttpHeaderService;
+        private IHttpHeaderService _httpHeaderService;
         private ScoreboardEndpoint _endpoint;
 
         [SetUp]
@@ -20,8 +19,8 @@ namespace MTCGTests.Endpoints
         {
             _userService = Substitute.For<IUserService>();
             _scoreboardService = Substitute.For<IScoreboardService>();
-            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
-            _endpoint = new ScoreboardEndpoint(_userService, _scoreboardService, _ihttpHeaderService);
+            _httpHeaderService = Substitute.For<IHttpHeaderService>();
+            _endpoint = new ScoreboardEndpoint(_userService, _scoreboardService, _httpHeaderService);
         }
 
         [Test]
@@ -29,7 +28,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/scoreboard", Method = "GET", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid_token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("invalid_token");
             _userService.GetUserByToken("invalid_token").Returns((User?)null);
 
             // Act
@@ -45,7 +44,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/scoreboard", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
             _userService.GetUserByToken("valid_token").Returns(new User());
 
             // Act

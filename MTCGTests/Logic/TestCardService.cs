@@ -3,7 +3,6 @@ using MTCG.Logic;
 using MTCG.Models;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;
-using MTCG.Repository;
 using NSubstitute;
 
 namespace MTCGTests.Logic
@@ -25,7 +24,7 @@ namespace MTCGTests.Logic
         {
             // Arrange
             var cardId = "123";
-            var expectedCard = new MonsterCard { Id = cardId, Name = "Fire Dragon", Damage = 20, ElementType = ElementType.Fire};
+            var expectedCard = new MonsterCard { Id = cardId, Name = "Fire Dragon", Damage = 20, ElementType = ElementType.Fire };
             _cardRepository.GetCardById(cardId).Returns(expectedCard);
 
             // Act
@@ -53,7 +52,7 @@ namespace MTCGTests.Logic
         public void SaveCardToDatabase_ShouldReturnCard_WhenCardIsSavedSuccessfully()
         {
             // Arrange
-            var card = new SpellCard { Id = "1", Name = "Water Spell", Damage = 100, ElementType = ElementType.Water};
+            var card = new SpellCard { Id = "1", Name = "Water Spell", Damage = 100, ElementType = ElementType.Water };
             _cardRepository.AddCardToDatabase(Arg.Any<Card>()).Returns(true);
 
             // Act

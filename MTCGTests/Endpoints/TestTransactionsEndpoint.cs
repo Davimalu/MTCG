@@ -1,12 +1,11 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using MTCG.Models.Enums;
 using NSubstitute;
 using System.Text.Json;
-using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -16,7 +15,7 @@ namespace MTCGTests.Endpoints
         private IPackageService _packageService;
         private IStackService _stackService;
         private IEventService _eventService;
-        private IHttpHeaderService _ihttpHeaderService;
+        private IHttpHeaderService _httpHeaderService;
         private TransactionsEndpoint _transactionsEndpoint;
 
         [SetUp]
@@ -26,14 +25,14 @@ namespace MTCGTests.Endpoints
             _packageService = Substitute.For<IPackageService>();
             _stackService = Substitute.For<IStackService>();
             _eventService = Substitute.For<IEventService>();
-            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
+            _httpHeaderService = Substitute.For<IHttpHeaderService>();
 
             _transactionsEndpoint = new TransactionsEndpoint(
                 _userService,
                 _packageService,
                 _stackService,
                 _eventService,
-                _ihttpHeaderService
+                _httpHeaderService
             );
         }
 
@@ -42,7 +41,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/transactions", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
             // Act
@@ -58,7 +57,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/transactions", Method = "GET", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user" });
 
             // Act
@@ -74,7 +73,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user", CoinCount = 3 });
 
             // Act
@@ -90,7 +89,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user", CoinCount = 10 });
             _packageService.GetRandomPackage().Returns((Package?)null);
 
@@ -107,7 +106,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/transactions/packages", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             var user = new User { Username = "test-user", CoinCount = 10, Stack = new Stack() };
             var package = new Package
             {
@@ -143,7 +142,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/invalid/path", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User { Username = "test-user", CoinCount = 10 });
 
             // Act

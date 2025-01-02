@@ -1,25 +1,24 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
+using MTCG.Interfaces.Logic;
 using MTCG.Models;
 using NSubstitute;
 using System.Text.Json;
-using MTCG.Interfaces.Logic;
 
 namespace MTCGTests.Endpoints
 {
     public class TestStatsEndpoint
     {
         private IUserService _userService;
-        private IHttpHeaderService _ihttpHeaderService;
+        private IHttpHeaderService _httpHeaderService;
         private StatsEndpoint _endpoint;
 
         [SetUp]
         public void SetUp()
         {
             _userService = Substitute.For<IUserService>();
-            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
-            _endpoint = new StatsEndpoint(_userService, _ihttpHeaderService);
+            _httpHeaderService = Substitute.For<IHttpHeaderService>();
+            _endpoint = new StatsEndpoint(_userService, _httpHeaderService);
         }
 
         [Test]
@@ -27,7 +26,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/stats", Method = "POST", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns((string?)null);
+            _httpHeaderService.GetTokenFromHeader(headers).Returns((string?)null);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
@@ -44,7 +43,7 @@ namespace MTCGTests.Endpoints
             var headers = new HttpHeader { Path = "/stats", Method = "GET", Version = "1.1" };
             var user = new User { Stats = new UserStatistics { Wins = 10, Losses = 5 } };
 
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
             _userService.GetUserByToken("valid_token").Returns(user);
 
             // Act
@@ -62,7 +61,7 @@ namespace MTCGTests.Endpoints
             var headers = new HttpHeader { Path = "/stats", Method = "POST", Version = "1.1" };
             var user = new User { Stats = new UserStatistics { Wins = 10, Losses = 5 } };
 
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid_token");
             _userService.GetUserByToken("valid_token").Returns(user);
 
             // Act

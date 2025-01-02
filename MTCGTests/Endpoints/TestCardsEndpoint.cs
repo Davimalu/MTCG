@@ -1,12 +1,11 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
-using MTCG.Models;
-using NSubstitute;
-using System.Text.Json;
 using MTCG.Interfaces.Logic;
+using MTCG.Models;
 using MTCG.Models.Cards;
 using MTCG.Models.Enums;
+using NSubstitute;
+using System.Text.Json;
 
 namespace MTCGTests.Endpoints
 {
@@ -14,15 +13,15 @@ namespace MTCGTests.Endpoints
     {
         private CardsEndpoint _cardsEndpoint;
         private IUserService _userService;
-        private IHttpHeaderService _ihttpHeaderService;
+        private IHttpHeaderService _httpHeaderService;
 
         [SetUp]
         public void Setup()
         {
             _userService = Substitute.For<IUserService>();
-            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
+            _httpHeaderService = Substitute.For<IHttpHeaderService>();
 
-            _cardsEndpoint = new CardsEndpoint(_userService, _ihttpHeaderService);
+            _cardsEndpoint = new CardsEndpoint(_userService, _httpHeaderService);
         }
 
         [Test]
@@ -30,7 +29,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/cards", Method = "GET", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns(("invalid-token"));
+            _httpHeaderService.GetTokenFromHeader(headers).Returns(("invalid-token"));
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
             // Act
@@ -70,7 +69,7 @@ namespace MTCGTests.Endpoints
             var serializedFancyDeck = JsonSerializer.Serialize(fancyStack);
 
 
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             // Act
@@ -87,7 +86,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/cards", Method = "POST", Version = "1.1" };
 
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(new User());
 
             // Act

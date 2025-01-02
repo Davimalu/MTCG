@@ -98,18 +98,41 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/deck", Method = "GET", Version = "1.1" };
-            var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
+            var user = new User
+            {
+                Username = "test_user",
+                Deck = new Deck
+                {
+                    Cards = new List<Card>()
+                    {
+                        new MonsterCard { Id = "1", Name = "Card1", Damage = 42, ElementType = ElementType.Water},
+                        new SpellCard() { Id = "2", Name = "Card2", Damage = 43, ElementType = ElementType.Normal},
+                        new MonsterCard { Id = "3", Name = "Card3", Damage = 44, ElementType = ElementType.Fire},
+                        new SpellCard() { Id = "4", Name = "Card4", Damage = 45, ElementType = ElementType.Water}
+                    }
+                }
+            };
             _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
             _httpHeaderService.GetQueryParameters(headers).Returns(new Dictionary<string, string> { { "format", "plain" } });
-            _deckService.SerializeDeckToPlaintext(user.Deck).Returns("Card 1\nCard 2\nCard 3\nCard 4");
+            _deckService.SerializeDeckToPlaintext(user.Deck).Returns("""
+                                                                     ID: 1, Name: Card1, Damage: 42, Card Type: Monster Card, Element Type: Water
+                                                                     ID: 2, Name: Card2, Damage: 43, Card Type: Spell Card, Element Type: Normal
+                                                                     ID: 3, Name: Card3, Damage: 44, Card Type: Monster Card, Element Type: Fire
+                                                                     ID: 4, Name: Card4, Damage: 45, Card Type: Spell Card, Element Type: Water
+                                                                     """);
 
             // Act
             var result = _endpoint.HandleRequest(null, headers, null);
 
             // Assert
             Assert.That(result.Item1, Is.EqualTo(200));
-            Assert.That(result.Item2, Is.EqualTo("Card 1\nCard 2\nCard 3\nCard 4"));
+            Assert.That(result.Item2, Is.EqualTo("""
+                                                 ID: 1, Name: Card1, Damage: 42, Card Type: Monster Card, Element Type: Water
+                                                 ID: 2, Name: Card2, Damage: 43, Card Type: Spell Card, Element Type: Normal
+                                                 ID: 3, Name: Card3, Damage: 44, Card Type: Monster Card, Element Type: Fire
+                                                 ID: 4, Name: Card4, Damage: 45, Card Type: Spell Card, Element Type: Water
+                                                 """));
         }
 
         [Test]
@@ -117,7 +140,20 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/deck", Method = "PUT", Version = "1.1" };
-            var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
+            var user = new User
+            {
+                Username = "test_user", Deck = new Deck { Cards = new List<Card>() },
+                Stack = new Stack
+                {
+                    Cards = new List<Card>
+                    {
+                        new MonsterCard { Id = "1" },
+                        new MonsterCard { Id = "2" },
+                        new MonsterCard { Id = "3" },
+                        new MonsterCard { Id = "4" }
+                    }
+                }
+            };
             var body = JsonSerializer.Serialize(new List<string> { "1", "2", "3", "4" });
 
             _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
@@ -139,7 +175,20 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/deck", Method = "POST", Version = "1.1" };
-            var user = new User { Username = "test_user", Deck = new Deck { Cards = new List<Card>() }, Stack = new Stack { Cards = new List<Card> { new MonsterCard { Id = "1" }, new MonsterCard { Id = "2" }, new MonsterCard { Id = "3" }, new MonsterCard { Id = "4" } } } };
+            var user = new User
+            {
+                Username = "test_user", Deck = new Deck { Cards = new List<Card>() },
+                Stack = new Stack
+                {
+                    Cards = new List<Card>
+                    {
+                        new MonsterCard { Id = "1" },
+                        new MonsterCard { Id = "2" },
+                        new MonsterCard { Id = "3" },
+                        new MonsterCard { Id = "4" }
+                    }
+                }
+            };
             _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 

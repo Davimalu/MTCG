@@ -12,7 +12,7 @@ namespace MTCG.Endpoints
     {
         private readonly IUserService _userService = UserService.Instance;
         private readonly ICardService _cardService = CardService.Instance;
-        private readonly IHttpHeaderService _ihttpHeaderService = new HttpHeaderService();
+        private readonly IHttpHeaderService _httpHeaderService = new HttpHeaderService();
 
         public CardsEndpoint()
         {
@@ -20,17 +20,17 @@ namespace MTCG.Endpoints
         }
 
         #region DependencyInjection
-        public CardsEndpoint(IUserService userService, IHttpHeaderService ihttpHeaderService)
+        public CardsEndpoint(IUserService userService, IHttpHeaderService httpHeaderService)
         {
             _userService = userService;
-            _ihttpHeaderService = ihttpHeaderService;
+            _httpHeaderService = httpHeaderService;
         }
         #endregion
 
         public (int, string?) HandleRequest(TcpClient? client, HttpHeader headers, string? body)
         {
             // Check if user is authorized
-            string? token = _ihttpHeaderService.GetTokenFromHeader(headers)!;
+            string? token = _httpHeaderService.GetTokenFromHeader(headers)!;
             User? user = _userService.GetUserByToken(token);
 
             if (user == null)

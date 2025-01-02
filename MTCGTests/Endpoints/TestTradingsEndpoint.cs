@@ -1,11 +1,10 @@
 ﻿using MTCG.Endpoints;
-using MTCG.Interfaces;
 using MTCG.Interfaces.HTTP;
 using MTCG.Interfaces.Logic;
 using MTCG.Models;
+using MTCG.Models.Cards;
 using NSubstitute;
 using System.Text.Json;
-using MTCG.Models.Cards;
 
 namespace MTCGTests.Endpoints
 {
@@ -15,7 +14,7 @@ namespace MTCGTests.Endpoints
         private IUserService _userService;
         private ITradingService _tradingService;
         private ICardService _cardService;
-        private IHttpHeaderService _ihttpHeaderService;
+        private IHttpHeaderService _httpHeaderService;
         private IEventService _eventService;
 
         [SetUp]
@@ -24,10 +23,10 @@ namespace MTCGTests.Endpoints
             _userService = Substitute.For<IUserService>();
             _tradingService = Substitute.For<ITradingService>();
             _cardService = Substitute.For<ICardService>();
-            _ihttpHeaderService = Substitute.For<IHttpHeaderService>();
+            _httpHeaderService = Substitute.For<IHttpHeaderService>();
             _eventService = Substitute.For<IEventService>();
 
-            _endpoint = new TradingsEndpoint(_userService, _tradingService, _cardService, _ihttpHeaderService, _eventService);
+            _endpoint = new TradingsEndpoint(_userService, _tradingService, _cardService, _httpHeaderService, _eventService);
         }
 
         [Test]
@@ -35,7 +34,7 @@ namespace MTCGTests.Endpoints
         {
             // Arrange
             var headers = new HttpHeader { Path = "/tradings", Method = "GET", Version = "1.1" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("invalid-token");
             _userService.GetUserByToken("invalid-token").Returns((User?)null);
 
             // Act
@@ -52,7 +51,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings", Method = "GET", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             var tradeDeals = new List<TradeOffer>
@@ -82,7 +81,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             // Act
@@ -99,7 +98,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings/nonexistent-card-id", Method = "DELETE", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             _tradingService.GetTradeOfferByCardId("nonexistent-card-id").Returns((TradeOffer?)null);
@@ -118,7 +117,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings", Method = "PUT", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             // Act
@@ -135,7 +134,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             var invalidJsonBody = "{ InvalidJson }";
@@ -154,7 +153,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings", Method = "POST", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             var validBody = JsonSerializer.Serialize(new { CardToTrade = "card-1", Type = "monster", MinimumDamage = 10 });
@@ -178,7 +177,7 @@ namespace MTCGTests.Endpoints
             var headers = new HttpHeader { Path = "/tradings/card-1", Method = "DELETE", Version = "1.1" };
             var user = new User { Username = "TestUser" };
             var otherUser = new User { Username = "OtherUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             var tradeDeal = new TradeOffer
@@ -202,7 +201,7 @@ namespace MTCGTests.Endpoints
             // Arrange
             var headers = new HttpHeader { Path = "/tradings/card-1", Method = "DELETE", Version = "1.1" };
             var user = new User { Username = "TestUser" };
-            _ihttpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
+            _httpHeaderService.GetTokenFromHeader(headers).Returns("valid-token");
             _userService.GetUserByToken("valid-token").Returns(user);
 
             var tradeDeal = new TradeOffer
